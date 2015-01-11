@@ -4,8 +4,12 @@
     <string name="app_name">DistributedMemory</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
-
     <string name="game_host">Host Game</string>
     <string name="game_join">Join Game</string>
+    <string name="title_activity_host_game">HostGameActivity</string>
+
+    <string name="host_default_service">TestGame</string>
+    <string name="host_start">Start hosting</string>
+    <string name="host_stop">Stop hosting</string>
 
 </resources>

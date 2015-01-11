@@ -1,9 +1,9 @@
 package org.faudroids.distributedmemory;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Toast;
 
 
 public class MainActivity extends Activity implements View.OnClickListener {
@@ -22,11 +22,11 @@ public class MainActivity extends Activity implements View.OnClickListener {
 	public void onClick(View view) {
 		switch(view.getId()) {
 			case R.id.game_host:
-				Toast.makeText(this, "Hosting game", Toast.LENGTH_SHORT).show();
+				startActivity(new Intent(this, HostGameActivity.class));
 				break;
 
 			case R.id.game_join:
-				Toast.makeText(this, "Joining game", Toast.LENGTH_SHORT).show();
+				startActivity(new Intent(this, ClientGameActivity.class));
 				break;
 		}
 	}
