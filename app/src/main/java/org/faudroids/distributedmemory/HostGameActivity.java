@@ -16,18 +16,6 @@ public class HostGameActivity extends Activity implements
 		ServiceRegistrationListener,
 		View.OnClickListener {
 
-
-	/*
-	private final IntentFilter intentFilter = new IntentFilter();
-	{
-		intentFilter.addAction(WIFI_P2P_STATE_CHANGED_ACTION);
-		intentFilter.addAction(WIFI_P2P_PEERS_CHANGED_ACTION);
-		intentFilter.addAction(WIFI_P2P_CONNECTION_CHANGED_ACTION);
-		intentFilter.addAction(WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
-	}
-	private BroadcastReceiver receiver;
-	*/
-
 	private P2pManager p2pManager;
 
 	private Button startHostButton;
