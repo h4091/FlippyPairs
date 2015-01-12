@@ -23,14 +23,13 @@ import android.net.NetworkInfo;
 import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.net.wifi.p2p.WifiP2pManager.Channel;
-import android.util.Log;
+
+import timber.log.Timber;
 
 /**
  * A BroadcastReceiver that notifies of important wifi p2p events.
  */
 public class WiFiDirectBroadcastReceiver extends BroadcastReceiver {
-
-	private static final String TAG = "RECEIVER";
 
 	private final P2pConnectionListener connectionListener;
     private final WifiP2pManager manager;
@@ -53,26 +52,26 @@ public class WiFiDirectBroadcastReceiver extends BroadcastReceiver {
 			case WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION:
 				NetworkInfo networkInfo = intent.getParcelableExtra(WifiP2pManager.EXTRA_NETWORK_INFO);
 				if (networkInfo.isConnected()) {
-					Log.i(TAG, "P2P connected, time to fetch connection info!");
+					Timber.i("P2P connected, time to fetch connection info!");
 					manager.requestConnectionInfo(channel, new WifiP2pManager.ConnectionInfoListener() {
 						@Override
 						public void onConnectionInfoAvailable(WifiP2pInfo info) {
 							if (info.groupFormed) {
-								if (info.isGroupOwner) Log.i(TAG, "Ignoring connected due to current peer being the group owner");
+								if (info.isGroupOwner) Timber.i("Ignoring connected due to current peer being the group owner");
 								else connectionListener.onConnected(info.groupOwnerAddress);
 							} else {
-								Log.i(TAG, "Ignoring connected due to missing group formation");
+								Timber.i("Ignoring connected due to missing group formation");
 							}
 						}
 					});
 
 				} else {
-					Log.i(TAG, "P2P disconnected");
+					Timber.i("P2P disconnected");
 				}
 				break;
 
 			case WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION:
-				Log.i(TAG, "This peer changed");
+				Timber.i("This peer changed");
 				break;
 		}
     }

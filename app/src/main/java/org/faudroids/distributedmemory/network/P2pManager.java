@@ -9,7 +9,6 @@ import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceInfo;
 import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceRequest;
-import android.util.Log;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -18,12 +17,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static android.net.wifi.p2p.WifiP2pManager.*;
+import timber.log.Timber;
+
+import static android.net.wifi.p2p.WifiP2pManager.ActionListener;
 import static android.net.wifi.p2p.WifiP2pManager.Channel;
+import static android.net.wifi.p2p.WifiP2pManager.DnsSdServiceResponseListener;
+import static android.net.wifi.p2p.WifiP2pManager.DnsSdTxtRecordListener;
+import static android.net.wifi.p2p.WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION;
+import static android.net.wifi.p2p.WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION;
+import static android.net.wifi.p2p.WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION;
+import static android.net.wifi.p2p.WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION;
 
 public final class P2pManager {
-
-	private static final String TAG = "DistributedMemory";
 
 	private static final String SERVICE_PREFIX = "org.faudroids.distributedmemory.";
 
@@ -51,13 +56,13 @@ public final class P2pManager {
 		manager.addLocalService(channel, serviceInfo, new ActionListener() {
 			@Override
 			public void onSuccess() {
-				Log.i(TAG, "Service \"" + fullServiceName + "\" registration successful");
+				Timber.i("Service \"" + fullServiceName + "\" registration successful");
 				registrationListener.onRegistrationSuccess(serviceName);
 			}
 
 			@Override
 			public void onFailure(int reason) {
-				Log.i(TAG, "Service \"" + fullServiceName + "\" registration failed");
+				Timber.i("Service \"" + fullServiceName + "\" registration failed");
 				registrationListener.onRegistrationSuccess(serviceName);
 			}
 		});
@@ -68,12 +73,12 @@ public final class P2pManager {
 		manager.clearLocalServices(channel, new ActionListener() {
 			@Override
 			public void onSuccess() {
-				Log.i(TAG, "Clearing services success");
+				Timber.i("Clearing services success");
 			}
 
 			@Override
 			public void onFailure(int reason) {
-				Log.i(TAG, "Clearing services error (" + reason + ")");
+				Timber.i("Clearing services error (" + reason + ")");
 			}
 		});
 	}
@@ -85,7 +90,7 @@ public final class P2pManager {
 				new DnsSdServiceResponseListener() {
 					@Override
 					public void onDnsSdServiceAvailable(String fullServiceName, String registrationType, WifiP2pDevice srcDevice) {
-						Log.i(TAG, "Service \"" + fullServiceName + "\" discovered");
+						Timber.i("Service \"" + fullServiceName + "\" discovered");
 						if (!fullServiceName.startsWith(SERVICE_PREFIX)) return;
 
 						String serviceName = fullServiceName.substring(SERVICE_PREFIX.length());
@@ -99,7 +104,7 @@ public final class P2pManager {
 				new DnsSdTxtRecordListener() {
 					@Override
 					public void onDnsSdTxtRecordAvailable(String fullDomainName, Map<String, String> txtRecordMap, WifiP2pDevice srcDevice) {
-						Log.i(TAG, "Device " + srcDevice.deviceName + " available");
+						Timber.i("Device " + srcDevice.deviceName + " available");
 					}
 				}
 		);
@@ -111,23 +116,23 @@ public final class P2pManager {
 				new ActionListener() {
 					@Override
 					public void onSuccess() {
-						Log.i(TAG, "Add service request success");
+						Timber.i("Add service request success");
 					}
 
 					@Override
 					public void onFailure(int reason) {
-						Log.i(TAG, "Service request error (" + reason + ")");
+						Timber.i("Service request error (" + reason + ")");
 					}
 				});
 		manager.discoverServices(channel, new ActionListener() {
 			@Override
 			public void onSuccess() {
-				Log.i(TAG, "Service discovery success");
+				Timber.i("Service discovery success");
 			}
 
 			@Override
 			public void onFailure(int reason) {
-				Log.i(TAG, "Service discover error (" + reason + ")");
+				Timber.i("Service discover error (" + reason + ")");
 			}
 		});
 	}
@@ -137,12 +142,12 @@ public final class P2pManager {
 		manager.clearServiceRequests(channel, new ActionListener() {
 			@Override
 			public void onSuccess() {
-				Log.i(TAG, "Stopping service discovery success");
+				Timber.i("Stopping service discovery success");
 			}
 
 			@Override
 			public void onFailure(int reason) {
-				Log.i(TAG, "Stopping service discovery error (" + reason + ")");
+				Timber.i("Stopping service discovery error (" + reason + ")");
 			}
 		});
 	}
@@ -175,12 +180,12 @@ public final class P2pManager {
 		manager.connect(channel, config, new ActionListener() {
 			@Override
 			public void onSuccess() {
-				Log.i(TAG, "Connecting start success");
+				Timber.i("Connecting start success");
 			}
 
 			@Override
 			public void onFailure(int reason) {
-				Log.i(TAG, "Connecting start error (" + reason + ")");
+				Timber.i("Connecting start error (" + reason + ")");
 			}
 		});
 	}
