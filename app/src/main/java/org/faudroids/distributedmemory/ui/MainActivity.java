@@ -38,7 +38,7 @@ public class MainActivity extends BaseActivity {
 
 	@OnClick(R.id.game_join)
 	public void startClientGameActivity() {
-		startActivity(new Intent(this, ClientGameActivity.class));
+		startActivity(new Intent(this, JoinGameActivity.class));
 	}
 
 }

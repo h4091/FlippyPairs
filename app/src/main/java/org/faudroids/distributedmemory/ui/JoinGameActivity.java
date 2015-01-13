@@ -23,7 +23,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 
-public class ClientGameActivity
+public class JoinGameActivity
 		extends BaseListActivity
 		implements ServiceDiscoveryListener,
 		P2pConnectionListener {

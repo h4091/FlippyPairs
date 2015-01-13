@@ -10,7 +10,7 @@ import dagger.Module;
 		injects = {
 				MainActivity.class,
 				HostGameActivity.class,
-				ClientGameActivity.class
+				JoinGameActivity.class
 		}
 )
 public final class UiModule {
