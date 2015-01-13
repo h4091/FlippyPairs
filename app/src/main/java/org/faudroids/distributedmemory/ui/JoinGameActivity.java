@@ -2,7 +2,6 @@ package org.faudroids.distributedmemory.ui;
 
 import android.content.Context;
 import android.content.Intent;
-import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -38,26 +37,16 @@ public class JoinGameActivity
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		WifiP2pManager wifiP2pManager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
-		this.p2pManager = new P2pManager(wifiP2pManager, wifiP2pManager.initialize(this, getMainLooper(), null));
-		this.p2pManager.register(this);
-		this.p2pManager.startServiceDiscovery();
-
-		this.adapter = new ArrayAdapter<>(this, android.R.layout.simple_expandable_list_item_1);
+		adapter = new ArrayAdapter<>(this, android.R.layout.simple_expandable_list_item_1);
 		adapter.addAll(p2pManager.getAllDiscoveredServices());
 		setListAdapter(adapter);
-	}
-
-	@Override
-	protected List<Object> getModules() {
-		return Lists.<Object>newArrayList(new UiModule());
 	}
 
 
 	@Override
 	protected void onListItemClick(ListView list, View v, int position, long id) {
 		P2pHost service = adapter.getItem(position);
-		p2pManager.connectTo(service, false);
+		p2pManager.connectTo(service);
 	}
 
 
@@ -79,14 +68,22 @@ public class JoinGameActivity
 	@Override
 	public void onResume() {
 		super.onResume();
-		p2pManager.register(this, this);
+
+		p2pManager.register((ServiceDiscoveryListener) this);
+		p2pManager.startServiceDiscovery();
+
+		p2pManager.register((P2pConnectionListener) this);
 	}
 
 
 	@Override
 	public void onPause() {
 		super.onPause();
-		p2pManager.unregister(this, this);
+
+		p2pManager.stopServiceDiscovery();
+		p2pManager.unregister((ServiceDiscoveryListener) this);
+
+		p2pManager.unregister((P2pConnectionListener) this);
 	}
 
 
@@ -94,6 +91,12 @@ public class JoinGameActivity
 	public void onConnected(InetAddress hostAddress) {
 		Toast.makeText(this, "Connected!", Toast.LENGTH_SHORT).show();
 		startActivity(new Intent(appContext, ClientGameActivity.class));
+	}
+
+
+	@Override
+	protected List<Object> getModules() {
+		return Lists.<Object>newArrayList(new UiModule());
 	}
 
 }

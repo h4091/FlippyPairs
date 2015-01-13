@@ -56,6 +56,7 @@ public class WiFiDirectBroadcastReceiver extends BroadcastReceiver {
 					manager.requestConnectionInfo(channel, new WifiP2pManager.ConnectionInfoListener() {
 						@Override
 						public void onConnectionInfoAvailable(WifiP2pInfo info) {
+							Timber.i("Group owner address " + info.groupOwnerAddress);
 							if (info.groupFormed) {
 								if (info.isGroupOwner) Timber.i("Ignoring connected due to current peer being the group owner");
 								else connectionListener.onConnected(info.groupOwnerAddress);

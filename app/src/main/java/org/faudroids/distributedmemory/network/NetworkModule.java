@@ -14,7 +14,7 @@ import dagger.Provides;
 		complete = false,
 		library = true,
 		injects = {
-				HostService.class,
+				LobbyService.class,
 				ClientService.class
 		}
 )

@@ -12,7 +12,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-public final class HostService extends BaseService {
+public final class LobbyService extends BaseService {
 
 	@Inject P2pManager p2pManager;
 

@@ -39,6 +39,7 @@ public final class P2pManager {
 
 	private final WifiP2pManager manager;
 	private final Channel channel;
+	private final Context context;
 
 	private final Set<P2pHost> discoveredServices = new HashSet<>();
 	private final List<ServiceDiscoveryListener> serviceDiscoveryListeners = new LinkedList<>();
@@ -47,7 +48,8 @@ public final class P2pManager {
 
 
 	@Inject
-	public P2pManager(WifiP2pManager manager, Channel channel) {
+	public P2pManager(Context context, WifiP2pManager manager, Channel channel) {
+		this.context = context;
 		this.manager = manager;
 		this.channel = channel;
 	}
@@ -174,17 +176,12 @@ public final class P2pManager {
 	}
 
 
-	public void connectTo(P2pHost service, boolean groupOwner) {
+	public void connectTo(P2pHost service) {
 		stopServiceDiscovery();
 
 		WifiP2pConfig config = new WifiP2pConfig();
 		config.deviceAddress = service.getDeviceAddress();
 		config.wps.setup = WpsInfo.PBC;
-		if (groupOwner) config.groupOwnerIntent = 15;
-		else config.groupOwnerIntent = 0;
-		// if (groupOwner) config.groupOwnerIntent = 15;
-		// else config.groupOwnerIntent = 1;
-
 		manager.connect(channel, config, new ActionListener() {
 			@Override
 			public void onSuccess() {
@@ -199,7 +196,7 @@ public final class P2pManager {
 	}
 
 
-	public void register(P2pConnectionListener listener, Context context) {
+	public void register(P2pConnectionListener listener) {
 		IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction(WIFI_P2P_STATE_CHANGED_ACTION);
 		intentFilter.addAction(WIFI_P2P_PEERS_CHANGED_ACTION);
@@ -210,7 +207,7 @@ public final class P2pManager {
 	}
 
 
-	public void unregister(P2pConnectionListener listener, Context context) {
+	public void unregister(P2pConnectionListener listener) {
 		context.unregisterReceiver(receiver);
 	}
 

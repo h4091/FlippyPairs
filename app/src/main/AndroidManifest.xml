@@ -37,7 +37,7 @@
             android:label="@string/title_activity_host_game" >
         </activity>
         <service
-            android:name=".network.HostService">
+            android:name=".network.LobbyService">
         </service>
         <service
             android:name=".network.ClientService">
