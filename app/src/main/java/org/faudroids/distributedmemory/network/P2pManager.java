@@ -40,7 +40,7 @@ public final class P2pManager {
 	private final WifiP2pManager manager;
 	private final Channel channel;
 
-	private final Set<P2pService> discoveredServices = new HashSet<>();
+	private final Set<P2pHost> discoveredServices = new HashSet<>();
 	private final List<ServiceDiscoveryListener> serviceDiscoveryListeners = new LinkedList<>();
 
 	private WiFiDirectBroadcastReceiver receiver;
@@ -100,7 +100,7 @@ public final class P2pManager {
 						if (!fullServiceName.startsWith(SERVICE_PREFIX)) return;
 
 						String serviceName = fullServiceName.substring(SERVICE_PREFIX.length());
-						P2pService service = new P2pService(serviceName, srcDevice.deviceAddress);
+						P2pHost service = new P2pHost(serviceName, srcDevice.deviceAddress);
 						discoveredServices.add(service);
 						for (ServiceDiscoveryListener listener : serviceDiscoveryListeners) {
 							listener.onNewService(service);
@@ -169,12 +169,12 @@ public final class P2pManager {
 	}
 
 
-	public Set<P2pService> getAllDiscoveredServices() {
+	public Set<P2pHost> getAllDiscoveredServices() {
 		return new HashSet<>(discoveredServices);
 	}
 
 
-	public void connectTo(P2pService service, boolean groupOwner) {
+	public void connectTo(P2pHost service, boolean groupOwner) {
 		stopServiceDiscovery();
 
 		WifiP2pConfig config = new WifiP2pConfig();

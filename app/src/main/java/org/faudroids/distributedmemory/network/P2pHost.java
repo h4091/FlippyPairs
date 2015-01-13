@@ -3,12 +3,12 @@ package org.faudroids.distributedmemory.network;
 
 import com.google.common.base.Objects;
 
-public final class P2pService {
+public final class P2pHost {
 
 	private final String serviceName;
 	private final String deviceAddress;
 
-	public P2pService(
+	public P2pHost(
 			String serviceName,
 			String deviceAddress) {
 
@@ -35,8 +35,8 @@ public final class P2pService {
 
 	@Override
 	public boolean equals(Object other) {
-		if (other == null || !(other instanceof P2pService)) return false;
-		P2pService service = (P2pService) other;
+		if (other == null || !(other instanceof P2pHost)) return false;
+		P2pHost service = (P2pHost) other;
 		return Objects.equal(serviceName, service.serviceName)
 				&& Objects.equal(deviceAddress, service.deviceAddress);
 	}

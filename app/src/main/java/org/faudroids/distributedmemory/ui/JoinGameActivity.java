@@ -12,8 +12,8 @@ import com.google.common.collect.Lists;
 
 import org.faudroids.distributedmemory.common.BaseListActivity;
 import org.faudroids.distributedmemory.network.P2pConnectionListener;
+import org.faudroids.distributedmemory.network.P2pHost;
 import org.faudroids.distributedmemory.network.P2pManager;
-import org.faudroids.distributedmemory.network.P2pService;
 import org.faudroids.distributedmemory.network.ServiceDiscoveryListener;
 
 import java.net.InetAddress;
@@ -28,7 +28,7 @@ public class JoinGameActivity
 		implements ServiceDiscoveryListener,
 		P2pConnectionListener {
 
-	private ArrayAdapter<P2pService> adapter;
+	private ArrayAdapter<P2pHost> adapter;
 	@Inject P2pManager p2pManager;
 
 
@@ -54,18 +54,18 @@ public class JoinGameActivity
 
 	@Override
 	protected void onListItemClick(ListView list, View v, int position, long id) {
-		P2pService service = adapter.getItem(position);
+		P2pHost service = adapter.getItem(position);
 		p2pManager.connectTo(service, false);
 	}
 
 
 	@Override
-	public void onNewService(P2pService service) {
+	public void onNewService(P2pHost service) {
 		adapter.clear();
 		adapter.addAll(p2pManager.getAllDiscoveredServices());
-		adapter.sort(new Comparator<P2pService>() {
+		adapter.sort(new Comparator<P2pHost>() {
 			@Override
-			public int compare(P2pService lhs, P2pService rhs) {
+			public int compare(P2pHost lhs, P2pHost rhs) {
 				return lhs.toString().compareTo(rhs.toString());
 			}
 		});
