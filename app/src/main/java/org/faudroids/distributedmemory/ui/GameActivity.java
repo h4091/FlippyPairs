@@ -38,10 +38,10 @@ public class GameActivity extends BaseActivity {
         EditText et2 = (EditText)findViewById(R.id.edit_card_id2);
         int id1 = Integer.parseInt(et.getText().toString());
         int id2 = Integer.parseInt(et2.getText().toString());
-        int winner = manager.run(id1, id2);
-        if(winner >= 0) {
+        GameManager.gameStatus state = manager.run(id1, id2);
+        if(state == GameManager.gameStatus.FINISHED) {
             Toast winnerToast = Toast.makeText(getApplicationContext(),
-                    "Winner: " + manager.getPlayerName(winner),
+                    "Winner: " + manager.getPlayerName(manager.getWinnerId()),
                     Toast.LENGTH_LONG);
             winnerToast.show();
         }
