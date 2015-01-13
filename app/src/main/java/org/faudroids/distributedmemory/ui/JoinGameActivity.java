@@ -1,6 +1,7 @@
 package org.faudroids.distributedmemory.ui;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Bundle;
 import android.view.View;
@@ -30,6 +31,7 @@ public class JoinGameActivity
 
 	private ArrayAdapter<P2pHost> adapter;
 	@Inject P2pManager p2pManager;
+	@Inject Context appContext;
 
 
 	@Override
@@ -91,6 +93,7 @@ public class JoinGameActivity
 	@Override
 	public void onConnected(InetAddress hostAddress) {
 		Toast.makeText(this, "Connected!", Toast.LENGTH_SHORT).show();
+		startActivity(new Intent(appContext, ClientGameActivity.class));
 	}
 
 }

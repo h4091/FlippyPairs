@@ -35,6 +35,9 @@
         <service
             android:name=".network.HostService">
         </service>
+        <service
+            android:name=".network.ClientService">
+        </service>
     </application>
 
 </manifest>

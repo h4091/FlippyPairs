@@ -1,8 +1,6 @@
 package org.faudroids.distributedmemory.ui;
 
-import android.app.Notification;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.net.wifi.p2p.WifiP2pManager;
@@ -36,6 +34,7 @@ public class HostGameActivity extends BaseActivity implements
 	@Inject Context appContext;
 	@Inject NotificationManager notificationManager;
 	@Inject P2pManager p2pManager;
+	@Inject UiUtils uiUtils;
 	@Inject ServiceUtils serviceUtils;
 
 	@InjectView(R.id.host_start) Button startHostButton;
@@ -101,16 +100,12 @@ public class HostGameActivity extends BaseActivity implements
 
 
 	private void showRunningNotification() {
-		Intent intent = new Intent(this, HostGameActivity.class);
-		intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-		Notification.Builder builder = new Notification.Builder(this)
-				.setContentTitle("Hosting game")
-				.setContentText("Hosting Distributed Memory Game in progress")
-				.setSmallIcon(R.drawable.ic_launcher)
-				.setOngoing(true)
-				.setContentIntent(PendingIntent.getActivity(appContext, 1000, intent, PendingIntent.FLAG_UPDATE_CURRENT));
-
-		notificationManager.notify(NOTIFICATION_ID, builder.build());
+		notificationManager.notify(
+				NOTIFICATION_ID,
+				uiUtils.createGameRunningNotification(
+						"Hosting game",
+						"Hosting Distributed Memory Game in progress",
+						HostGameActivity.class));
 	}
 
 

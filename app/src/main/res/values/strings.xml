@@ -12,4 +12,6 @@
     <string name="host_start">Start hosting</string>
     <string name="host_stop">Stop hosting</string>
 
+    <string name="client_disconnect">Disconnect</string>
+
 </resources>
