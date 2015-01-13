@@ -3,6 +3,7 @@ package org.faudroids.distributedmemory.app;
 
 import org.faudroids.distributedmemory.common.CommonModule;
 import org.faudroids.distributedmemory.network.NetworkModule;
+import org.faudroids.distributedmemory.utils.UtilsModule;
 
 import dagger.Module;
 
@@ -10,6 +11,7 @@ import dagger.Module;
 		addsTo = CommonModule.class,
 		includes = {
 				NetworkModule.class,
+				UtilsModule.class
 		},
 		injects = {
 				DistributedMemoryApplication.class

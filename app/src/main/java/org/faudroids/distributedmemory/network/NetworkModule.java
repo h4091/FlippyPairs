@@ -12,7 +12,10 @@ import dagger.Provides;
 
 @Module(
 		complete = false,
-		library = true
+		library = true,
+		injects = {
+				HostService.class
+		}
 )
 public final class NetworkModule {
 

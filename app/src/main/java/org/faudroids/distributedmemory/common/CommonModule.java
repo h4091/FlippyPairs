@@ -1,6 +1,7 @@
 package org.faudroids.distributedmemory.common;
 
 
+import android.app.NotificationManager;
 import android.content.Context;
 import android.os.Looper;
 
@@ -32,6 +33,13 @@ public final class CommonModule {
 	@Singleton
 	Looper provideMainLooper(Context context) {
 		return context.getMainLooper();
+	}
+
+
+	@Provides
+	@Singleton
+	NotificationManager provideNotificationManager(Context context) {
+		return (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 	}
 
 }
