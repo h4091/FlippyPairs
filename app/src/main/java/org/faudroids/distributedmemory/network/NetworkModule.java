@@ -14,7 +14,8 @@ import dagger.Provides;
 		complete = false,
 		library = true,
 		injects = {
-				HostService.class
+				HostService.class,
+				ClientService.class
 		}
 )
 public final class NetworkModule {

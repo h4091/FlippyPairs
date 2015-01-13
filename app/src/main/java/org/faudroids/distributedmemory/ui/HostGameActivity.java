@@ -13,10 +13,12 @@ import com.google.common.collect.Lists;
 import org.faudroids.distributedmemory.R;
 import org.faudroids.distributedmemory.common.BaseActivity;
 import org.faudroids.distributedmemory.network.HostService;
+import org.faudroids.distributedmemory.network.P2pConnectionListener;
 import org.faudroids.distributedmemory.network.P2pManager;
 import org.faudroids.distributedmemory.network.ServiceRegistrationListener;
 import org.faudroids.distributedmemory.utils.ServiceUtils;
 
+import java.net.InetAddress;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -24,10 +26,12 @@ import javax.inject.Inject;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
+import timber.log.Timber;
 
 
 public class HostGameActivity extends BaseActivity implements
-		ServiceRegistrationListener {
+		ServiceRegistrationListener,
+		P2pConnectionListener {
 
 	private static final int NOTIFICATION_ID = 42;
 
@@ -94,8 +98,28 @@ public class HostGameActivity extends BaseActivity implements
 
 
 	@Override
+	public void onResume() {
+		super.onResume();
+		p2pManager.register(this, this);
+	}
+
+
+	@Override
+	public void onPause() {
+		super.onPause();
+		p2pManager.unregister(this, this);
+	}
+
+
+	@Override
 	public void onRegistrationError(String serviceName) {
 		startHostButton.setEnabled(true);
+	}
+
+
+	@Override
+	public void onConnected(InetAddress hostAddress) {
+		Timber.d("onConnected in host");
 	}
 
 

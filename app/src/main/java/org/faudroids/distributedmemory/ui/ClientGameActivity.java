@@ -8,6 +8,7 @@ import com.google.common.collect.Lists;
 
 import org.faudroids.distributedmemory.R;
 import org.faudroids.distributedmemory.common.BaseActivity;
+import org.faudroids.distributedmemory.network.P2pManager;
 import org.faudroids.distributedmemory.utils.ServiceUtils;
 
 import java.util.List;
@@ -25,6 +26,7 @@ public class ClientGameActivity extends BaseActivity {
 	@Inject UiUtils uiUtils;
 	@Inject ServiceUtils serviceUtils;
 	@Inject NotificationManager notificationManager;
+	@Inject P2pManager p2pManager;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +46,7 @@ public class ClientGameActivity extends BaseActivity {
 	@OnClick(R.id.disconnect)
 	public void disconnectClient() {
 		Toast.makeText(this, "Not much to do here ...", Toast.LENGTH_SHORT).show();
+		notificationManager.cancel(NOTIFICATION_ID);
 	}
 
 

@@ -32,6 +32,10 @@
             android:name=".ui.JoinGameActivity"
             android:label="@string/title_activity_host_game" >
         </activity>
+        <activity
+            android:name=".ui.ClientGameActivity"
+            android:label="@string/title_activity_host_game" >
+        </activity>
         <service
             android:name=".network.HostService">
         </service>

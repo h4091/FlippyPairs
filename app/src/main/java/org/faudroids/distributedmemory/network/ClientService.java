@@ -10,8 +10,11 @@ import org.faudroids.distributedmemory.common.BaseService;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 public final class ClientService extends BaseService {
 
+	@Inject P2pManager p2pManager;
 
 	@Override
 	public int onStartCommand(Intent intent,int flags, int startId) {
@@ -26,7 +29,14 @@ public final class ClientService extends BaseService {
 
 
 	@Override
+	public void onDestroy() {
+		p2pManager.shutdown();
+	}
+
+
+	@Override
 	protected List<Object> getModules() {
 		return Lists.newArrayList();
 	}
+
 }

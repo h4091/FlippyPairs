@@ -180,8 +180,10 @@ public final class P2pManager {
 		WifiP2pConfig config = new WifiP2pConfig();
 		config.deviceAddress = service.getDeviceAddress();
 		config.wps.setup = WpsInfo.PBC;
-		if (groupOwner) config.groupOwnerIntent = 0;
-		else config.groupOwnerIntent = 15;
+		if (groupOwner) config.groupOwnerIntent = 15;
+		else config.groupOwnerIntent = 0;
+		// if (groupOwner) config.groupOwnerIntent = 15;
+		// else config.groupOwnerIntent = 1;
 
 		manager.connect(channel, config, new ActionListener() {
 			@Override
@@ -212,4 +214,62 @@ public final class P2pManager {
 		context.unregisterReceiver(receiver);
 	}
 
+
+	public void shutdown() {
+		manager.removeGroup(channel, new ActionListener() {
+			@Override
+			public void onSuccess() {
+				Timber.i("Remove group success");
+			}
+
+			@Override
+			public void onFailure(int reason) {
+				Timber.i("Remove group failed");
+			}
+		});
+		manager.clearLocalServices(channel, new ActionListener() {
+			@Override
+			public void onSuccess() {
+				Timber.i("Clear local services success");
+			}
+
+			@Override
+			public void onFailure(int reason) {
+				Timber.i("Clear local services error");
+			}
+		});
+		manager.clearServiceRequests(channel, new ActionListener() {
+			@Override
+			public void onSuccess() {
+				Timber.i("Clear service requests success");
+			}
+
+			@Override
+			public void onFailure(int reason) {
+				Timber.i("Clear service requests error");
+			}
+		});
+		manager.cancelConnect(channel, new ActionListener() {
+			@Override
+			public void onSuccess() {
+				Timber.i("Cancel connect success");
+			}
+
+			@Override
+			public void onFailure(int reason) {
+				Timber.i("Cancel connect error");
+			}
+		});
+		manager.stopPeerDiscovery(channel, new ActionListener() {
+			@Override
+			public void onSuccess() {
+				Timber.i("Stop peer discovery success");
+			}
+
+			@Override
+			public void onFailure(int reason) {
+				Timber.i("Stop peer discovery error");
+			}
+		});
+	}
 }
