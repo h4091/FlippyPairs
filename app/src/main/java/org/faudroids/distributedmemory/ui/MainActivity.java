@@ -41,4 +41,9 @@ public class MainActivity extends BaseActivity {
 		startActivity(new Intent(this, ClientGameActivity.class));
 	}
 
+    @OnClick(R.id.game_start)
+    public void startGameActivity() {
+        startActivity(new Intent(this, GameActivity.class));
+    }
+
 }

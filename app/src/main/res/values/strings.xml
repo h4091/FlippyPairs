@@ -11,5 +11,7 @@
     <string name="host_default_service">TestGame</string>
     <string name="host_start">Start hosting</string>
     <string name="host_stop">Stop hosting</string>
+    <string name="game_start">Start game</string>
+    <string name="submit_id">Will they match?</string>
 
 </resources>

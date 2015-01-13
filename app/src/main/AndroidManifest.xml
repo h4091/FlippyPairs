@@ -32,6 +32,9 @@
             android:name=".ui.ClientGameActivity"
             android:label="@string/title_activity_host_game" >
         </activity>
+        <activity android:name=".ui.GameActivity"
+                  android:label="GameActivity" >
+        </activity>
     </application>
 
 </manifest>
