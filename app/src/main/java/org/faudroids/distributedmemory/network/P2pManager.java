@@ -10,6 +10,8 @@ import android.net.wifi.p2p.WifiP2pManager;
 import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceInfo;
 import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceRequest;
 
+import org.faudroids.distributedmemory.utils.Assert;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -41,6 +43,7 @@ public final class P2pManager {
 	private final Channel channel;
 	private final Context context;
 
+	private final Set<String> registeredServices = new HashSet<>();
 	private final Set<P2pHost> discoveredServices = new HashSet<>();
 	private final List<ServiceDiscoveryListener> serviceDiscoveryListeners = new LinkedList<>();
 
@@ -56,6 +59,9 @@ public final class P2pManager {
 
 
 	public void startServiceRegistration(final String serviceName, final ServiceRegistrationListener registrationListener) {
+		Assert.assertFalse(registeredServices.contains(serviceName), "already registered");
+		registeredServices.add(serviceName);
+
 		final String fullServiceName = SERVICE_PREFIX + serviceName;
 		Map<String, String> record = new HashMap<>();
 		record.put("available", "visible");
@@ -89,6 +95,12 @@ public final class P2pManager {
 				Timber.i("Clearing services error (" + reason + ")");
 			}
 		});
+		registeredServices.clear();
+	}
+
+
+	public boolean isServiceRegistrationStarted(String serviceName) {
+		return registeredServices.contains(serviceName);
 	}
 
 
@@ -161,12 +173,12 @@ public final class P2pManager {
 	}
 
 
-	public void register(ServiceDiscoveryListener listener) {
+	public void registerServiceDiscoveryListener(ServiceDiscoveryListener listener) {
 		this.serviceDiscoveryListeners.add(listener);
 	}
 
 
-	public void unregister(ServiceDiscoveryListener listener) {
+	public void unregisterServiceDiscoveryListener(ServiceDiscoveryListener listener) {
 		this.serviceDiscoveryListeners.remove(listener);
 	}
 
@@ -196,7 +208,7 @@ public final class P2pManager {
 	}
 
 
-	public void register(P2pConnectionListener listener) {
+	public void registerP2pConnectionListener(P2pConnectionListener listener) {
 		IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction(WIFI_P2P_STATE_CHANGED_ACTION);
 		intentFilter.addAction(WIFI_P2P_PEERS_CHANGED_ACTION);
@@ -207,7 +219,7 @@ public final class P2pManager {
 	}
 
 
-	public void unregister(P2pConnectionListener listener) {
+	public void unregisterP2pConnectionListener(P2pConnectionListener listener) {
 		context.unregisterReceiver(receiver);
 	}
 

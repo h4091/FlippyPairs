@@ -4,16 +4,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
-import android.widget.EditText;
 
 import com.google.common.collect.Lists;
 
 import org.faudroids.distributedmemory.R;
 import org.faudroids.distributedmemory.common.BaseActivity;
 import org.faudroids.distributedmemory.network.LobbyService;
+import org.faudroids.distributedmemory.network.P2pHost;
 import org.faudroids.distributedmemory.network.P2pManager;
+import org.faudroids.distributedmemory.network.ServiceDiscoveryListener;
 import org.faudroids.distributedmemory.network.ServiceRegistrationListener;
-import org.faudroids.distributedmemory.utils.ServiceUtils;
 
 import java.util.List;
 
@@ -22,18 +22,20 @@ import javax.inject.Inject;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
+import timber.log.Timber;
 
 
 public class HostGameActivity extends BaseActivity implements
+		ServiceDiscoveryListener,
 		ServiceRegistrationListener {
+
+	private final String SERVICE_NAME = "serviceTest";
 
 	@Inject Context appContext;
 	@Inject P2pManager p2pManager;
-	@Inject ServiceUtils serviceUtils;
 
 	@InjectView(R.id.host_start) Button startHostButton;
 	@InjectView(R.id.host_stop) Button stopHostButton;
-	@InjectView(R.id.host_name) EditText serviceNameEditText;
 
 
 	@Override
@@ -42,7 +44,7 @@ public class HostGameActivity extends BaseActivity implements
 		setContentView(R.layout.activity_host_game);
 		ButterKnife.inject(this);
 
-		if (serviceUtils.isServiceRunning(LobbyService.class)) {
+		if (p2pManager.isServiceRegistrationStarted(SERVICE_NAME)) {
 			startHostButton.setEnabled(false);
 			stopHostButton.setEnabled(true);
 		} else {
@@ -55,7 +57,8 @@ public class HostGameActivity extends BaseActivity implements
 	@OnClick(R.id.host_start)
 	public void startHost() {
 		startHostButton.setEnabled(false);
-		p2pManager.startServiceRegistration(serviceNameEditText.getText().toString(), this);
+		p2pManager.registerServiceDiscoveryListener(this);
+		p2pManager.startServiceRegistration(SERVICE_NAME, this);
 		p2pManager.startServiceDiscovery();
 	}
 
@@ -88,4 +91,8 @@ public class HostGameActivity extends BaseActivity implements
 	}
 
 
+	@Override
+	public void onNewService(P2pHost service) {
+		Timber.i("discovered service " + service.getServiceName());
+	}
 }

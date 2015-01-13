@@ -69,10 +69,10 @@ public class JoinGameActivity
 	public void onResume() {
 		super.onResume();
 
-		p2pManager.register((ServiceDiscoveryListener) this);
+		p2pManager.registerServiceDiscoveryListener((ServiceDiscoveryListener) this);
 		p2pManager.startServiceDiscovery();
 
-		p2pManager.register((P2pConnectionListener) this);
+		p2pManager.registerP2pConnectionListener((P2pConnectionListener) this);
 	}
 
 
@@ -81,9 +81,9 @@ public class JoinGameActivity
 		super.onPause();
 
 		p2pManager.stopServiceDiscovery();
-		p2pManager.unregister((ServiceDiscoveryListener) this);
+		p2pManager.unregisterServiceDiscoveryListener((ServiceDiscoveryListener) this);
 
-		p2pManager.unregister((P2pConnectionListener) this);
+		p2pManager.unregisterP2pConnectionListener((P2pConnectionListener) this);
 	}
 
 
