@@ -1,4 +1,4 @@
-package org.faudroids.distributedmemory.main;
+package org.faudroids.distributedmemory.app;
 
 
 import com.google.common.collect.Lists;
@@ -10,7 +10,7 @@ import java.util.List;
 import dagger.ObjectGraph;
 import timber.log.Timber;
 
-public final class MainApplication extends BaseApplication {
+public final class DistributedMemoryApplication extends BaseApplication {
 
 	private ObjectGraph objectGraph;
 
@@ -23,7 +23,7 @@ public final class MainApplication extends BaseApplication {
 
 	@Override
 	protected List<Object> getModules() {
-		return Lists.<Object>newArrayList(new MainModule());
+		return Lists.<Object>newArrayList(new AppModule());
 	}
 
 }

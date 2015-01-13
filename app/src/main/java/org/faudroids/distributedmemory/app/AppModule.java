@@ -1,4 +1,4 @@
-package org.faudroids.distributedmemory.main;
+package org.faudroids.distributedmemory.app;
 
 
 import org.faudroids.distributedmemory.common.CommonModule;
@@ -12,9 +12,9 @@ import dagger.Module;
 				NetworkModule.class,
 		},
 		injects = {
-				MainApplication.class
+				DistributedMemoryApplication.class
 		}
 )
-public final class MainModule {
+public final class AppModule {
 
 }

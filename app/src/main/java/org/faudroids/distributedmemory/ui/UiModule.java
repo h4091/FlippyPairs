@@ -1,12 +1,12 @@
 package org.faudroids.distributedmemory.ui;
 
 
-import org.faudroids.distributedmemory.main.MainModule;
+import org.faudroids.distributedmemory.app.AppModule;
 
 import dagger.Module;
 
 @Module(
-		addsTo = MainModule.class,
+		addsTo = AppModule.class,
 		injects = {
 				MainActivity.class,
 				HostGameActivity.class,
