@@ -1,6 +1,5 @@
-package org.faudroids.distributedmemory;
+package org.faudroids.distributedmemory.ui;
 
-import android.app.Activity;
 import android.content.Context;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Bundle;
@@ -8,15 +7,23 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.google.common.collect.Lists;
+
+import org.faudroids.distributedmemory.R;
+import org.faudroids.distributedmemory.common.BaseActivity;
 import org.faudroids.distributedmemory.network.P2pManager;
 import org.faudroids.distributedmemory.network.ServiceRegistrationListener;
 
+import java.util.List;
 
-public class HostGameActivity extends Activity implements
+import javax.inject.Inject;
+
+
+public class HostGameActivity extends BaseActivity implements
 		ServiceRegistrationListener,
 		View.OnClickListener {
 
-	private P2pManager p2pManager;
+	@Inject P2pManager p2pManager;
 
 	private Button startHostButton;
 	private Button stopHostButton;
@@ -37,6 +44,12 @@ public class HostGameActivity extends Activity implements
 
 		startHostButton.setOnClickListener(this);
 		stopHostButton.setOnClickListener(this);
+	}
+
+
+	@Override
+	protected List<Object> getModules() {
+		return Lists.<Object>newArrayList(new UiModule());
 	}
 
 

@@ -1,6 +1,5 @@
-package org.faudroids.distributedmemory;
+package org.faudroids.distributedmemory.ui;
 
-import android.app.ListActivity;
 import android.content.Context;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Bundle;
@@ -9,6 +8,9 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.google.common.collect.Lists;
+
+import org.faudroids.distributedmemory.common.BaseListActivity;
 import org.faudroids.distributedmemory.network.P2pConnectionListener;
 import org.faudroids.distributedmemory.network.P2pManager;
 import org.faudroids.distributedmemory.network.P2pService;
@@ -16,15 +18,18 @@ import org.faudroids.distributedmemory.network.ServiceDiscoveryListener;
 
 import java.net.InetAddress;
 import java.util.Comparator;
+import java.util.List;
+
+import javax.inject.Inject;
 
 
 public class ClientGameActivity
-		extends ListActivity
+		extends BaseListActivity
 		implements ServiceDiscoveryListener,
 		P2pConnectionListener {
 
 	private ArrayAdapter<P2pService> adapter;
-	private P2pManager p2pManager;
+	@Inject P2pManager p2pManager;
 
 
 	@Override
@@ -39,6 +44,11 @@ public class ClientGameActivity
 		this.adapter = new ArrayAdapter<>(this, android.R.layout.simple_expandable_list_item_1);
 		adapter.addAll(p2pManager.getAllDiscoveredServices());
 		setListAdapter(adapter);
+	}
+
+	@Override
+	protected List<Object> getModules() {
+		return Lists.<Object>newArrayList(new UiModule());
 	}
 
 

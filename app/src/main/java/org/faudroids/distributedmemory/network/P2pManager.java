@@ -17,6 +17,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 import timber.log.Timber;
 
 import static android.net.wifi.p2p.WifiP2pManager.ActionListener;
@@ -28,6 +31,8 @@ import static android.net.wifi.p2p.WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION;
 import static android.net.wifi.p2p.WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION;
 import static android.net.wifi.p2p.WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION;
 
+
+@Singleton
 public final class P2pManager {
 
 	private static final String SERVICE_PREFIX = "org.faudroids.distributedmemory.";
@@ -41,6 +46,7 @@ public final class P2pManager {
 	private WiFiDirectBroadcastReceiver receiver;
 
 
+	@Inject
 	public P2pManager(WifiP2pManager manager, Channel channel) {
 		this.manager = manager;
 		this.channel = channel;
