@@ -31,7 +31,7 @@ public class MainActivity extends BaseActivity {
 
 	@OnClick(R.id.test_connection)
 	public void startP2pActivity() {
-		startActivity(new Intent(this, P2pActivity.class));
+		startActivity(new Intent(this, HostGameActivity.class));
 	}
 
 

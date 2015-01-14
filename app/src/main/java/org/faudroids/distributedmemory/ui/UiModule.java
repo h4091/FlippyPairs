@@ -9,8 +9,9 @@ import dagger.Module;
 		addsTo = AppModule.class,
 		injects = {
 				MainActivity.class,
-				P2pActivity.class,
-				GameActivity.class
+				GameActivity.class,
+				HostGameActivity.class,
+				P2pActivity.class
 		}
 )
 public final class UiModule {

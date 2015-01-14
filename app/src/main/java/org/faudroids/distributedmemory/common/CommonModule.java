@@ -3,6 +3,7 @@ package org.faudroids.distributedmemory.common;
 
 import android.app.NotificationManager;
 import android.content.Context;
+import android.net.nsd.NsdManager;
 import android.os.Looper;
 
 import javax.inject.Singleton;
@@ -40,6 +41,13 @@ public final class CommonModule {
 	@Singleton
 	NotificationManager provideNotificationManager(Context context) {
 		return (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+	}
+
+
+	@Provides
+	@Singleton
+	NsdManager provideNsdManager(Context context) {
+		return (NsdManager) context.getSystemService(Context.NSD_SERVICE);
 	}
 
 }
