@@ -59,7 +59,7 @@ public class P2pBroadcastReceiver extends BroadcastReceiver {
 							Timber.i("Group owner address " + info.groupOwnerAddress);
 							if (info.groupFormed) {
 								if (info.isGroupOwner) connectionListener.onHostConnected();
-								else connectionListener.onClientConnected(info.groupOwnerAddress);
+								connectionListener.onClientConnected(info.groupOwnerAddress);
 							} else {
 								Timber.i("Ignoring connected due to missing group formation");
 							}
