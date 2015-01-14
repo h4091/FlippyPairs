@@ -44,7 +44,7 @@ public final class P2pManager {
 	private final Set<String> registeredServices = new HashSet<>();
 	private final Set<P2pHost> discoveredServices = new HashSet<>();
 
-	private WiFiDirectBroadcastReceiver receiver;
+	private P2pBroadcastReceiver receiver;
 
 
 	@Inject
@@ -197,7 +197,7 @@ public final class P2pManager {
 		intentFilter.addAction(WIFI_P2P_PEERS_CHANGED_ACTION);
 		intentFilter.addAction(WIFI_P2P_CONNECTION_CHANGED_ACTION);
 		intentFilter.addAction(WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
-		receiver = new WiFiDirectBroadcastReceiver(listener, manager, channel);
+		receiver = new P2pBroadcastReceiver(listener, manager, channel);
 		context.registerReceiver(receiver, intentFilter);
 	}
 

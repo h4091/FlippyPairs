@@ -29,13 +29,13 @@ import timber.log.Timber;
 /**
  * A BroadcastReceiver that notifies of important wifi p2p events.
  */
-public class WiFiDirectBroadcastReceiver extends BroadcastReceiver {
+public class P2pBroadcastReceiver extends BroadcastReceiver {
 
 	private final P2pConnectionListener connectionListener;
     private final WifiP2pManager manager;
     private final Channel channel;
 
-    public WiFiDirectBroadcastReceiver(
+    public P2pBroadcastReceiver(
 			P2pConnectionListener connectionListener,
 			WifiP2pManager manager,
 			Channel channel) {
