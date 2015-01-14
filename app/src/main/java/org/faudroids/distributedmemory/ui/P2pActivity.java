@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 
 import com.google.common.collect.Lists;
 
@@ -24,6 +26,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import butterknife.ButterKnife;
+import butterknife.InjectView;
 import timber.log.Timber;
 
 
@@ -38,11 +41,19 @@ public class P2pActivity extends BaseActivity implements
 	@Inject HostSocketHandler hostSocketHandler;
 	ClientSocketHandler clientSocketHandler;
 
+	@InjectView(R.id.peers_list) ListView peersList;
+	private ArrayAdapter<String> peersAdapter;
+
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_p2p);
 		ButterKnife.inject(this);
+
+
+		peersAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
+		peersList.setAdapter(peersAdapter);
 	}
 
 
@@ -121,6 +132,14 @@ public class P2pActivity extends BaseActivity implements
 	public void onHostConnected() {
 		Timber.i("Host connected");
 		hostSocketHandler.start();
+	}
+
+
+	@Override
+	public void onClientsListChanged(List<String> clients) {
+		peersAdapter.clear();
+		peersAdapter.addAll(clients);
+		peersAdapter.notifyDataSetChanged();
 	}
 
 

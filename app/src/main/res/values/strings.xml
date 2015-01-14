@@ -9,4 +9,12 @@
     <string name="disconnect">Disconnect</string>
     <string name="submit_id">Will they match?</string>
 
+    <string-array name="p2p_connection_status">
+        <item>"Available"</item>
+        <item>"Connected"</item>
+        <item>"Failed"</item>
+        <item>"Invited"</item>
+        <item>"Unavailable"</item>
+    </string-array>
+
 </resources>
