@@ -39,7 +39,7 @@ public final class ClientSocketHandler {
 
 	public void shutdown() {
 		Timber.i("stopping client socket handler");
-		clientHandler.shutdown();
+		if (clientHandler != null) clientHandler.shutdown();
 	}
 
 }

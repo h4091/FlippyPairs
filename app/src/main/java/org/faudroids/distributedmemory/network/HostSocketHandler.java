@@ -38,7 +38,7 @@ public final class HostSocketHandler {
 
 
 	public void shutdown() {
-		serverRunnable.shutdown();
+		if (serverRunnable != null) serverRunnable.shutdown();
 		serverRunnable = null;
 	}
 

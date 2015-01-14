@@ -70,6 +70,7 @@ public class P2pActivity extends BaseActivity implements
 		if (hostSocketHandler != null) hostSocketHandler.shutdown();
 		if (clientSocketHandler != null) clientSocketHandler.shutdown();
 		p2pManager.shutdown();
+		super.onDestroy();
 	}
 
 
