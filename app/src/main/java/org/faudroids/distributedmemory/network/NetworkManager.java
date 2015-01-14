@@ -50,12 +50,12 @@ public final class NetworkManager {
 	public <T extends Activity & NetworkListener> void startDiscovery(T networkListener) {
 		if (discoveryListener != null) throw new IllegalStateException("Can only listen for one service type");
 
-		discoveryListener = new DiscoveryListener<>(networkListener, new ResolveListener<>(networkListener), nsdManager);
+		discoveryListener = new DiscoveryListener<>(networkListener, nsdManager);
 		nsdManager.discoverServices(SERVICE_TYPE, NsdManager.PROTOCOL_DNS_SD, discoveryListener);
 	}
 
 
-	public void stopDiscovery(NetworkListener networkListener) {
+	public void stopDiscovery() {
 		if (discoveryListener != null) nsdManager.stopServiceDiscovery(discoveryListener);
 	}
 
@@ -74,7 +74,7 @@ public final class NetworkManager {
 
 		@Override
 		public void onServiceRegistered(NsdServiceInfo serviceInfo) {
-			Timber.e("Service registration success");
+			Timber.i("Service registration success");
 			if (serviceInfo.getServiceName().equals(serviceName)) {
 				networkListener.runOnUiThread(new Runnable() {
 					@Override
@@ -102,7 +102,7 @@ public final class NetworkManager {
 
 		@Override
 		public void onServiceUnregistered(NsdServiceInfo serviceInfo) {
-			Timber.e("Service unregistered");
+			Timber.i("Service unregistered");
 		}
 
 
@@ -117,12 +117,10 @@ public final class NetworkManager {
 	private static final class DiscoveryListener<T extends Activity & NetworkListener> implements NsdManager.DiscoveryListener {
 
 		private final T networkListener;
-		private final NsdManager.ResolveListener resolveListener;
 		private final NsdManager nsdManager;
 
-		public DiscoveryListener(T networkListener, NsdManager.ResolveListener resolveListener, NsdManager nsdManager) {
+		public DiscoveryListener(T networkListener, NsdManager nsdManager) {
 			this.networkListener = networkListener;
-			this.resolveListener = resolveListener;
 			this.nsdManager = nsdManager;
 		}
 
@@ -146,7 +144,7 @@ public final class NetworkManager {
 				Timber.i("Discarding discovered service");
 				return;
 			}
-			nsdManager.resolveService(serviceInfo, resolveListener);
+			nsdManager.resolveService(serviceInfo, new ResolveListener<>(networkListener));
 		}
 
 
@@ -213,7 +211,7 @@ public final class NetworkManager {
 
 		@Override
 		public void onServiceResolved(final NsdServiceInfo serviceInfo) {
-			Timber.e("Service resolve success");
+			Timber.i("Service resolve success (" + serviceInfo + ")");
 			networkListener.runOnUiThread(new Runnable() {
 				@Override
 				public void run() {

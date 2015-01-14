@@ -31,9 +31,7 @@ public class HostGameActivity extends BaseActivity implements NetworkListener {
 
 	@Inject Context appContext;
 	@Inject NetworkManager networkManager;
-
 	@Inject HostSocketHandler hostSocketHandler;
-	private int hostPort;
 
 	@InjectView(R.id.peers_list) ListView peersList;
 	private ArrayAdapter<String> peersAdapter;
@@ -47,12 +45,6 @@ public class HostGameActivity extends BaseActivity implements NetworkListener {
 
 		peersAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
 		peersList.setAdapter(peersAdapter);
-
-		try {
-			hostPort = hostSocketHandler.start();
-		} catch (IOException ioe) {
-			Timber.e(ioe, "failed to start host");
-		}
 	}
 
 
@@ -73,14 +65,19 @@ public class HostGameActivity extends BaseActivity implements NetworkListener {
 
 	@Override
 	public void onPause() {
-		networkManager.stopDiscovery(this);
+		networkManager.stopDiscovery();
 		super.onPause();
 	}
 
 
 	@OnClick(R.id.start_hosting)
 	public void startHosting() {
-		networkManager.registerService(SERVICE_NAME, hostPort, this);
+		try {
+			int hostPort = hostSocketHandler.start();
+			networkManager.registerService(SERVICE_NAME, hostPort, this);
+		} catch (IOException ioe) {
+			Timber.e(ioe, "failed to start host");
+		}
 	}
 
 

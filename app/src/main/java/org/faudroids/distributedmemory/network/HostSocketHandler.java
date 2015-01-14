@@ -32,6 +32,7 @@ public final class HostSocketHandler {
 				serverSocket,
 				new ThreadPoolExecutor(10, 10, 10, TimeUnit.DAYS.SECONDS, new LinkedBlockingDeque<Runnable>()));
 		new Thread(serverRunnable).start();
+		Timber.i("Hosting on port " + serverSocket.getLocalPort());
 		return serverSocket.getLocalPort();
 	}
 
