@@ -41,7 +41,7 @@ public class P2pActivity extends BaseActivity implements
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_host_game);
+		setContentView(R.layout.activity_p2p);
 		ButterKnife.inject(this);
 	}
 

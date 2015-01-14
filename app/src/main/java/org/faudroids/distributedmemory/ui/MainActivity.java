@@ -32,34 +32,9 @@ public class MainActivity extends BaseActivity {
     }
 
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.activity_main, menu);
-		return true;
-	}
-
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-			case R.id.shutdown:
-				p2pManager.shutdown();
-				return true;
-		}
-		return super.onOptionsItemSelected(item);
-	}
-
-
-	@OnClick(R.id.game_host)
-	public void startHostGameActivity() {
+	@OnClick(R.id.start_game)
+	public void startP2pActivity() {
 		startActivity(new Intent(this, P2pActivity.class));
-	}
-
-
-	@OnClick(R.id.game_join)
-	public void startClientGameActivity() {
-		startActivity(new Intent(this, JoinGameActivity.class));
 	}
 
 

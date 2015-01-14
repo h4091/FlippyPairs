@@ -25,20 +25,8 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ui.HostGameActivity"
-            android:label="@string/title_activity_host_game" >
-        </activity>
-        <activity
-            android:name=".ui.JoinGameActivity"
-            android:label="@string/title_activity_host_game" >
-        </activity>
-        <activity
-            android:name=".ui.ClientGameActivity"
-            android:label="@string/title_activity_host_game" >
-        </activity>
-        <activity
             android:name=".ui.P2pActivity"
-            android:label="@string/title_activity_host_game" >
+            android:label="@string/app_name" >
         </activity>
     </application>
 
