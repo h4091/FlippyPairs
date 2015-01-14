@@ -8,8 +8,14 @@
     android:paddingBottom="@dimen/activity_vertical_margin">
 
     <Button
-        android:id="@+id/start_game"
-        android:text="@string/start_game"
+        android:id="@+id/test_connection"
+        android:text="@string/menu_test_connection"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:id="@+id/test_game"
+        android:text="@string/menu_test_game"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 

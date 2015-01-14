@@ -2,9 +2,6 @@ package org.faudroids.distributedmemory.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 
 import com.google.common.collect.Lists;
 
@@ -32,7 +29,7 @@ public class MainActivity extends BaseActivity {
     }
 
 
-	@OnClick(R.id.start_game)
+	@OnClick(R.id.test_connection)
 	public void startP2pActivity() {
 		startActivity(new Intent(this, P2pActivity.class));
 	}
@@ -42,5 +39,10 @@ public class MainActivity extends BaseActivity {
 	protected List<Object> getModules() {
 		return Lists.<Object>newArrayList(new UiModule());
 	}
+
+    @OnClick(R.id.test_game)
+    public void startGameActivity() {
+        startActivity(new Intent(this, GameActivity.class));
+    }
 
 }

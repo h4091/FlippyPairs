@@ -3,7 +3,10 @@
 
     <string name="app_name">DistributedMemory</string>
 
-    <string name="start_game">Start Game</string>
+    <string name="menu_test_connection">Test Connection</string>
+    <string name="menu_test_game">Test Game</string>
+
     <string name="disconnect">Disconnect</string>
+    <string name="submit_id">Will they match?</string>
 
 </resources>
