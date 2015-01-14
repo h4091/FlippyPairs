@@ -1,4 +1,4 @@
-package org.faudroids.distributedmemory.network;
+package org.faudroids.distributedmemory.network_old;
 
 
 import com.google.common.base.Objects;

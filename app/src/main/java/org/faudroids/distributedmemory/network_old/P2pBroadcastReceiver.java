@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.faudroids.distributedmemory.network;
+package org.faudroids.distributedmemory.network_old;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

@@ -7,7 +7,7 @@ import com.google.common.collect.Lists;
 
 import org.faudroids.distributedmemory.R;
 import org.faudroids.distributedmemory.common.BaseActivity;
-import org.faudroids.distributedmemory.network.P2pManager;
+import org.faudroids.distributedmemory.network_old.P2pManager;
 
 import java.util.List;
 

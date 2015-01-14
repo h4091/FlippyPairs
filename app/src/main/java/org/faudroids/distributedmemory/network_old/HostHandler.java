@@ -1,4 +1,4 @@
-package org.faudroids.distributedmemory.network;
+package org.faudroids.distributedmemory.network_old;
 
 
 import java.io.BufferedReader;

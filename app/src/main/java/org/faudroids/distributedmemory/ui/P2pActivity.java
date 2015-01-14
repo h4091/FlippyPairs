@@ -12,13 +12,13 @@ import com.google.common.collect.Lists;
 
 import org.faudroids.distributedmemory.R;
 import org.faudroids.distributedmemory.common.BaseActivity;
-import org.faudroids.distributedmemory.network.ClientSocketHandler;
-import org.faudroids.distributedmemory.network.HostSocketHandler;
-import org.faudroids.distributedmemory.network.P2pConnectionListener;
-import org.faudroids.distributedmemory.network.P2pHost;
-import org.faudroids.distributedmemory.network.P2pManager;
-import org.faudroids.distributedmemory.network.ServiceDiscoveryListener;
-import org.faudroids.distributedmemory.network.ServiceRegistrationListener;
+import org.faudroids.distributedmemory.network_old.ClientSocketHandler;
+import org.faudroids.distributedmemory.network_old.HostSocketHandler;
+import org.faudroids.distributedmemory.network_old.P2pConnectionListener;
+import org.faudroids.distributedmemory.network_old.P2pHost;
+import org.faudroids.distributedmemory.network_old.P2pManager;
+import org.faudroids.distributedmemory.network_old.ServiceDiscoveryListener;
+import org.faudroids.distributedmemory.network_old.ServiceRegistrationListener;
 
 import java.net.InetAddress;
 import java.util.List;
