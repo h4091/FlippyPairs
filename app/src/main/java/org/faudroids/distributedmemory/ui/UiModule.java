@@ -12,8 +12,7 @@ import dagger.Module;
 				GameActivity.class,
 				HostGameActivity.class,
 				JoinGameActivity.class,
-				LobbyActivity.class,
-				P2pActivity.class
+				LobbyActivity.class
 		}
 )
 public final class UiModule {

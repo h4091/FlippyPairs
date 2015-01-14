@@ -7,19 +7,14 @@ import com.google.common.collect.Lists;
 
 import org.faudroids.distributedmemory.R;
 import org.faudroids.distributedmemory.common.BaseActivity;
-import org.faudroids.distributedmemory.network_old.P2pManager;
 
 import java.util.List;
-
-import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 
 public class MainActivity extends BaseActivity {
-
-	@Inject P2pManager p2pManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
