@@ -2,7 +2,7 @@ package org.faudroids.distributedmemory.app;
 
 
 import org.faudroids.distributedmemory.common.CommonModule;
-import org.faudroids.distributedmemory.network_old.NetworkModule;
+import org.faudroids.distributedmemory.network.NetworkModule;
 import org.faudroids.distributedmemory.utils.UtilsModule;
 
 import dagger.Module;

@@ -1,14 +1,14 @@
 package org.faudroids.distributedmemory.ui;
 
-import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
 
 import com.google.common.collect.Lists;
 
 import org.faudroids.distributedmemory.R;
 import org.faudroids.distributedmemory.common.BaseActivity;
+import org.faudroids.distributedmemory.network.ClientSocketHandler;
+import org.faudroids.distributedmemory.network.Host;
 import org.faudroids.distributedmemory.network.HostSocketHandler;
 import org.faudroids.distributedmemory.network.NetworkListener;
 import org.faudroids.distributedmemory.network.NetworkManager;
@@ -20,7 +20,6 @@ import java.util.List;
 import javax.inject.Inject;
 
 import butterknife.ButterKnife;
-import butterknife.InjectView;
 import butterknife.OnClick;
 import timber.log.Timber;
 
@@ -29,12 +28,9 @@ public class HostGameActivity extends BaseActivity implements NetworkListener {
 
 	private static final String SERVICE_NAME = "serviceTest";
 
-	@Inject Context appContext;
 	@Inject NetworkManager networkManager;
 	@Inject HostSocketHandler hostSocketHandler;
-
-	@InjectView(R.id.peers_list) ListView peersList;
-	private ArrayAdapter<String> peersAdapter;
+	ClientSocketHandler clientSocketHandler;
 
 
 	@Override
@@ -42,31 +38,15 @@ public class HostGameActivity extends BaseActivity implements NetworkListener {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_host_game);
 		ButterKnife.inject(this);
-
-		peersAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
-		peersList.setAdapter(peersAdapter);
 	}
 
 
 	@Override
 	protected void onDestroy() {
+		if (clientSocketHandler != null) clientSocketHandler.shutdown();
 		hostSocketHandler.shutdown();
 		networkManager.unregisterService();
 		super.onDestroy();
-	}
-
-
-	@Override
-	public void onResume() {
-		super.onResume();
-		networkManager.startDiscovery(this);
-	}
-
-
-	@Override
-	public void onPause() {
-		networkManager.stopDiscovery();
-		super.onPause();
 	}
 
 
@@ -74,7 +54,13 @@ public class HostGameActivity extends BaseActivity implements NetworkListener {
 	public void startHosting() {
 		try {
 			int hostPort = hostSocketHandler.start();
+			clientSocketHandler = new ClientSocketHandler(InetAddress.getByName("127.0.0.1"), hostPort);
+			clientSocketHandler.start();
+
 			networkManager.registerService(SERVICE_NAME, hostPort, this);
+			Intent intent = new Intent(this, LobbyActivity.class);
+			intent.putExtra(LobbyActivity.KEY_IS_HOST, true);
+			startActivity(intent);
 		} catch (IOException ioe) {
 			Timber.e(ioe, "failed to start host");
 		}
@@ -90,17 +76,11 @@ public class HostGameActivity extends BaseActivity implements NetworkListener {
 
 
 	@Override
-	public void onServiceDiscovered(String hostName, InetAddress hostAddress, int hostPort) {
-		peersAdapter.add(hostName);
-		peersAdapter.notifyDataSetChanged();
-	}
+	public void onServiceDiscovered(Host host) { }
 
 
 	@Override
-	public void onServiceLost(String hostName) {
-		peersAdapter.remove(hostName);
-		peersAdapter.notifyDataSetChanged();
-	}
+	public void onServiceLost(String hostName) { }
 
 
 	@Override

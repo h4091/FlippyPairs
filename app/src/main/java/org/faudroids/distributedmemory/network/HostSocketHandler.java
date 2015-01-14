@@ -1,10 +1,9 @@
 package org.faudroids.distributedmemory.network;
 
 
-import org.faudroids.distributedmemory.network_old.HostHandler;
-
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -20,6 +19,7 @@ import timber.log.Timber;
 @Singleton
 public final class HostSocketHandler {
 
+	private final List<String> connectedClients = Collections.synchronizedList(new LinkedList<String>());
 	private ServerRunnable serverRunnable;
 
 	@Inject
@@ -30,7 +30,8 @@ public final class HostSocketHandler {
 		ServerSocket serverSocket = new ServerSocket(0);
 		serverRunnable = new ServerRunnable(
 				serverSocket,
-				new ThreadPoolExecutor(10, 10, 10, TimeUnit.DAYS.SECONDS, new LinkedBlockingDeque<Runnable>()));
+				new ThreadPoolExecutor(10, 10, 10, TimeUnit.DAYS.SECONDS, new LinkedBlockingDeque<Runnable>()),
+				connectedClients);
 		new Thread(serverRunnable).start();
 		Timber.i("Hosting on port " + serverSocket.getLocalPort());
 		return serverSocket.getLocalPort();
@@ -43,17 +44,24 @@ public final class HostSocketHandler {
 	}
 
 
+	public List<String> getConnectedClients() {
+		return connectedClients;
+	}
+
+
 	private static final class ServerRunnable implements Runnable {
 
 		private final ServerSocket serverSocket;
 		private final ExecutorService executorService;
 		private final List<HostHandler> hostHandlers = new LinkedList<>();
+		private final List<String> connectedClients;
 
 		private boolean alive = true;
 
-		public ServerRunnable(ServerSocket serverSocket, ExecutorService executorService) {
+		public ServerRunnable(ServerSocket serverSocket, ExecutorService executorService, List<String> connectedClients) {
 			this.serverSocket = serverSocket;
 			this.executorService = executorService;
+			this.connectedClients = connectedClients;
 		}
 
 
@@ -67,7 +75,7 @@ public final class HostSocketHandler {
 		public void run() {
 			while (alive) {
 				try {
-					HostHandler handler = new HostHandler(serverSocket.accept());
+					HostHandler handler = new HostHandler(serverSocket.accept(), connectedClients);
 					hostHandlers.add(handler);
 					executorService.execute(handler);
 				} catch(IOException ioe) {

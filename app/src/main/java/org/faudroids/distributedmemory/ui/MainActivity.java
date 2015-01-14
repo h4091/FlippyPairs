@@ -29,20 +29,27 @@ public class MainActivity extends BaseActivity {
     }
 
 
-	@OnClick(R.id.test_connection)
-	public void startP2pActivity() {
+	@OnClick(R.id.host_game)
+	public void hostGame() {
 		startActivity(new Intent(this, HostGameActivity.class));
 	}
+
+
+	@OnClick(R.id.join_game)
+	public void joinGame() {
+		startActivity(new Intent(this, JoinGameActivity.class));
+	}
+
+
+    @OnClick(R.id.test_game)
+    public void startGameActivity() {
+        startActivity(new Intent(this, GameActivity.class));
+    }
 
 
 	@Override
 	protected List<Object> getModules() {
 		return Lists.<Object>newArrayList(new UiModule());
 	}
-
-    @OnClick(R.id.test_game)
-    public void startGameActivity() {
-        startActivity(new Intent(this, GameActivity.class));
-    }
 
 }
