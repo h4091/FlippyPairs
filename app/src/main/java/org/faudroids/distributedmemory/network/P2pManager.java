@@ -14,8 +14,6 @@ import org.faudroids.distributedmemory.utils.Assert;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -45,7 +43,6 @@ public final class P2pManager {
 
 	private final Set<String> registeredServices = new HashSet<>();
 	private final Set<P2pHost> discoveredServices = new HashSet<>();
-	private final List<ServiceDiscoveryListener> serviceDiscoveryListeners = new LinkedList<>();
 
 	private WiFiDirectBroadcastReceiver receiver;
 
@@ -104,7 +101,7 @@ public final class P2pManager {
 	}
 
 
-	public void startServiceDiscovery() {
+	public void startServiceDiscovery(final ServiceDiscoveryListener listener) {
 		manager.setDnsSdResponseListeners(
 				channel,
 				new DnsSdServiceResponseListener() {
@@ -116,9 +113,7 @@ public final class P2pManager {
 						String serviceName = fullServiceName.substring(SERVICE_PREFIX.length());
 						P2pHost service = new P2pHost(serviceName, srcDevice.deviceAddress);
 						discoveredServices.add(service);
-						for (ServiceDiscoveryListener listener : serviceDiscoveryListeners) {
-							listener.onNewService(service);
-						}
+						listener.onNewService(service);
 					}
 				},
 				new DnsSdTxtRecordListener() {
@@ -173,24 +168,12 @@ public final class P2pManager {
 	}
 
 
-	public void registerServiceDiscoveryListener(ServiceDiscoveryListener listener) {
-		this.serviceDiscoveryListeners.add(listener);
-	}
-
-
-	public void unregisterServiceDiscoveryListener(ServiceDiscoveryListener listener) {
-		this.serviceDiscoveryListeners.remove(listener);
-	}
-
-
 	public Set<P2pHost> getAllDiscoveredServices() {
 		return new HashSet<>(discoveredServices);
 	}
 
 
 	public void connectTo(P2pHost service) {
-		stopServiceDiscovery();
-
 		WifiP2pConfig config = new WifiP2pConfig();
 		config.deviceAddress = service.getDeviceAddress();
 		config.wps.setup = WpsInfo.PBC;

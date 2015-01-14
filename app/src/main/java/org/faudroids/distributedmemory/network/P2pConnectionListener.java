@@ -5,6 +5,14 @@ import java.net.InetAddress;
 
 public interface P2pConnectionListener {
 
-	public void onConnected(InetAddress hostAddress);
+	/**
+	 * Called when this device is a client peer.
+	 */
+	public void onClientConnected(InetAddress groupOwnerAddress);
+
+	/**
+	 * Called when this device is the group leader.
+	 */
+	public void onHostConnected();
 
 }

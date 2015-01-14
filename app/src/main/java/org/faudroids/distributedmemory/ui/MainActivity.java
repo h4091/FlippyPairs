@@ -53,7 +53,7 @@ public class MainActivity extends BaseActivity {
 
 	@OnClick(R.id.game_host)
 	public void startHostGameActivity() {
-		startActivity(new Intent(this, HostGameActivity.class));
+		startActivity(new Intent(this, P2pActivity.class));
 	}
 
 

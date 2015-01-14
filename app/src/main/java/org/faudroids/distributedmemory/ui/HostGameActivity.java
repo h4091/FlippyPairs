@@ -1,7 +1,6 @@
 package org.faudroids.distributedmemory.ui;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 
@@ -9,7 +8,6 @@ import com.google.common.collect.Lists;
 
 import org.faudroids.distributedmemory.R;
 import org.faudroids.distributedmemory.common.BaseActivity;
-import org.faudroids.distributedmemory.network.LobbyService;
 import org.faudroids.distributedmemory.network.P2pHost;
 import org.faudroids.distributedmemory.network.P2pManager;
 import org.faudroids.distributedmemory.network.ServiceDiscoveryListener;
@@ -57,9 +55,9 @@ public class HostGameActivity extends BaseActivity implements
 	@OnClick(R.id.host_start)
 	public void startHost() {
 		startHostButton.setEnabled(false);
-		p2pManager.registerServiceDiscoveryListener(this);
+		// p2pManager.registerServiceDiscoveryListener(this);
 		p2pManager.startServiceRegistration(SERVICE_NAME, this);
-		p2pManager.startServiceDiscovery();
+		// p2pManager.startServiceDiscovery();
 	}
 
 
@@ -68,13 +66,13 @@ public class HostGameActivity extends BaseActivity implements
 		stopHostButton.setEnabled(false);
 		p2pManager.stopServiceRegistration();
 		startHostButton.setEnabled(true);
-		stopService(new Intent(appContext, LobbyService.class));
+		// stopService(new Intent(appContext, LobbyService.class));
 	}
 
 
 	@Override
 	public void onRegistrationSuccess(String serviceName) {
-		startService(new Intent(appContext, LobbyService.class));
+		// startService(new Intent(appContext, LobbyService.class));
 		stopHostButton.setEnabled(true);
 	}
 

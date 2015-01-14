@@ -25,8 +25,7 @@ import javax.inject.Inject;
 
 public class JoinGameActivity
 		extends BaseListActivity
-		implements ServiceDiscoveryListener,
-		P2pConnectionListener {
+		implements ServiceDiscoveryListener {
 
 	private ArrayAdapter<P2pHost> adapter;
 	@Inject P2pManager p2pManager;
@@ -69,8 +68,8 @@ public class JoinGameActivity
 	public void onResume() {
 		super.onResume();
 
-		p2pManager.registerServiceDiscoveryListener((ServiceDiscoveryListener) this);
-		p2pManager.startServiceDiscovery();
+		// p2pManager.registerServiceDiscoveryListener((ServiceDiscoveryListener) this);
+		// p2pManager.startServiceDiscovery();
 
 		p2pManager.registerP2pConnectionListener((P2pConnectionListener) this);
 	}
@@ -81,14 +80,14 @@ public class JoinGameActivity
 		super.onPause();
 
 		p2pManager.stopServiceDiscovery();
-		p2pManager.unregisterServiceDiscoveryListener((ServiceDiscoveryListener) this);
+		// p2pManager.unregisterServiceDiscoveryListener((ServiceDiscoveryListener) this);
 
 		p2pManager.unregisterP2pConnectionListener((P2pConnectionListener) this);
 	}
 
 
-	@Override
-	public void onConnected(InetAddress hostAddress) {
+	// @Override
+	public void onClientConnected(InetAddress hostAddress) {
 		Toast.makeText(this, "Connected!", Toast.LENGTH_SHORT).show();
 		startActivity(new Intent(appContext, ClientGameActivity.class));
 	}

@@ -12,10 +12,7 @@ import dagger.Provides;
 
 @Module(
 		complete = false,
-		library = true,
-		injects = {
-				LobbyService.class
-		}
+		library = true
 )
 public final class NetworkModule {
 
