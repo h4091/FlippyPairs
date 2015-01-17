@@ -14,7 +14,7 @@ import timber.log.Timber;
 @Singleton
 public final class NetworkManager {
 
-	private static final String SERVICE_PREFIX = "org.faudroids.distributedmemory.";
+	private static final String SERVICE_PREFIX = "distributedmemory";
 	private static final String SERVICE_TYPE = "_socket._tcp.";
 
 	private final NsdManager nsdManager;
@@ -44,6 +44,7 @@ public final class NetworkManager {
 
 	public void unregisterService() {
 		if (serviceRegistrationListener != null) nsdManager.unregisterService(serviceRegistrationListener);
+		serviceRegistrationListener = null;
 	}
 
 
@@ -57,6 +58,7 @@ public final class NetworkManager {
 
 	public void stopDiscovery() {
 		if (discoveryListener != null) nsdManager.stopServiceDiscovery(discoveryListener);
+		discoveryListener = null;
 	}
 
 
