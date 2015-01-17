@@ -218,7 +218,7 @@ public final class NetworkManager {
 				@Override
 				public void run() {
 					networkListener.onServiceDiscovered(
-							new Host(
+							new HostInfo(
 									serviceInfo.getServiceName().substring(SERVICE_PREFIX.length()),
 									serviceInfo.getHost(),
 									serviceInfo.getPort()));

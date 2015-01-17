@@ -3,13 +3,13 @@ package org.faudroids.distributedmemory.network;
 
 import java.net.InetAddress;
 
-public final class Host {
+public final class HostInfo {
 
 	private final String name;
 	private final InetAddress address;
 	private final int port;
 
-	public Host(String name, InetAddress address, int port) {
+	public HostInfo(String name, InetAddress address, int port) {
 		this.name = name;
 		this.address = address;
 		this.port = port;

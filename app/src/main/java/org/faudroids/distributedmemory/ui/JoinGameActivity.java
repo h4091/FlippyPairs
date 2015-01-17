@@ -10,7 +10,7 @@ import com.google.common.collect.Lists;
 
 import org.faudroids.distributedmemory.common.BaseListActivity;
 import org.faudroids.distributedmemory.network.ClientSocketHandler;
-import org.faudroids.distributedmemory.network.Host;
+import org.faudroids.distributedmemory.network.HostInfo;
 import org.faudroids.distributedmemory.network.NetworkListener;
 import org.faudroids.distributedmemory.network.NetworkManager;
 
@@ -22,7 +22,7 @@ import javax.inject.Inject;
 public class JoinGameActivity extends BaseListActivity implements NetworkListener {
 
 	@Inject NetworkManager networkManager;
-	private ArrayAdapter<Host> adapter;
+	private ArrayAdapter<HostInfo> adapter;
 	private ClientSocketHandler clientSocketHandler;
 
 
@@ -37,8 +37,8 @@ public class JoinGameActivity extends BaseListActivity implements NetworkListene
 
 	@Override
 	public void onListItemClick(ListView listView, View view, int position, long id) {
-		Host host =  adapter.getItem(position);
-		clientSocketHandler = new ClientSocketHandler(host.getAddress(), host.getPort());
+		HostInfo hostInfo =  adapter.getItem(position);
+		clientSocketHandler = new ClientSocketHandler(hostInfo.getAddress(), hostInfo.getPort());
 		clientSocketHandler.start();
 
 		Intent intent = new Intent(this, LobbyActivity.class);
@@ -77,8 +77,8 @@ public class JoinGameActivity extends BaseListActivity implements NetworkListene
 
 
 	@Override
-	public void onServiceDiscovered(Host host) {
-		adapter.add(host);
+	public void onServiceDiscovered(HostInfo hostInfo) {
+		adapter.add(hostInfo);
 		adapter.notifyDataSetChanged();
 	}
 

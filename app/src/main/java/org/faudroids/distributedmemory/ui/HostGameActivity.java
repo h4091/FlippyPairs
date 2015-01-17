@@ -8,7 +8,7 @@ import com.google.common.collect.Lists;
 import org.faudroids.distributedmemory.R;
 import org.faudroids.distributedmemory.common.BaseActivity;
 import org.faudroids.distributedmemory.network.ClientSocketHandler;
-import org.faudroids.distributedmemory.network.Host;
+import org.faudroids.distributedmemory.network.HostInfo;
 import org.faudroids.distributedmemory.network.HostSocketHandler;
 import org.faudroids.distributedmemory.network.NetworkListener;
 import org.faudroids.distributedmemory.network.NetworkManager;
@@ -76,7 +76,7 @@ public class HostGameActivity extends BaseActivity implements NetworkListener {
 
 
 	@Override
-	public void onServiceDiscovered(Host host) { }
+	public void onServiceDiscovered(HostInfo hostInfo) { }
 
 
 	@Override
