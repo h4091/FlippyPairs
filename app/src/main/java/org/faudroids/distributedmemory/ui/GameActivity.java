@@ -6,8 +6,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.GridLayout;
 import android.widget.TextView;
-import android.widget.Toast;
-import android.os.Handler;
 
 import com.google.common.collect.Lists;
 
@@ -41,6 +39,8 @@ public class GameActivity extends BaseActivity {
         GridLayout grid = (GridLayout)findViewById(R.id.gameGrid);
         int numberOfPairs = (grid.getColumnCount()*(grid.getRowCount()-1))/2;
         Log.d("onCreate", "numberOfPairs: " + numberOfPairs);
+		/*
+		// TODO will be fixed once the GameManager API is a little more stable ...
         this.manager = new GameManager(numberOfPairs,2);
         this.txtPlayer = (TextView)findViewById(R.id.playerText);
         txtPlayer.setText(manager.getPlayerName(manager.getCurrentPlayer()));
@@ -48,6 +48,7 @@ public class GameActivity extends BaseActivity {
         txtPoints.setText("Points: " + manager.getPlayerPoints(manager.getCurrentPlayer()));
         this.first = -1;
         this.second = -1;
+        */
 	}
 
 	@Override
@@ -59,6 +60,7 @@ public class GameActivity extends BaseActivity {
         Button b = (Button)v;
         GridLayout g = (GridLayout)b.getParent();
 
+		/*
         int id = (int)(b.getX()/b.getWidth()+g.getColumnCount()*(int)(b.getY()/b.getHeight()));
 
         if(this.toggle) {
@@ -108,5 +110,6 @@ public class GameActivity extends BaseActivity {
                 errorToast.show();
             }
         }
+        */
     }
 }

@@ -1,46 +1,48 @@
 package org.faudroids.distributedmemory.core;
 
-/**
- * Created by sim0n on 13.01.15.
- */
-public class Card implements Comparable<Card> {
-    private int value;
-    private int id;
-    private boolean closed;
 
-    Card(int id, int value)
-    {
+import com.google.common.base.Objects;
+
+public final class Card implements Comparable<Card> {
+
+	private final int id;
+    private final int value;
+
+    Card(int id, int value) {
         this.id = id;
         this.value = value;
-        this.closed = false;
     }
 
-    public boolean isClosed() {
-        return closed;
-    }
 
-    public void setClosed(boolean closed) {
-        this.closed = closed;
-    }
+	public int getId() {
+		return id;
+	}
+
 
     public int getValue() {
         return value;
     }
 
-    public void setValue(int value) {
-        this.value = value;
-    }
 
-    public int getId() {
-        return id;
-    }
+	@Override
+	public boolean equals(Object other) {
+		if (other == null || !(other instanceof Card)) return false;
+		if (other == this) return true;
+		Card card = (Card) other;
+		return Objects.equal(id, card.id)
+				&& Objects.equal(value, card.value);
+	}
 
-    public void setId(int id) {
-        this.id = id;
-    }
+
+	@Override
+	public int hashCode() {
+		return Objects.hashCode(id, value);
+	}
+
 
     @Override
     public int compareTo(Card another) {
         return ((Integer) this.id).compareTo(another.getId());
     }
+
 }
