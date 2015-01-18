@@ -15,5 +15,11 @@ public interface ConnectionHandler {
 	public void registerMessageListener(MessageListener listener, Handler handler);
 	public void unregisterMessageListener();
 
+
+	static interface MessageListener {
+
+		public void onNewMessage(String msg);
+
+	}
 }
 

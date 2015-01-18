@@ -81,7 +81,7 @@ final class SimpleConnectionHandler implements ConnectionHandler {
 
 
 	/**
-	 * Returns messages that were not delivered to any {@link org.faudroids.distributedmemory.network.MessageListener}
+	 * Returns messages that were not delivered to any {@link org.faudroids.distributedmemory.network.ConnectionHandler.MessageListener}
 	 * due to none being registered via {@link #registerMessageListener(MessageListener, android.os.Handler)}.
 	 */
 	public List<String> getUndeliveredMessages() {
