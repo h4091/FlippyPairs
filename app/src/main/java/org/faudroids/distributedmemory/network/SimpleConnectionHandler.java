@@ -8,6 +8,8 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.LinkedList;
 import java.util.List;
@@ -19,37 +21,44 @@ import timber.log.Timber;
 final class SimpleConnectionHandler implements ConnectionHandler {
 
 	private final Socket socket;
-	private final MessageListenerAdapter messageListenerAdapter ;
+	private final MessageListenerAdapter messageListenerAdapter;
 
-	private OutputThread outputThread;
-	private InputThread inputThread;
+	private final OutputThread outputThread;
+	private final InputThread inputThread;
 
 
-	public SimpleConnectionHandler(Socket socket) {
-		this.messageListenerAdapter = new MessageListenerAdapter();
+	SimpleConnectionHandler(Socket socket) throws IOException {
 		this.socket = socket;
+		this.messageListenerAdapter = new MessageListenerAdapter();
+
+		this.outputThread = new OutputThread(socket.getOutputStream());
+		this.inputThread = new InputThread(socket.getInputStream(), null);
+	}
+
+
+	SimpleConnectionHandler(InetAddress inetAddress, int port) throws IOException {
+		this(new Socket());
+		this.socket.bind(null);
+		this.socket.connect(new InetSocketAddress(inetAddress.getHostAddress(), port));
 	}
 
 
 	@Override
-	public void start() throws IOException {
-		outputThread = new OutputThread(socket.getOutputStream());
+	public void start() {
 		outputThread.start();
-
-		inputThread = new InputThread(socket.getInputStream(), null);
 		inputThread.start();
 	}
 
 
 	@Override
-	public void stop() throws IOException {
+	public void stop() {
 		outputThread.interrupt();
-		outputThread = null;
-
 		inputThread.interrupt();
-		inputThread = null;
-
-		socket.close();
+		try {
+			socket.close();
+		} catch (IOException ioe) {
+			Timber.e(ioe, "failed to close socket");
+		}
 	}
 
 
@@ -188,6 +197,5 @@ final class SimpleConnectionHandler implements ConnectionHandler {
 		}
 
 	}
-
 
 }

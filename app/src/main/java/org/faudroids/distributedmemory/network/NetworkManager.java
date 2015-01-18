@@ -1,9 +1,14 @@
 package org.faudroids.distributedmemory.network;
 
 
-import android.app.Activity;
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
+import android.os.Handler;
+
+import org.faudroids.distributedmemory.utils.Assert;
+
+import java.io.IOException;
+import java.net.Socket;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -18,59 +23,124 @@ public final class NetworkManager {
 	private static final String SERVICE_TYPE = "_socket._tcp.";
 
 	private final NsdManager nsdManager;
+	private final HostSocketHandler hostSocketHandler;
 
 	private NsdManager.RegistrationListener serviceRegistrationListener;
 	private NsdManager.DiscoveryListener discoveryListener;
 
 	@Inject
-	public NetworkManager(NsdManager nsdManager) {
+	public NetworkManager(NsdManager nsdManager, HostSocketHandler hostSocketHandler) {
 		this.nsdManager = nsdManager;
+		this.hostSocketHandler = hostSocketHandler;
 	}
 
 
-	public <T extends Activity & NetworkListener> void registerService(String serviceName, int port, T registrationListener) {
-		if (serviceRegistrationListener != null) throw new IllegalStateException("Can only register one service");
+	public void startServer(String serviceName, final NetworkListener networkListener, final Handler handler) {
+		Assert.assertFalse(hostSocketHandler.isRunning(), "can only start one server");
 
-		String fullServiceName = SERVICE_PREFIX + serviceName;
-		NsdServiceInfo serviceInfo = new NsdServiceInfo();
-		serviceInfo.setServiceName(fullServiceName);
-		serviceInfo.setServiceType(SERVICE_TYPE);
-		serviceInfo.setPort(port);
+		try {
+			int serverPort = hostSocketHandler.start(new ClientConnectionListener() {
+				@Override
+				public void onClientConnected(Socket socket) {
+					try {
+						final ConnectionHandler connectionHandler = new SimpleConnectionHandler(socket);
+						handler.post(new Runnable() {
+							@Override
+							public void run() {
+								networkListener.onConnectedToClient(connectionHandler);
+							}
+						});
+					} catch (IOException ioe) {
+						Timber.e(ioe, "failed to connect to client");
+					}
+				}
+			});
 
-		serviceRegistrationListener = new RegistrationListener<>(fullServiceName, registrationListener);
-		nsdManager.registerService(serviceInfo, NsdManager.PROTOCOL_DNS_SD, serviceRegistrationListener);
+			String fullServiceName = SERVICE_PREFIX + serviceName;
+			NsdServiceInfo serviceInfo = new NsdServiceInfo();
+			serviceInfo.setServiceName(fullServiceName);
+			serviceInfo.setServiceType(SERVICE_TYPE);
+			serviceInfo.setPort(serverPort);
+
+			serviceRegistrationListener = new RegistrationListener(fullServiceName, networkListener, handler);
+			nsdManager.registerService(serviceInfo, NsdManager.PROTOCOL_DNS_SD, serviceRegistrationListener);
+
+		} catch (IOException ioe) {
+			Timber.e(ioe, "failed to start server");
+			networkListener.onServerStartError();
+		}
+
 	}
 
 
-	public void unregisterService() {
-		if (serviceRegistrationListener != null) nsdManager.unregisterService(serviceRegistrationListener);
+	public boolean isServerRunning() {
+		return hostSocketHandler.isRunning();
+	}
+
+
+	public void stopServer() {
+		Assert.assertTrue(hostSocketHandler.isRunning(), "sever not started");
+		hostSocketHandler.shutdown();
+		nsdManager.unregisterService(serviceRegistrationListener);
 		serviceRegistrationListener = null;
 	}
 
 
-	public <T extends Activity & NetworkListener> void startDiscovery(T networkListener) {
-		if (discoveryListener != null) throw new IllegalStateException("Can only listen for one service type");
+	public void startDiscovery(NetworkListener networkListener, Handler handler) {
+		Assert.assertTrue(discoveryListener != null, "Can only listen for one service type");
 
-		discoveryListener = new DiscoveryListener<>(networkListener, nsdManager);
+		discoveryListener = new DiscoveryListener(networkListener, nsdManager, handler);
 		nsdManager.discoverServices(SERVICE_TYPE, NsdManager.PROTOCOL_DNS_SD, discoveryListener);
 	}
 
 
+	public boolean isDiscoveryRunning() {
+		return discoveryListener != null;
+	}
+
+
 	public void stopDiscovery() {
-		if (discoveryListener != null) nsdManager.stopServiceDiscovery(discoveryListener);
+		nsdManager.stopServiceDiscovery(discoveryListener);
 		discoveryListener = null;
 	}
 
 
+	public void connectToHost(final HostInfo hostInfo, final NetworkListener networkListener, final Handler handler) {
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					final ConnectionHandler connectionHandler = new SimpleConnectionHandler(hostInfo.getAddress(), hostInfo.getPort());
+					handler.post(new Runnable() {
+						@Override
+						public void run() {
+							networkListener.onConnectedToHostSuccess(connectionHandler);
+						}
+					});
+				} catch (IOException ioe) {
+					Timber.e(ioe, "failed to connect to client");
+					handler.post(new Runnable() {
+						@Override
+						public void run() {
+							networkListener.onConnectedToHostError();
+						}
+					});
+				}
+			}
+		}).start();
+	}
 
-	private static final class RegistrationListener<T extends Activity & NetworkListener> implements NsdManager.RegistrationListener {
+
+	private static final class RegistrationListener implements NsdManager.RegistrationListener {
 
 		private final String serviceName;
-		private final T networkListener;
+		private final NetworkListener networkListener;
+		private final Handler handler;
 
-		public RegistrationListener(String serviceName, T networkListener) {
+		public RegistrationListener(String serviceName, NetworkListener networkListener, Handler handler) {
 			this.serviceName = serviceName;
 			this.networkListener = networkListener;
+			this.handler = handler;
 		}
 
 
@@ -78,18 +148,18 @@ public final class NetworkManager {
 		public void onServiceRegistered(NsdServiceInfo serviceInfo) {
 			Timber.i("Service registration success");
 			if (serviceInfo.getServiceName().equals(serviceName)) {
-				networkListener.runOnUiThread(new Runnable() {
+				handler.post(new Runnable() {
 					@Override
 					public void run() {
-						networkListener.onRegistrationSuccess();
+						networkListener.onServerStartSuccess();
 					}
 				});
 			} else {
 				Timber.e("Registered service name did not match");
-				networkListener.runOnUiThread(new Runnable() {
+				handler.post(new Runnable() {
 					@Override
 					public void run() {
-						networkListener.onRegistrationError();
+						networkListener.onServerStartError();
 					}
 				});
 			}
@@ -98,7 +168,12 @@ public final class NetworkManager {
 
 		@Override public void onRegistrationFailed(NsdServiceInfo serviceInfo, int errorCode) {
 			Timber.e("Service registration failed (" + errorCode + ")");
-			networkListener.onRegistrationError();
+			handler.post(new Runnable() {
+				@Override
+				public void run() {
+					networkListener.onServerStartError();
+				}
+			});
 		}
 
 
@@ -116,14 +191,16 @@ public final class NetworkManager {
 	}
 
 
-	private static final class DiscoveryListener<T extends Activity & NetworkListener> implements NsdManager.DiscoveryListener {
+	private static final class DiscoveryListener implements NsdManager.DiscoveryListener {
 
-		private final T networkListener;
+		private final NetworkListener networkListener;
 		private final NsdManager nsdManager;
+		private final Handler handler;
 
-		public DiscoveryListener(T networkListener, NsdManager nsdManager) {
+		public DiscoveryListener(NetworkListener networkListener, NsdManager nsdManager, Handler handler) {
 			this.networkListener = networkListener;
 			this.nsdManager = nsdManager;
+			this.handler = handler;
 		}
 
 
@@ -146,14 +223,14 @@ public final class NetworkManager {
 				Timber.i("Discarding discovered service");
 				return;
 			}
-			nsdManager.resolveService(serviceInfo, new ResolveListener<>(networkListener));
+			nsdManager.resolveService(serviceInfo, new ResolveListener(networkListener, handler));
 		}
 
 
 		@Override
 		public void onServiceLost(final NsdServiceInfo serviceInfo) {
 			Timber.i("Service lost (" + serviceInfo + ")");
-			networkListener.runOnUiThread(new Runnable() {
+			handler.post(new Runnable() {
 				@Override
 				public void run() {
 					networkListener.onServiceLost(serviceInfo.getServiceName().substring(SERVICE_PREFIX.length()));
@@ -166,7 +243,7 @@ public final class NetworkManager {
 		public void onStartDiscoveryFailed(String serviceType, int errorCode) {
 			Timber.e("Service discovery failed (" + errorCode + ")");
 			nsdManager.stopServiceDiscovery(this);
-			networkListener.runOnUiThread(new Runnable() {
+			handler.post(new Runnable() {
 				@Override
 				public void run() {
 					networkListener.onServiceDiscoveryError();
@@ -179,7 +256,7 @@ public final class NetworkManager {
 		public void onStopDiscoveryFailed(String serviceType, int errorCode) {
 			Timber.e("Stopping service discovery failed (" + errorCode + ")");
 			nsdManager.stopServiceDiscovery(this);
-			networkListener.runOnUiThread(new Runnable() {
+			handler.post(new Runnable() {
 				@Override
 				public void run() {
 					networkListener.onServiceDiscoveryError();
@@ -190,19 +267,21 @@ public final class NetworkManager {
 	}
 
 
-	private static final class ResolveListener<T extends Activity & NetworkListener> implements NsdManager.ResolveListener {
+	private static final class ResolveListener implements NsdManager.ResolveListener {
 
-		private final T networkListener;
+		private final NetworkListener networkListener;
+		private final Handler handler;
 
-		public ResolveListener(T networkListener) {
+		public ResolveListener(NetworkListener networkListener, Handler handler) {
 			this.networkListener = networkListener;
+			this.handler = handler;
 		}
 
 
 		@Override
 		public void onResolveFailed(NsdServiceInfo serviceInfo, int errorCode) {
 			Timber.e("Service resolve error (" + errorCode + ")");
-			networkListener.runOnUiThread(new Runnable() {
+			handler.post(new Runnable() {
 				@Override
 				public void run() {
 					networkListener.onServiceDiscoveryError();
@@ -214,7 +293,7 @@ public final class NetworkManager {
 		@Override
 		public void onServiceResolved(final NsdServiceInfo serviceInfo) {
 			Timber.i("Service resolve success (" + serviceInfo + ")");
-			networkListener.runOnUiThread(new Runnable() {
+			handler.post(new Runnable() {
 				@Override
 				public void run() {
 					networkListener.onServiceDiscovered(

@@ -1,73 +1,71 @@
 package org.faudroids.distributedmemory.network;
 
 
+import org.faudroids.distributedmemory.utils.Assert;
+
 import java.io.IOException;
 import java.net.ServerSocket;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.net.Socket;
 
-import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import timber.log.Timber;
 
 @Singleton
-public final class HostSocketHandler {
+final class HostSocketHandler {
 
-	private final List<String> connectedClients = Collections.synchronizedList(new LinkedList<String>());
 	private ServerRunnable serverRunnable;
 
-	@Inject
-	public HostSocketHandler() { }
 
+	public int start(ClientConnectionListener clientConnectionListener) throws IOException {
+		Assert.assertFalse(isRunning(), "server already running");
 
-	public int start() throws IOException {
 		ServerSocket serverSocket = new ServerSocket(0);
-		serverRunnable = new ServerRunnable(
+		this.serverRunnable = new ServerRunnable(
 				serverSocket,
-				new ThreadPoolExecutor(10, 10, 10, TimeUnit.DAYS.SECONDS, new LinkedBlockingDeque<Runnable>()),
-				connectedClients);
+				clientConnectionListener);
 		new Thread(serverRunnable).start();
 		Timber.i("Hosting on port " + serverSocket.getLocalPort());
 		return serverSocket.getLocalPort();
 	}
 
 
-	public void shutdown() {
-		if (serverRunnable != null) serverRunnable.shutdown();
-		serverRunnable = null;
+	public boolean isRunning() {
+		return serverRunnable != null;
 	}
 
 
-	public List<String> getConnectedClients() {
-		return connectedClients;
+	public void shutdown() {
+		Assert.assertTrue(isRunning(), "server not running");
+
+		serverRunnable.shutdown();
+		serverRunnable = null;
 	}
 
 
 	private static final class ServerRunnable implements Runnable {
 
 		private final ServerSocket serverSocket;
-		private final ExecutorService executorService;
-		private final List<HostHandler> hostHandlers = new LinkedList<>();
-		private final List<String> connectedClients;
+		private final ClientConnectionListener clientConnectionListener;
 
 		private boolean alive = true;
 
-		public ServerRunnable(ServerSocket serverSocket, ExecutorService executorService, List<String> connectedClients) {
+		public ServerRunnable(
+				ServerSocket serverSocket,
+				ClientConnectionListener clientConnectionListener) {
+
 			this.serverSocket = serverSocket;
-			this.executorService = executorService;
-			this.connectedClients = connectedClients;
+			this.clientConnectionListener = clientConnectionListener;
 		}
 
 
 		public void shutdown() {
-			this.alive = false;
-			for (HostHandler handler : hostHandlers) handler.shutdown();
+			alive = false;
+			try {
+				serverSocket.close();
+			} catch (IOException ioe) {
+				Timber.e("failed to close server socket");
+			}
 		}
 
 
@@ -75,14 +73,12 @@ public final class HostSocketHandler {
 		public void run() {
 			while (alive) {
 				try {
-					HostHandler handler = new HostHandler(serverSocket.accept(), connectedClients);
-					hostHandlers.add(handler);
-					executorService.execute(handler);
+					Socket socket = serverSocket.accept();
+					clientConnectionListener.onClientConnected(socket);
 				} catch(IOException ioe) {
 					Timber.e(ioe, "failed to accept client");
 				}
 			}
-			executorService.shutdownNow();
 			try {
 				serverSocket.close();
 			} catch (IOException ioe) {

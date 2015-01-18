@@ -1,7 +1,7 @@
 package org.faudroids.distributedmemory.ui;
 
-import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -9,7 +9,7 @@ import android.widget.ListView;
 import com.google.common.collect.Lists;
 
 import org.faudroids.distributedmemory.common.BaseListActivity;
-import org.faudroids.distributedmemory.network.ClientSocketHandler;
+import org.faudroids.distributedmemory.network.ConnectionHandler;
 import org.faudroids.distributedmemory.network.HostInfo;
 import org.faudroids.distributedmemory.network.NetworkListener;
 import org.faudroids.distributedmemory.network.NetworkManager;
@@ -23,7 +23,6 @@ public class JoinGameActivity extends BaseListActivity implements NetworkListene
 
 	@Inject NetworkManager networkManager;
 	private ArrayAdapter<HostInfo> adapter;
-	private ClientSocketHandler clientSocketHandler;
 
 
 	@Override
@@ -38,26 +37,14 @@ public class JoinGameActivity extends BaseListActivity implements NetworkListene
 	@Override
 	public void onListItemClick(ListView listView, View view, int position, long id) {
 		HostInfo hostInfo =  adapter.getItem(position);
-		clientSocketHandler = new ClientSocketHandler(hostInfo.getAddress(), hostInfo.getPort());
-		clientSocketHandler.start();
-
-		Intent intent = new Intent(this, LobbyActivity.class);
-		intent.putExtra(LobbyActivity.KEY_IS_HOST, false);
-		startActivity(intent);
-	}
-
-
-	@Override
-	public void onDestroy() {
-		if (clientSocketHandler != null) clientSocketHandler.shutdown();
-		super.onDestroy();
+		networkManager.connectToHost(hostInfo, this, new Handler(getMainLooper()));
 	}
 
 
 	@Override
 	public void onResume() {
 		super.onResume();
-		networkManager.startDiscovery(this);
+		networkManager.startDiscovery(this, new Handler(getMainLooper()));
 	}
 
 
@@ -69,11 +56,15 @@ public class JoinGameActivity extends BaseListActivity implements NetworkListene
 
 
 	@Override
-	public void onRegistrationSuccess() {  }
+	public void onServerStartSuccess() {  }
 
 
 	@Override
-	public void onRegistrationError() {  }
+	public void onServerStartError()  { }
+
+
+	@Override
+	public void onConnectedToClient(ConnectionHandler connectionHandler) { }
 
 
 	@Override
@@ -97,6 +88,19 @@ public class JoinGameActivity extends BaseListActivity implements NetworkListene
 
 	@Override
 	public void onServiceDiscoveryError() {  }
+
+
+
+	@Override
+	public void onConnectedToHostSuccess(ConnectionHandler connectionHandler) {
+		// TODO something smart here
+	}
+
+
+	@Override
+	public void onConnectedToHostError() {
+		// TODO something smart here
+	}
 
 
 	@Override

@@ -10,20 +10,14 @@ import com.google.common.collect.Lists;
 
 import org.faudroids.distributedmemory.R;
 import org.faudroids.distributedmemory.common.BaseListActivity;
-import org.faudroids.distributedmemory.network.HostSocketHandler;
 
 import java.util.List;
-
-import javax.inject.Inject;
-
-import timber.log.Timber;
 
 
 public class LobbyActivity extends BaseListActivity {
 
 	static final String KEY_IS_HOST = "IS_HOST";
 
-	@Inject HostSocketHandler hostSocketHandler;
 	private ArrayAdapter<String> adapter;
 	private boolean isHost;
 
@@ -50,9 +44,9 @@ public class LobbyActivity extends BaseListActivity {
 		switch(item.getItemId()) {
 			case R.id.refresh:
 				adapter.clear();
-				adapter.addAll(hostSocketHandler.getConnectedClients());
-				adapter.notifyDataSetChanged();
-				Timber.i("Called refresh and found " + hostSocketHandler.getConnectedClients().size() + " elements");
+				//adapter.addAll(hostSocketHandler.getConnectedClients());
+				// adapter.notifyDataSetChanged();
+				// Timber.i("Called refresh and found " + hostSocketHandler.getConnectedClients().size() + " elements");
 				return true;
 		}
 		return super.onOptionsItemSelected(item);
