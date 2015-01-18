@@ -28,6 +28,7 @@ public class GameActivity extends BaseActivity {
     private Button firstBtn;
     private Button sndBtn;
     private TextView txtPlayer;
+    private TextView txtPoints;
 
     private boolean toggle = false;
 
@@ -43,6 +44,10 @@ public class GameActivity extends BaseActivity {
         this.manager = new GameManager(numberOfPairs,2);
         this.txtPlayer = (TextView)findViewById(R.id.playerText);
         txtPlayer.setText(manager.getPlayerName(manager.getCurrentPlayer()));
+        this.txtPoints = (TextView)findViewById(R.id.playerPoints);
+        txtPoints.setText("Points: " + manager.getPlayerPoints(manager.getCurrentPlayer()));
+        this.first = -1;
+        this.second = -1;
 	}
 
 	@Override
@@ -58,40 +63,49 @@ public class GameActivity extends BaseActivity {
 
         if(this.toggle) {
             this.second = id;
+            Log.d("select", "id: "+id);
             this.sndBtn = b;
             b.setText(""+manager.getCardValue(id));
             this.toggle = false;
         } else {
             this.first = id;
+            Log.d("select", "id: "+id);
             this.firstBtn = b;
             b.setText(""+manager.getCardValue(id));
             this.toggle = true;
         }
 
-        if(first>0 && second>0) {
-            GameManager.gameEvents events = manager.run(first, second);
-            if(events == GameManager.gameEvents.FINISH) {
-                Toast winnerToast = Toast.makeText(getApplicationContext(),
-                        "Winner: " + manager.getPlayerName(manager.getWinnerId()),
-                        Toast.LENGTH_LONG);
-                winnerToast.show();
-            } else if(events == GameManager.gameEvents.MATCH) {
-                Log.d("run", "match");
-                this.first = 0;
-                this.second = 0;
-            } else if(events == GameManager.gameEvents.SWITCH) {
-                android.os.Handler handler = new android.os.Handler();
-                handler.postDelayed(new Runnable() {
-                    public void run() {
-                        firstBtn.setText("?");
-                        sndBtn.setText("?");
-                        first = 0;
-                        second = 0;
-                        txtPlayer.setText(manager.getPlayerName(manager.getCurrentPlayer()));
-                    }
-                }, 300);
-            } else if(events == GameManager.gameEvents.ERROR) {
-                Log.e("Error", "An error occured!");
+        if(first>=0 && second>=0) {
+            if (first != second) {
+                GameManager.gameEvents events = manager.run(first, second);
+                if (events == GameManager.gameEvents.FINISH) {
+                    Toast winnerToast = Toast.makeText(getApplicationContext(),
+                            "Winner: " + manager.getPlayerName(manager.getWinnerId()),
+                            Toast.LENGTH_LONG);
+                    winnerToast.show();
+                } else if (events == GameManager.gameEvents.MATCH) {
+                    txtPoints.setText("Points: " + manager.getPlayerPoints(manager.getCurrentPlayer()));
+                    Log.d("run", "match");
+                    this.first = -1;
+                    this.second = -1;
+                } else if (events == GameManager.gameEvents.SWITCH) {
+                    android.os.Handler handler = new android.os.Handler();
+                    handler.postDelayed(new Runnable() {
+                        public void run() {
+                            firstBtn.setText("?");
+                            sndBtn.setText("?");
+                            first = -1;
+                            second = -1;
+                            txtPlayer.setText(manager.getPlayerName(manager.getCurrentPlayer()));
+                            txtPoints.setText("Points: " + manager.getPlayerPoints(manager.getCurrentPlayer()));
+                        }
+                    }, 300);
+                } else if (events == GameManager.gameEvents.ERROR) {
+                    Log.e("Error", "An error occured!");
+                }
+            } else {
+                Toast errorToast = Toast.makeText(getApplicationContext(), "Invalid selection!", Toast.LENGTH_LONG);
+                errorToast.show();
             }
         }
     }

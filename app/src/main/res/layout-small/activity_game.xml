@@ -82,4 +82,9 @@
             android:onClick="onCardSelect"/>
     <Button android:text="\?"
             android:onClick="onCardSelect"/>
+
+    <GridLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
+    </GridLayout>
 </GridLayout>

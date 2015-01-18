@@ -78,6 +78,7 @@ public class GameManager {
                     this.players.get(this.currentPlayer).setPoints(this.players.get(this.currentPlayer)
                             .getPoints() + 1);
                     Log.i("run", "Points: " + this.players.get(this.currentPlayer).getPoints());
+                    Log.d("run", "open pairs " + this.openPairs);
                     return gameEvents.MATCH;
                 } else if (matchPairs(id1, id2) == returnValue.MISS) {
                     this.currentPlayer = getNextPlayer();
@@ -118,5 +119,9 @@ public class GameManager {
 
     public String getPlayerName(int id) {
         return this.players.get(id).getName();
+    }
+
+    public int getPlayerPoints(int id) {
+        return this.players.get(id).getPoints();
     }
 }
