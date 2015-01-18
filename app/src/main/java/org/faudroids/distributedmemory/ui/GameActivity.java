@@ -7,6 +7,7 @@ import android.widget.Button;
 import android.widget.GridLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.os.Handler;
 
 import com.google.common.collect.Lists;
 
@@ -79,11 +80,16 @@ public class GameActivity extends BaseActivity {
                 this.first = 0;
                 this.second = 0;
             } else if(events == GameManager.gameEvents.SWITCH) {
-                this.firstBtn.setText("?");
-                this.sndBtn.setText("?");
-                this.first = 0;
-                this.second = 0;
-                this.txtPlayer.setText(manager.getPlayerName(manager.getCurrentPlayer()));
+                android.os.Handler handler = new android.os.Handler();
+                handler.postDelayed(new Runnable() {
+                    public void run() {
+                        firstBtn.setText("?");
+                        sndBtn.setText("?");
+                        first = 0;
+                        second = 0;
+                        txtPlayer.setText(manager.getPlayerName(manager.getCurrentPlayer()));
+                    }
+                }, 300);
             } else if(events == GameManager.gameEvents.ERROR) {
                 Log.e("Error", "An error occured!");
             }
