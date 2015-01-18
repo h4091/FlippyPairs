@@ -88,4 +88,10 @@ final class HostSocketHandler {
 
 	}
 
+
+	static interface ClientConnectionListener {
+
+		public void onClientConnected(Socket hostSocket);
+
+	}
 }

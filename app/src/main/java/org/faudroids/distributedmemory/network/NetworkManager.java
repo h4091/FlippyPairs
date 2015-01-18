@@ -39,7 +39,7 @@ public final class NetworkManager {
 		Assert.assertFalse(hostSocketHandler.isRunning(), "can only start one server");
 
 		try {
-			int serverPort = hostSocketHandler.start(new ClientConnectionListener() {
+			int serverPort = hostSocketHandler.start(new HostSocketHandler.ClientConnectionListener() {
 				@Override
 				public void onClientConnected(Socket socket) {
 					try {
