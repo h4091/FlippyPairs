@@ -1,32 +1,85 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical"
-                android:paddingLeft="@dimen/activity_horizontal_margin"
-                android:paddingRight="@dimen/activity_horizontal_margin"
-                android:paddingTop="@dimen/activity_vertical_margin"
-                android:paddingBottom="@dimen/activity_vertical_margin">
+<GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/gameGrid"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:columnCount="4"
+            android:rowCount="10"
+            android:orientation="horizontal" >
 
-    <EditText
-        android:id="@+id/edit_card_id1"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:inputType="number"
-        android:text="0"
-        />
+    <TextView android:layout_columnSpan="4"
+              android:id="@+id/playerText"/>
 
-    <EditText
-        android:id="@+id/edit_card_id2"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:inputType="number"
-        android:text="1"
-        />
-
-    <Button
-        android:id="@+id/submit_id"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/submit_id" />
-
-</LinearLayout>
+    <Button android:text="\?"
+            android:onClick="onCardSelect"/>
+    <Button android:text="\?"
+            android:onClick="onCardSelect"/>
+    <Button android:text="\?"
+            android:onClick="onCardSelect"/>
+    <Button android:text="\?"
+            android:onClick="onCardSelect"/>
+    <Button android:text="\?"
+            android:onClick="onCardSelect"/>
+    <Button android:text="\?"
+            android:onClick="onCardSelect"/>
+    <Button android:text="\?"
+            android:onClick="onCardSelect"/>
+    <Button android:text="\?"
+            android:onClick="onCardSelect"/>
+    <Button android:text="\?"
+            android:onClick="onCardSelect"/>
+    <Button android:text="\?"
+            android:onClick="onCardSelect"/>
+    <Button android:text="\?"
+            android:onClick="onCardSelect"/>
+    <Button android:text="\?"
+            android:onClick="onCardSelect"/>
+    <Button android:text="\?"
+            android:onClick="onCardSelect"/>
+    <Button android:text="\?"
+            android:onClick="onCardSelect"/>
+    <Button android:text="\?"
+            android:onClick="onCardSelect"/>
+    <Button android:text="\?"
+            android:onClick="onCardSelect"/>
+    <Button android:text="\?"
+            android:onClick="onCardSelect"/>
+    <Button android:text="\?"
+            android:onClick="onCardSelect"/>
+    <Button android:text="\?"
+            android:onClick="onCardSelect"/>
+    <Button android:text="\?"
+            android:onClick="onCardSelect"/>
+    <Button android:text="\?"
+            android:onClick="onCardSelect"/>
+    <Button android:text="\?"
+            android:onClick="onCardSelect"/>
+    <Button android:text="\?"
+            android:onClick="onCardSelect"/>
+    <Button android:text="\?"
+            android:onClick="onCardSelect"/>
+    <Button android:text="\?"
+            android:onClick="onCardSelect"/>
+    <Button android:text="\?"
+            android:onClick="onCardSelect"/>
+    <Button android:text="\?"
+            android:onClick="onCardSelect"/>
+    <Button android:text="\?"
+            android:onClick="onCardSelect"/>
+    <Button android:text="\?"
+            android:onClick="onCardSelect"/>
+    <Button android:text="\?"
+            android:onClick="onCardSelect"/>
+    <Button android:text="\?"
+            android:onClick="onCardSelect"/>
+    <Button android:text="\?"
+            android:onClick="onCardSelect"/>
+    <Button android:text="\?"
+            android:onClick="onCardSelect"/>
+    <Button android:text="\?"
+            android:onClick="onCardSelect"/>
+    <Button android:text="\?"
+            android:onClick="onCardSelect"/>
+    <Button android:text="\?"
+            android:onClick="onCardSelect"/>
+</GridLayout>
