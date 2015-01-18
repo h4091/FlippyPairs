@@ -9,9 +9,9 @@ import android.widget.ListView;
 import com.google.common.collect.Lists;
 
 import org.faudroids.distributedmemory.common.BaseListActivity;
+import org.faudroids.distributedmemory.network.ClientListener;
 import org.faudroids.distributedmemory.network.ConnectionHandler;
 import org.faudroids.distributedmemory.network.HostInfo;
-import org.faudroids.distributedmemory.network.NetworkListener;
 import org.faudroids.distributedmemory.network.NetworkManager;
 
 import java.util.List;
@@ -19,7 +19,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 
-public class JoinGameActivity extends BaseListActivity implements NetworkListener {
+public class JoinGameActivity extends BaseListActivity implements ClientListener {
 
 	@Inject NetworkManager networkManager;
 	private ArrayAdapter<HostInfo> adapter;
@@ -53,18 +53,6 @@ public class JoinGameActivity extends BaseListActivity implements NetworkListene
 		networkManager.stopDiscovery();
 		super.onPause();
 	}
-
-
-	@Override
-	public void onServerStartSuccess() {  }
-
-
-	@Override
-	public void onServerStartError()  { }
-
-
-	@Override
-	public void onConnectedToClient(ConnectionHandler connectionHandler) { }
 
 
 	@Override

@@ -35,7 +35,7 @@ public final class NetworkManager {
 	}
 
 
-	public void startServer(String serviceName, final NetworkListener networkListener, final Handler handler) {
+	public void startServer(String serviceName, final HostListener hostListener, final Handler handler) {
 		Assert.assertFalse(hostSocketHandler.isRunning(), "can only start one server");
 
 		try {
@@ -47,7 +47,7 @@ public final class NetworkManager {
 						handler.post(new Runnable() {
 							@Override
 							public void run() {
-								networkListener.onConnectedToClient(connectionHandler);
+								hostListener.onConnectedToClient(connectionHandler);
 							}
 						});
 					} catch (IOException ioe) {
@@ -62,12 +62,12 @@ public final class NetworkManager {
 			serviceInfo.setServiceType(SERVICE_TYPE);
 			serviceInfo.setPort(serverPort);
 
-			serviceRegistrationListener = new RegistrationListener(fullServiceName, networkListener, handler);
+			serviceRegistrationListener = new RegistrationListener(fullServiceName, hostListener, handler);
 			nsdManager.registerService(serviceInfo, NsdManager.PROTOCOL_DNS_SD, serviceRegistrationListener);
 
 		} catch (IOException ioe) {
 			Timber.e(ioe, "failed to start server");
-			networkListener.onServerStartError();
+			hostListener.onServerStartError();
 		}
 
 	}
@@ -86,10 +86,10 @@ public final class NetworkManager {
 	}
 
 
-	public void startDiscovery(NetworkListener networkListener, Handler handler) {
+	public void startDiscovery(ClientListener clientListener, Handler handler) {
 		Assert.assertTrue(discoveryListener != null, "Can only listen for one service type");
 
-		discoveryListener = new DiscoveryListener(networkListener, nsdManager, handler);
+		discoveryListener = new DiscoveryListener(clientListener, nsdManager, handler);
 		nsdManager.discoverServices(SERVICE_TYPE, NsdManager.PROTOCOL_DNS_SD, discoveryListener);
 	}
 
@@ -105,7 +105,7 @@ public final class NetworkManager {
 	}
 
 
-	public void connectToHost(final HostInfo hostInfo, final NetworkListener networkListener, final Handler handler) {
+	public void connectToHost(final HostInfo hostInfo, final ClientListener clientListener, final Handler handler) {
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -114,7 +114,7 @@ public final class NetworkManager {
 					handler.post(new Runnable() {
 						@Override
 						public void run() {
-							networkListener.onConnectedToHostSuccess(connectionHandler);
+							clientListener.onConnectedToHostSuccess(connectionHandler);
 						}
 					});
 				} catch (IOException ioe) {
@@ -122,7 +122,7 @@ public final class NetworkManager {
 					handler.post(new Runnable() {
 						@Override
 						public void run() {
-							networkListener.onConnectedToHostError();
+							clientListener.onConnectedToHostError();
 						}
 					});
 				}
@@ -134,12 +134,12 @@ public final class NetworkManager {
 	private static final class RegistrationListener implements NsdManager.RegistrationListener {
 
 		private final String serviceName;
-		private final NetworkListener networkListener;
+		private final HostListener hostListener;
 		private final Handler handler;
 
-		public RegistrationListener(String serviceName, NetworkListener networkListener, Handler handler) {
+		public RegistrationListener(String serviceName, HostListener hostListener, Handler handler) {
 			this.serviceName = serviceName;
-			this.networkListener = networkListener;
+			this.hostListener = hostListener;
 			this.handler = handler;
 		}
 
@@ -151,7 +151,7 @@ public final class NetworkManager {
 				handler.post(new Runnable() {
 					@Override
 					public void run() {
-						networkListener.onServerStartSuccess();
+						hostListener.onServerStartSuccess();
 					}
 				});
 			} else {
@@ -159,7 +159,7 @@ public final class NetworkManager {
 				handler.post(new Runnable() {
 					@Override
 					public void run() {
-						networkListener.onServerStartError();
+						hostListener.onServerStartError();
 					}
 				});
 			}
@@ -171,7 +171,7 @@ public final class NetworkManager {
 			handler.post(new Runnable() {
 				@Override
 				public void run() {
-					networkListener.onServerStartError();
+					hostListener.onServerStartError();
 				}
 			});
 		}
@@ -193,12 +193,12 @@ public final class NetworkManager {
 
 	private static final class DiscoveryListener implements NsdManager.DiscoveryListener {
 
-		private final NetworkListener networkListener;
+		private final ClientListener clientListener;
 		private final NsdManager nsdManager;
 		private final Handler handler;
 
-		public DiscoveryListener(NetworkListener networkListener, NsdManager nsdManager, Handler handler) {
-			this.networkListener = networkListener;
+		public DiscoveryListener(ClientListener clientListener, NsdManager nsdManager, Handler handler) {
+			this.clientListener = clientListener;
 			this.nsdManager = nsdManager;
 			this.handler = handler;
 		}
@@ -223,7 +223,7 @@ public final class NetworkManager {
 				Timber.i("Discarding discovered service");
 				return;
 			}
-			nsdManager.resolveService(serviceInfo, new ResolveListener(networkListener, handler));
+			nsdManager.resolveService(serviceInfo, new ResolveListener(clientListener, handler));
 		}
 
 
@@ -233,7 +233,7 @@ public final class NetworkManager {
 			handler.post(new Runnable() {
 				@Override
 				public void run() {
-					networkListener.onServiceLost(serviceInfo.getServiceName().substring(SERVICE_PREFIX.length()));
+					clientListener.onServiceLost(serviceInfo.getServiceName().substring(SERVICE_PREFIX.length()));
 				}
 			});
 		}
@@ -246,7 +246,7 @@ public final class NetworkManager {
 			handler.post(new Runnable() {
 				@Override
 				public void run() {
-					networkListener.onServiceDiscoveryError();
+					clientListener.onServiceDiscoveryError();
 				}
 			});
 		}
@@ -259,7 +259,7 @@ public final class NetworkManager {
 			handler.post(new Runnable() {
 				@Override
 				public void run() {
-					networkListener.onServiceDiscoveryError();
+					clientListener.onServiceDiscoveryError();
 				}
 			});
 		}
@@ -269,11 +269,11 @@ public final class NetworkManager {
 
 	private static final class ResolveListener implements NsdManager.ResolveListener {
 
-		private final NetworkListener networkListener;
+		private final ClientListener clientListener;
 		private final Handler handler;
 
-		public ResolveListener(NetworkListener networkListener, Handler handler) {
-			this.networkListener = networkListener;
+		public ResolveListener(ClientListener clientListener, Handler handler) {
+			this.clientListener = clientListener;
 			this.handler = handler;
 		}
 
@@ -284,7 +284,7 @@ public final class NetworkManager {
 			handler.post(new Runnable() {
 				@Override
 				public void run() {
-					networkListener.onServiceDiscoveryError();
+					clientListener.onServiceDiscoveryError();
 				}
 			});
 		}
@@ -296,7 +296,7 @@ public final class NetworkManager {
 			handler.post(new Runnable() {
 				@Override
 				public void run() {
-					networkListener.onServiceDiscovered(
+					clientListener.onServiceDiscovered(
 							new HostInfo(
 									serviceInfo.getServiceName().substring(SERVICE_PREFIX.length()),
 									serviceInfo.getHost(),
