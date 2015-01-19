@@ -1,27 +1,20 @@
 package org.faudroids.distributedmemory.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import com.google.common.collect.Lists;
 
 import org.faudroids.distributedmemory.R;
 import org.faudroids.distributedmemory.common.BaseActivity;
-import org.faudroids.distributedmemory.network.NetworkManager;
 
 import java.util.List;
-
-import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 
 public class HostGameActivity extends BaseActivity {
-
-	private static final String SERVICE_NAME = "serviceTest";
-
-	@Inject NetworkManager networkManager;
-
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -33,9 +26,12 @@ public class HostGameActivity extends BaseActivity {
 
 	@OnClick(R.id.start_hosting)
 	public void startHosting() {
-		// TODO something smart here
-	}
+		Intent hostIntent = new Intent(this, HostService.class);
+		startService(hostIntent);
 
+		Intent lobbyIntent = new Intent(this, LobbyActivity.class);
+		startActivity(lobbyIntent);
+	}
 
 
 	@Override

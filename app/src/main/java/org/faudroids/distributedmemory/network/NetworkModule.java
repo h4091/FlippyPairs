@@ -8,7 +8,6 @@ import dagger.Module;
 		library = true,
 		injects = {
 				NetworkManager.class,
-				HostSocketHandler.class
 		}
 )
 public final class NetworkModule {

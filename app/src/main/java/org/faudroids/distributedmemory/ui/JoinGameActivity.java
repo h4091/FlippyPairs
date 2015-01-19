@@ -1,14 +1,18 @@
 package org.faudroids.distributedmemory.ui;
 
+import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.google.common.collect.Lists;
 
 import org.faudroids.distributedmemory.common.BaseListActivity;
+import org.faudroids.distributedmemory.core.ClientGameManager;
 import org.faudroids.distributedmemory.network.ClientListener;
 import org.faudroids.distributedmemory.network.ConnectionHandler;
 import org.faudroids.distributedmemory.network.HostInfo;
@@ -21,6 +25,7 @@ import javax.inject.Inject;
 
 public class JoinGameActivity extends BaseListActivity implements ClientListener {
 
+	@Inject ClientGameManager clientGameManager;
 	@Inject NetworkManager networkManager;
 	private ArrayAdapter<HostInfo> adapter;
 
@@ -81,13 +86,16 @@ public class JoinGameActivity extends BaseListActivity implements ClientListener
 
 	@Override
 	public void onConnectedToHostSuccess(ConnectionHandler connectionHandler) {
-		// TODO something smart here
+		Intent serviceIntent = new Intent(this, ClientService.class);
+		startService(serviceIntent);
+
+		clientGameManager.register(connectionHandler, Build.DEVICE, 42);
 	}
 
 
 	@Override
 	public void onConnectedToHostError() {
-		// TODO something smart here
+		Toast.makeText(this, "Failed to join game!", Toast.LENGTH_LONG).show();
 	}
 
 

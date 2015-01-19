@@ -87,7 +87,7 @@ public final class NetworkManager {
 
 
 	public void startDiscovery(ClientListener clientListener, Handler handler) {
-		Assert.assertTrue(discoveryListener != null, "Can only listen for one service type");
+		Assert.assertTrue(discoveryListener == null, "Can only listen for one service type");
 
 		discoveryListener = new DiscoveryListener(clientListener, nsdManager, handler);
 		nsdManager.discoverServices(SERVICE_TYPE, NsdManager.PROTOCOL_DNS_SD, discoveryListener);

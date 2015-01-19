@@ -11,7 +11,7 @@ import com.google.common.collect.Lists;
 
 import org.faudroids.distributedmemory.R;
 import org.faudroids.distributedmemory.common.BaseActivity;
-import org.faudroids.distributedmemory.core.GameManager;
+import org.faudroids.distributedmemory.core.HostGameManager;
 
 import java.util.List;
 
@@ -30,7 +30,7 @@ public class GameActivity extends BaseActivity {
 
     private boolean toggle = false;
 
-    private GameManager manager;
+    private HostGameManager manager;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);

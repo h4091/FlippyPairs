@@ -10,16 +10,20 @@ import com.google.common.collect.Lists;
 
 import org.faudroids.distributedmemory.R;
 import org.faudroids.distributedmemory.common.BaseListActivity;
+import org.faudroids.distributedmemory.core.Device;
+import org.faudroids.distributedmemory.core.HostGameManager;
 
 import java.util.List;
+
+import javax.inject.Inject;
+
+import timber.log.Timber;
 
 
 public class LobbyActivity extends BaseListActivity {
 
-	static final String KEY_IS_HOST = "IS_HOST";
-
+	@Inject HostGameManager hostGameManager;
 	private ArrayAdapter<String> adapter;
-	private boolean isHost;
 
 
 	@Override
@@ -27,7 +31,6 @@ public class LobbyActivity extends BaseListActivity {
 		super.onCreate(savedInstanceState);
 		adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
 		setListAdapter(adapter);
-		isHost = getIntent().getBooleanExtra(KEY_IS_HOST, false);
 	}
 
 
@@ -44,9 +47,10 @@ public class LobbyActivity extends BaseListActivity {
 		switch(item.getItemId()) {
 			case R.id.refresh:
 				adapter.clear();
-				//adapter.addAll(hostSocketHandler.getConnectedClients());
-				// adapter.notifyDataSetChanged();
-				// Timber.i("Called refresh and found " + hostSocketHandler.getConnectedClients().size() + " elements");
+				List<Device> devices = hostGameManager.getConnectedDevices();
+				for (Device device : devices) adapter.add(device.getName());
+				adapter.notifyDataSetChanged();
+				Timber.i("Called refresh and found " + adapter.getCount() + " elements");
 				return true;
 		}
 		return super.onOptionsItemSelected(item);

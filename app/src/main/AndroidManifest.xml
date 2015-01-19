@@ -39,6 +39,14 @@
         <activity android:name=".ui.GameActivity"
                   android:label="GameActivity" >
         </activity>
+        <service
+            android:name=".ui.HostService"
+            android:label="HostService">
+        </service>
+        <service
+            android:name=".ui.ClientService"
+            android:label="ClientService">
+        </service>
     </application>
 
 </manifest>

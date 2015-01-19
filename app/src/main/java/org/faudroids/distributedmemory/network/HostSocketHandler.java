@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import timber.log.Timber;
@@ -15,6 +16,10 @@ import timber.log.Timber;
 final class HostSocketHandler {
 
 	private ServerRunnable serverRunnable;
+
+
+	@Inject
+	public HostSocketHandler() { }
 
 
 	public int start(ClientConnectionListener clientConnectionListener) throws IOException {

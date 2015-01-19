@@ -1,4 +1,4 @@
-package org.faudroids.distributedmemory.ui;
+package org.faudroids.distributedmemory.utils;
 
 
 import android.app.Notification;
@@ -10,17 +10,17 @@ import org.faudroids.distributedmemory.R;
 
 import javax.inject.Inject;
 
-public final class UiUtils {
+public final class NotificationUtils {
 
 	private final Context context;
 
 	@Inject
-	public UiUtils(Context context) {
+	public NotificationUtils(Context context) {
 		this.context = context;
 	}
 
 
-	public Notification createGameRunningNotification(
+	public Notification createOngoingNotification(
 			String title,
 			String message,
 			Class<?> activityClass) {

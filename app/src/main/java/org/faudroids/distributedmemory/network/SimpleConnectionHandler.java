@@ -21,7 +21,7 @@ import timber.log.Timber;
 final class SimpleConnectionHandler implements ConnectionHandler {
 
 	private final Socket socket;
-	private final MessageListenerAdapter messageListenerAdapter;
+	private final MessageListenerAdapter messageListenerAdapter = new MessageListenerAdapter();
 
 	private final OutputThread outputThread;
 	private final InputThread inputThread;
@@ -29,17 +29,17 @@ final class SimpleConnectionHandler implements ConnectionHandler {
 
 	SimpleConnectionHandler(Socket socket) throws IOException {
 		this.socket = socket;
-		this.messageListenerAdapter = new MessageListenerAdapter();
-
 		this.outputThread = new OutputThread(socket.getOutputStream());
-		this.inputThread = new InputThread(socket.getInputStream(), null);
+		this.inputThread = new InputThread(socket.getInputStream(), messageListenerAdapter);
 	}
 
 
 	SimpleConnectionHandler(InetAddress inetAddress, int port) throws IOException {
-		this(new Socket());
+		this.socket = new Socket();
 		this.socket.bind(null);
 		this.socket.connect(new InetSocketAddress(inetAddress.getHostAddress(), port));
+		this.outputThread = new OutputThread(socket.getOutputStream());
+		this.inputThread = new InputThread(socket.getInputStream(), messageListenerAdapter);
 	}
 
 
