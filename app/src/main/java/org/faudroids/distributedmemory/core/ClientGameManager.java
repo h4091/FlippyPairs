@@ -4,6 +4,7 @@ import android.os.Handler;
 import android.os.Looper;
 
 import org.faudroids.distributedmemory.network.ConnectionHandler;
+import org.faudroids.distributedmemory.utils.Assert;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -17,6 +18,7 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 	private ConnectionHandler connectionHandler;
 	private String deviceName;
 	private int pairsCount;
+	private ClientGameListener clientGameListener;
 
 	private GameState currentState = GameState.CONNECTING;
 
@@ -27,7 +29,7 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 	 * Registers a device with this manager.
 	 * Call in state {@link GameState#CONNECTING}.
 	 */
-	public void register(ConnectionHandler connectionHandler, String deviceName, int pairsCount) {
+	public void registerDevice(ConnectionHandler connectionHandler, String deviceName, int pairsCount) {
 		assertValidState(GameState.CONNECTING);
 
 		this.connectionHandler = connectionHandler;
@@ -39,13 +41,30 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 	}
 
 
-	private void assertValidState(GameState state) {
-		if (!currentState.equals(state)) throw new IllegalStateException("must be in state " + state + " to perform this action");
+	public GameState getCurrentState() {
+		return currentState;
 	}
 
 
 	public void stopGame() {
 		connectionHandler.stop();
+	}
+
+
+	public void registerClientGameListener(ClientGameListener clientGameListener) {
+		Assert.assertTrue(this.clientGameListener ==  null, "already registered");
+		this.clientGameListener = clientGameListener;
+	}
+
+
+	public void unregisterClientGameListener() {
+		Assert.assertTrue(clientGameListener != null, "not registered");
+		this.clientGameListener = null;
+	}
+
+
+	private void assertValidState(GameState state) {
+		if (!currentState.equals(state)) throw new IllegalStateException("must be in state " + state + " to perform this action");
 	}
 
 
@@ -64,6 +83,9 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 				break;
 
 			case SETUP:
+				// TODO this should only be called when receiving game state msg from server!
+				// setup -> select_1st_card
+				if (clientGameListener != null) clientGameListener.onGameStarted();
 				break;
 		}
 	}

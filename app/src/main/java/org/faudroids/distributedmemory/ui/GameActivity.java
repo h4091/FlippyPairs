@@ -1,5 +1,6 @@
 package org.faudroids.distributedmemory.ui;
 
+import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -11,14 +12,23 @@ import com.google.common.collect.Lists;
 
 import org.faudroids.distributedmemory.R;
 import org.faudroids.distributedmemory.common.BaseActivity;
+import org.faudroids.distributedmemory.core.ClientGameListener;
+import org.faudroids.distributedmemory.core.ClientGameManager;
+import org.faudroids.distributedmemory.core.GameState;
 import org.faudroids.distributedmemory.core.HostGameManager;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import butterknife.ButterKnife;
 
 
-public class GameActivity extends BaseActivity {
+public class GameActivity extends BaseActivity implements ClientGameListener {
+
+	@Inject ClientGameManager clientGameManager;
+
+	private ProgressDialog waitingForHostDialog;
 
     private int first;
     private int second;
@@ -31,6 +41,8 @@ public class GameActivity extends BaseActivity {
     private boolean toggle = false;
 
     private HostGameManager manager;
+
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -112,4 +124,35 @@ public class GameActivity extends BaseActivity {
         }
         */
     }
+
+
+	@Override
+	public void onResume() {
+		super.onResume();
+		clientGameManager.registerClientGameListener(this);
+
+		if (clientGameManager.getCurrentState() == GameState.SETUP
+				|| clientGameManager.getCurrentState() == GameState.CONNECTING) {
+
+			waitingForHostDialog = ProgressDialog.show(
+					this,
+					"Waiting for host",
+					"Waiting for host to start the game. Maybe giving him a cookie will make him work faster?",
+					false);
+		}
+	}
+
+	@Override
+	public void onPause() {
+		clientGameManager.unregisterClientGameListener();
+		super.onPause();
+	}
+
+	@Override
+	public void onGameStarted() {
+		if (waitingForHostDialog != null) {
+			waitingForHostDialog.cancel();
+			waitingForHostDialog = null;
+		}
+	}
 }

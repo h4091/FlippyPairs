@@ -1,5 +1,6 @@
 package org.faudroids.distributedmemory.ui;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -28,6 +29,7 @@ public class JoinGameActivity extends BaseListActivity implements ClientNetworkL
 	@Inject ClientGameManager clientGameManager;
 	@Inject NetworkManager networkManager;
 	private ArrayAdapter<HostInfo> adapter;
+	private ProgressDialog connectingToHostDialog;
 
 
 	@Override
@@ -43,6 +45,7 @@ public class JoinGameActivity extends BaseListActivity implements ClientNetworkL
 	public void onListItemClick(ListView listView, View view, int position, long id) {
 		HostInfo hostInfo =  adapter.getItem(position);
 		networkManager.connectToHost(hostInfo, this, new Handler(getMainLooper()));
+		connectingToHostDialog = ProgressDialog.show(this, "Connecting to host", "Please wait ...", false);
 	}
 
 
@@ -86,15 +89,25 @@ public class JoinGameActivity extends BaseListActivity implements ClientNetworkL
 
 	@Override
 	public void onConnectedToHostSuccess(ConnectionHandler connectionHandler) {
+		connectingToHostDialog.cancel();
+		connectingToHostDialog = null;
+
+		/*
 		Intent serviceIntent = new Intent(this, ClientService.class);
 		startService(serviceIntent);
+		*/
 
-		clientGameManager.register(connectionHandler, Build.DEVICE, 42);
+		clientGameManager.registerDevice(connectionHandler, Build.DEVICE, 42);
+
+		Intent intent = new Intent(this, GameActivity.class);
+		startActivity(intent);
 	}
 
 
 	@Override
 	public void onConnectedToHostError() {
+		connectingToHostDialog.cancel();
+		connectingToHostDialog = null;
 		Toast.makeText(this, "Failed to join game!", Toast.LENGTH_LONG).show();
 	}
 
