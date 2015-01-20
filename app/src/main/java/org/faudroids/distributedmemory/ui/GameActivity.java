@@ -60,16 +60,6 @@ public class GameActivity extends BaseActivity implements ClientGameListener {
 		setContentView(R.layout.activity_game);
 		ButterKnife.inject(this);
 
-		// fill grid layout with buttons
-		for (int column = 0; column < getResources().getInteger(R.integer.grid_column_count); ++column) {
-			for (int row = 0; row < getResources().getInteger(R.integer.grid_row_count); ++row) {
-				gridLayout.addView(
-						new Button(this),
-						new GridLayout.LayoutParams(
-								GridLayout.spec(row, 1),
-								GridLayout.spec(column, 1)));
-			}
-		}
 		/*
         GridLayout grid = (GridLayout)findViewById(R.id.gameGrid);
         int numberOfPairs = (grid.getColumnCount()*(grid.getRowCount()-1))/2;

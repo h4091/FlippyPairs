@@ -36,12 +36,6 @@ public class MainActivity extends BaseActivity {
 	}
 
 
-    @OnClick(R.id.test_game)
-    public void startGameActivity() {
-        startActivity(new Intent(this, GameActivity.class));
-    }
-
-
 	@Override
 	protected List<Object> getModules() {
 		return Lists.<Object>newArrayList(new UiModule());
