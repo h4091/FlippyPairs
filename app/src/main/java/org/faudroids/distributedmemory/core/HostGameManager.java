@@ -12,6 +12,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -30,10 +31,7 @@ public final class HostGameManager {
 	private final Map<Integer, Device> devices = new HashMap<>();
 	private int setupDevices = 0;
 
-    private final List<Player> players = new ArrayList<>();
-
 	private GameState currentState = GameState.CONNECTING;
-    private int currentPlayer;
 
 	// used to postpone execution of tasks until method is finished (dirty hack?!)
 	private final Handler handler = new Handler(Looper.getMainLooper());
@@ -41,8 +39,10 @@ public final class HostGameManager {
 	@Inject
 	public HostGameManager() { }
 
+
 	/**
 	 * Registers a device with this manager.
+	 * State {@link GameState#CONNECTING}.
 	 */
 	public void addDevice(ConnectionHandler connectionHandler) {
 		assertValidState(GameState.CONNECTING);
@@ -57,16 +57,16 @@ public final class HostGameManager {
 
 	/**
 	 * Setup and distribute the cards after all devices have been connected.
+	 * Will change state from {@link GameState#CONNECTING} {@link GameState#SETUP}.
 	 */
 	public void startGame() {
 		assertValidState(GameState.CONNECTING);
 		changeState(GameState.SETUP);
 
-		int playerCount = 2; // TODO
 		int pairsCount = 0;
 		for (Device device : devices.values()) pairsCount += device.getPairsCount();
 
-		// setup game logic
+		// setup cards locally
         Timber.i("Pairs: " + pairsCount);
 		Random rand = new Random();
         for(int id = 0; id < pairsCount * 2; id += 2) {
@@ -77,35 +77,32 @@ public final class HostGameManager {
             Timber.i("Value " + (id + 1) + " : " + closedCards.get(id + 1).getValue());
         }
 
-        for(int id = 0; id < playerCount; ++id) {
-            players.add(new Player(id, "Player" + id));
-        }
+		// remove those clients which have not sent any device info
+		Set<Integer> invalidDeviceIds = connectionHandlers.keySet();
+		invalidDeviceIds.removeAll(devices.keySet());
+		for (Integer id : invalidDeviceIds) {
+			Timber.w("Dropping client with id " + id + " due to missing device info");
+			connectionHandlers.remove(id);
+		}
 
 		// send card details to devices
-		for (Map.Entry<Integer, ConnectionHandler> entry : connectionHandlers.entrySet()) {
-			entry.getValue().sendMessage("Here are your cards: foo and bar!");
-		}
+		int currentPairCount = 0;
+		List<Card> allCards = new ArrayList<>(closedCards.values());
 
-        currentPlayer = 0;
+		for (Integer id : devices.keySet()) {
+			ConnectionHandler connectionHandler = connectionHandlers.get(id);
+			Device device = devices.get(id);
+			StringBuilder msgBuilder = new StringBuilder();
+
+			for (int i = 0; i < device.getPairsCount(); ++i) {
+				Card card = allCards.get(currentPairCount);
+				++currentPairCount;
+				msgBuilder.append("(").append(card.getId()).append(",").append(card.getValue()).append(")");
+			}
+			connectionHandler.sendMessage(msgBuilder.toString());
+		}
     }
 
-
-	/**
-	 * Returns all cards that belong to one device. After having been called by all clients
-	 * the game will start.
-	 */
-	private List<Card> setupDevice(int deviceId) {
-		assertValidState(GameState.CONNECTING);
-		if (++setupDevices == devices.size()) changeState(GameState.SELECT_1ST_CARD);
-
-		// TODO this does not distribute cards evenly across devices!!
-		List<Card> cards = new LinkedList<>();
-		int pairsCount = devices.get(deviceId).getPairsCount();
-		for (int i = 0; i < pairsCount; ++i) {
-			cards.add(closedCards.get(i));
-		}
-		return cards;
-	}
 
 
 	/**
@@ -156,11 +153,6 @@ public final class HostGameManager {
 
 	public void  finish() {
 		for (ConnectionHandler handler : connectionHandlers.values()) handler.stop();
-	}
-
-
-	public int getCurrentPlayer() {
-		return currentPlayer;
 	}
 
 
