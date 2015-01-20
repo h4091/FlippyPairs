@@ -35,6 +35,8 @@ public final class HostGameManager {
 	private GameState currentState = GameState.CONNECTING;
     private int currentPlayer;
 
+    private HostGameListener hostGameListener;
+
 	// used to postpone execution of tasks until method is finished (dirty hack?!)
 	private final Handler handler = new Handler(Looper.getMainLooper());
 
@@ -178,6 +180,17 @@ public final class HostGameManager {
 		currentState = nextState;
 	}
 
+    public void registerHostGameListener(HostGameListener l) {
+        if(this.hostGameListener!=null) {
+            throw new IllegalArgumentException("There's already a listener registered.");
+        } else {
+            this.hostGameListener = l;
+        }
+    }
+
+    public void unregisterHostGameListener() {
+        this.hostGameListener = null;
+    }
 
 	private final class HostMessageListener implements ConnectionHandler.MessageListener {
 
@@ -195,12 +208,14 @@ public final class HostGameManager {
 					String deviceName = tokens[0];
 					int pairsCount = Integer.valueOf(tokens[1]);
 					devices.put(deviceId, new Device(deviceId, deviceName, pairsCount));
+                    if(hostGameListener!=null) {
+                        hostGameListener.onClientAdded();
+                    }
 					break;
 
 				case SETUP:
 					break;
 			}
 		}
-
 	}
 }
