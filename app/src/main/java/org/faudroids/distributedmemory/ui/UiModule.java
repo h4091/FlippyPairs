@@ -12,6 +12,7 @@ import dagger.Module;
 				HostGameActivity.class,
 				JoinGameActivity.class,
 				LobbyActivity.class,
+				GameActivity.class,
 				HostService.class,
 				ClientService.class
 		}

@@ -7,6 +7,7 @@ import org.faudroids.distributedmemory.network.ConnectionHandler;
 import org.faudroids.distributedmemory.utils.Assert;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -80,29 +81,33 @@ public final class HostGameManager {
 		// setup cards locally
         Timber.i("Pairs: " + pairsCount);
 		Random rand = new Random();
-        for(int id = 0; id < pairsCount * 2; ++id) {
+		int cardId = 0;
+        for(int i = 0; i < pairsCount; ++i) {
             int randomValue = rand.nextInt(pairsCount);
-            int randomId = rand.nextInt(pairsCount);
-            if(closedCards.get(randomId)!=null) {
-                closedCards.put(id, new Card(id, randomValue));
-            }
-            Timber.i("Value " + id + " : " + closedCards.get(id).getValue());
+			closedCards.put(cardId, new Card(cardId, randomValue));
+			++cardId;
+			closedCards.put(cardId, new Card(cardId, randomValue));
+			++cardId;
+
+            Timber.i("Added card " + randomValue + " (" + (cardId - 2) + ")");
+			Timber.i("Added card " + randomValue + " (" + (cardId - 1) + ")");
         }
 
-		// TODO race condition between connections beeing added and clients seding device info
+		// TODO race condition between connections being added and clients sending device info
 
 		// send card details to devices
-		int currentPairCount = 0;
+		int currentCardCount = 0;
 		List<Card> allCards = new ArrayList<>(closedCards.values());
+		Collections.shuffle(allCards);
 
 		for (Integer id : devices.keySet()) {
 			ConnectionHandler connectionHandler = connectionHandlers.get(id);
 			Device device = devices.get(id);
 			StringBuilder msgBuilder = new StringBuilder();
 
-			for (int i = 0; i < device.getPairsCount(); ++i) {
-				Card card = allCards.get(currentPairCount);
-				++currentPairCount;
+			for (int i = 0; i < device.getPairsCount() * 2; ++i) {
+				Card card = allCards.get(currentCardCount);
+				++currentCardCount;
 				msgBuilder.append("(").append(card.getId()).append(",").append(card.getValue()).append(")");
 			}
 			connectionHandler.sendMessage(msgBuilder.toString());
