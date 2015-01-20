@@ -112,6 +112,39 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 				}
 
 				if (clientGameListener != null) clientGameListener.onGameStarted();
+				connectionHandler.sendMessage(Message.ACK);
+				changeState(GameState.SELECT_1ST_CARD);
+				break;
+
+			case SELECT_1ST_CARD:
+				int card1Id = Integer.valueOf(msg);
+				// TODO update UI / cards!
+				Timber.i("selected first card with id " + card1Id);
+				connectionHandler.sendMessage(Message.ACK);
+				changeState(GameState.SELECT_2ND_CARD);
+				break;
+
+
+			case SELECT_2ND_CARD:
+				int card2Id = Integer.valueOf(msg);
+				// TODO update UI / cards!
+				Timber.i("selected second card with id " + card2Id);
+				connectionHandler.sendMessage(Message.ACK);
+				changeState(GameState.UPDATE_CARDS);
+				break;
+
+			case UPDATE_CARDS:
+				switch (msg) {
+					case Message.EVALUATION_MATCH_CONTINUE:
+						// TODO update UI / cards!
+					case Message.EVALUATION_MISS:
+						changeState(GameState.SELECT_1ST_CARD);
+						break;
+					case Message.EVALUATION_MATCH_FINISH:
+						changeState(GameState.FINISHED);
+						break;
+				}
+				connectionHandler.sendMessage(Message.ACK);
 				break;
 		}
 	}
