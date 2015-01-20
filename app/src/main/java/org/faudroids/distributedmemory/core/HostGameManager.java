@@ -138,6 +138,7 @@ public final class HostGameManager {
         broadcast(Integer.toString(cardId));
 
 		changeState(GameState.UPDATE_CARDS);
+        evaluateCardSelection();
 	}
 
 
@@ -147,20 +148,23 @@ public final class HostGameManager {
 	 */
 	public void evaluateCardSelection() {
 		assertValidState(GameState.UPDATE_CARDS);
-		changeState(GameState.CONNECTING);
 
 		if (selectedCards.get(0).getValue() == selectedCards.get(1).getValue()) {
 			for (Card card : selectedCards) matchedCards.put(card.getId(), card);
 			selectedCards.clear();
-            broadcast("MATCH");
+            if (closedCards.size() == 0) {
+                changeState(GameState.FINISHED);
+                broadcast(Message.EVALUATION_MATCH_FINISH);
+            } else {
+                changeState(GameState.SELECT_1ST_CARD);
+                broadcast(Message.EVALUATION_MATCH_CONTINUE);
+            }
 		} else {
             for (Card card : selectedCards) closedCards.put(card.getId(), card);
             selectedCards.clear();
-            broadcast("MISS");
+            changeState(GameState.SELECT_1ST_CARD);
+            broadcast(Message.EVALUATION_MISS);
         }
-
-		if (closedCards.size() == 0) changeState(GameState.FINISHED);
-		else changeState(GameState.SELECT_1ST_CARD);
 	}
 
 
@@ -180,9 +184,11 @@ public final class HostGameManager {
 
 
 	private void changeState(final GameState nextState) {
-        if(this.acks==devices.size()) {
+        if(currentState != GameState.CONNECTING && this.acks==devices.size()) {
             currentState = nextState;
             this.acks=0;
+        } else {
+            currentState = nextState;
         }
 	}
 
@@ -207,7 +213,7 @@ public final class HostGameManager {
 		}
 
         public boolean checkForAck(String msg) {
-            if(msg.compareTo("ACK")==0) {
+            if(Message.ACK.equals(msg)) {
                 ++acks;
                 return true;
             } else {
@@ -227,9 +233,11 @@ public final class HostGameManager {
                     if(hostGameListener!=null) {
                         hostGameListener.onClientAdded();
                     }
+                    Timber.i("CONNECTING");
 					break;
 
 				case SETUP:
+                    Timber.i("SETUP");
                     checkForAck(msg);
 					break;
 
@@ -245,6 +253,10 @@ public final class HostGameManager {
                         int id = Integer.parseInt(msg);
                         selectSecondCard(id);
                     }
+                    break;
+
+                case UPDATE_CARDS:
+                    checkForAck(msg);
                     break;
 			}
 		}
