@@ -25,6 +25,10 @@ public final class HostService extends BaseService implements HostNetworkListene
 
 	private static final int NOTIFICATION_ID = 422;
 
+	static final String ACTION_SERVER_STATE_CHANGED = "org.faudroids.distributedmemory.ACTION_SERVER_STATE_CHANGED";
+	static final String EXTRA_SERVER_RUNNING = "EXTRA_SERVER_RUNNING";
+
+
 	@Inject NetworkManager networkManager;
 	@Inject NotificationManager notificationManager;
 	@Inject NotificationUtils notificationUtils;
@@ -70,6 +74,7 @@ public final class HostService extends BaseService implements HostNetworkListene
 				"You are hosting a distributed memory game!",
 				HostGameActivity.class);
 		notificationManager.notify(NOTIFICATION_ID, notification);
+		sendServerStartedBroadcast();
 	}
 
 
@@ -83,6 +88,32 @@ public final class HostService extends BaseService implements HostNetworkListene
 	@Override
 	public void onConnectedToClient(ConnectionHandler connectionHandler) {
 		hostGameManager.addDevice(connectionHandler);
+	}
+
+
+	@Override
+	public void onServerStoppedSuccess() {
+		sendServerStoppedBroadcast();
+	}
+
+
+	@Override
+	public void onServerStoppedError() {
+		sendServerStoppedBroadcast();
+	}
+
+
+	private void sendServerStartedBroadcast() {
+		Intent intent = new Intent(ACTION_SERVER_STATE_CHANGED);
+		intent.putExtra(EXTRA_SERVER_RUNNING, true);
+		sendBroadcast(intent);
+	}
+
+
+	private void sendServerStoppedBroadcast() {
+		Intent intent = new Intent(ACTION_SERVER_STATE_CHANGED);
+		intent.putExtra(EXTRA_SERVER_RUNNING, false);
+		sendBroadcast(intent);
 	}
 
 

@@ -180,12 +180,24 @@ public final class NetworkManager {
 		@Override
 		public void onServiceUnregistered(NsdServiceInfo serviceInfo) {
 			Timber.i("Service unregistered");
+			handler.post(new Runnable() {
+				@Override
+				public void run() {
+					hostNetworkListener.onServerStoppedSuccess();
+				}
+			});
 		}
 
 
 		@Override
 		public void onUnregistrationFailed(NsdServiceInfo serviceInfo, int errorCode) {
 			Timber.e("Service unregistration failed (" + errorCode + ")");
+			handler.post(new Runnable() {
+				@Override
+				public void run() {
+					hostNetworkListener.onServerStoppedError();
+				}
+			});
 		}
 
 	}
