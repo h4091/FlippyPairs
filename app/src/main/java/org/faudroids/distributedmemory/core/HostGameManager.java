@@ -33,6 +33,8 @@ public final class HostGameManager {
 
     private HostGameListener hostGameListener;
 
+    private int acks = 0;
+
 	// used to postpone execution of tasks until method is finished (dirty hack?!)
 	private final Handler handler = new Handler(Looper.getMainLooper());
 
@@ -40,6 +42,12 @@ public final class HostGameManager {
 	@Inject
 	public HostGameManager() { }
 
+    public void broadcast(String msg) {
+        for (Integer id : devices.keySet()) {
+            ConnectionHandler connectionHandler = connectionHandlers.get(id);
+            connectionHandler.sendMessage(msg);
+        }
+    }
 
 	/**
 	 * Registers a device with this manager.
@@ -72,12 +80,13 @@ public final class HostGameManager {
 		// setup cards locally
         Timber.i("Pairs: " + pairsCount);
 		Random rand = new Random();
-        for(int id = 0; id < pairsCount * 2; id += 2) {
+        for(int id = 0; id < pairsCount * 2; ++id) {
             int randomValue = rand.nextInt(pairsCount);
-            closedCards.put(id, new Card(id, randomValue));
-			closedCards.put(id + 1, new Card(id + 1, randomValue));
+            int randomId = rand.nextInt(pairsCount);
+            if(closedCards.get(randomId)!=null) {
+                closedCards.put(id, new Card(id, randomValue));
+            }
             Timber.i("Value " + id + " : " + closedCards.get(id).getValue());
-            Timber.i("Value " + (id + 1) + " : " + closedCards.get(id + 1).getValue());
         }
 
 		// TODO race condition between connections beeing added and clients seding device info
@@ -111,6 +120,7 @@ public final class HostGameManager {
 
 		Card card = closedCards.remove(cardId);
 		selectedCards.add(card);
+        broadcast(Integer.toString(cardId));
 
 		changeState(GameState.SELECT_2ND_CARD);
 	}
@@ -125,6 +135,7 @@ public final class HostGameManager {
 
 		Card card = closedCards.remove(cardId);
 		selectedCards.add(card);
+        broadcast(Integer.toString(cardId));
 
 		changeState(GameState.UPDATE_CARDS);
 	}
@@ -141,7 +152,12 @@ public final class HostGameManager {
 		if (selectedCards.get(0).getValue() == selectedCards.get(1).getValue()) {
 			for (Card card : selectedCards) matchedCards.put(card.getId(), card);
 			selectedCards.clear();
-		}
+            broadcast("MATCH");
+		} else {
+            for (Card card : selectedCards) closedCards.put(card.getId(), card);
+            selectedCards.clear();
+            broadcast("MISS");
+        }
 
 		if (closedCards.size() == 0) changeState(GameState.FINISHED);
 		else changeState(GameState.SELECT_1ST_CARD);
@@ -164,7 +180,10 @@ public final class HostGameManager {
 
 
 	private void changeState(final GameState nextState) {
-		currentState = nextState;
+        if(this.acks==devices.size()) {
+            currentState = nextState;
+            this.acks=0;
+        }
 	}
 
     public void registerHostGameListener(HostGameListener l) {
@@ -179,13 +198,22 @@ public final class HostGameManager {
         this.hostGameListener = null;
     }
 
-	private final class HostMessageListener implements ConnectionHandler.MessageListener {
+    private final class HostMessageListener implements ConnectionHandler.MessageListener {
 
 		private final int deviceId;
 
 		public HostMessageListener(int deviceId) {
 			this.deviceId = deviceId;
 		}
+
+        public boolean checkForAck(String msg) {
+            if(msg.compareTo("ACK")==0) {
+                ++acks;
+                return true;
+            } else {
+                return false;
+            }
+        }
 
 		@Override
 		public void onNewMessage(String msg) {
@@ -202,7 +230,22 @@ public final class HostGameManager {
 					break;
 
 				case SETUP:
+                    checkForAck(msg);
 					break;
+
+                case SELECT_1ST_CARD:
+                    if(!checkForAck(msg)) {
+                        int id = Integer.parseInt(msg);
+                        selectFirstCard(id);
+                    }
+                    break;
+
+                case SELECT_2ND_CARD:
+                    if(!checkForAck(msg)) {
+                        int id = Integer.parseInt(msg);
+                        selectSecondCard(id);
+                    }
+                    break;
 			}
 		}
 	}

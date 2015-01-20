@@ -9,7 +9,7 @@ import dagger.Module;
 		addsTo = AppModule.class,
 		injects = {
 				MainActivity.class,
-				GameActivity.class,
+				GameHostActivity.class,
 				HostGameActivity.class,
 				JoinGameActivity.class,
 				LobbyActivity.class,
