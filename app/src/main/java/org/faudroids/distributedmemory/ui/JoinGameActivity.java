@@ -12,6 +12,7 @@ import android.widget.Toast;
 
 import com.google.common.collect.Lists;
 
+import org.faudroids.distributedmemory.R;
 import org.faudroids.distributedmemory.common.BaseListActivity;
 import org.faudroids.distributedmemory.core.ClientGameManager;
 import org.faudroids.distributedmemory.network.ClientNetworkListener;
@@ -97,7 +98,9 @@ public class JoinGameActivity extends BaseListActivity implements ClientNetworkL
 		startService(serviceIntent);
 		*/
 
-		clientGameManager.registerDevice(connectionHandler, Build.DEVICE, 36);
+		int cardsCount = getResources().getInteger(R.integer.grid_column_count)
+				* getResources().getInteger(R.integer.grid_row_count);
+		clientGameManager.registerDevice(connectionHandler, Build.DEVICE, cardsCount);
 
 		Intent intent = new Intent(this, GameActivity.class);
 		startActivity(intent);
