@@ -1,7 +1,7 @@
 package org.faudroids.distributedmemory.network;
 
 
-public interface ClientListener {
+public interface ClientNetworkListener {
 
 	public void onServiceDiscovered(HostInfo hostInfo);
 	public void onServiceLost(String hostName);

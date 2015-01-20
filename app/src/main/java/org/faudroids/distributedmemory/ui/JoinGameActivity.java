@@ -13,7 +13,7 @@ import com.google.common.collect.Lists;
 
 import org.faudroids.distributedmemory.common.BaseListActivity;
 import org.faudroids.distributedmemory.core.ClientGameManager;
-import org.faudroids.distributedmemory.network.ClientListener;
+import org.faudroids.distributedmemory.network.ClientNetworkListener;
 import org.faudroids.distributedmemory.network.ConnectionHandler;
 import org.faudroids.distributedmemory.network.HostInfo;
 import org.faudroids.distributedmemory.network.NetworkManager;
@@ -23,7 +23,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 
-public class JoinGameActivity extends BaseListActivity implements ClientListener {
+public class JoinGameActivity extends BaseListActivity implements ClientNetworkListener {
 
 	@Inject ClientGameManager clientGameManager;
 	@Inject NetworkManager networkManager;

@@ -13,7 +13,7 @@ import com.google.common.collect.Lists;
 import org.faudroids.distributedmemory.common.BaseService;
 import org.faudroids.distributedmemory.core.HostGameManager;
 import org.faudroids.distributedmemory.network.ConnectionHandler;
-import org.faudroids.distributedmemory.network.HostListener;
+import org.faudroids.distributedmemory.network.HostNetworkListener;
 import org.faudroids.distributedmemory.network.NetworkManager;
 import org.faudroids.distributedmemory.utils.NotificationUtils;
 
@@ -21,7 +21,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-public final class HostService extends BaseService implements HostListener {
+public final class HostService extends BaseService implements HostNetworkListener {
 
 	private static final int NOTIFICATION_ID = 422;
 
