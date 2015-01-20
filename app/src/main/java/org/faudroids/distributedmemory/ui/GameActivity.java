@@ -2,7 +2,6 @@ package org.faudroids.distributedmemory.ui;
 
 import android.app.ProgressDialog;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.GridLayout;
@@ -12,16 +11,20 @@ import com.google.common.collect.Lists;
 
 import org.faudroids.distributedmemory.R;
 import org.faudroids.distributedmemory.common.BaseActivity;
+import org.faudroids.distributedmemory.core.Card;
 import org.faudroids.distributedmemory.core.ClientGameListener;
 import org.faudroids.distributedmemory.core.ClientGameManager;
 import org.faudroids.distributedmemory.core.GameState;
 import org.faudroids.distributedmemory.core.HostGameManager;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.TreeSet;
 
 import javax.inject.Inject;
 
 import butterknife.ButterKnife;
+import butterknife.InjectView;
 
 
 public class GameActivity extends BaseActivity implements ClientGameListener {
@@ -29,6 +32,14 @@ public class GameActivity extends BaseActivity implements ClientGameListener {
 	@Inject ClientGameManager clientGameManager;
 
 	private ProgressDialog waitingForHostDialog;
+	private final TreeSet<Card> cards = new TreeSet<>(new Comparator<Card>() {
+		@Override
+		public int compare(Card lhs, Card rhs) {
+			return Integer.valueOf(lhs.getId()).compareTo(rhs.getId());
+		}
+	});
+
+	@InjectView(R.id.cards_grid) GridLayout gridLayout;
 
     private int first;
     private int second;
@@ -48,10 +59,11 @@ public class GameActivity extends BaseActivity implements ClientGameListener {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_game);
 		ButterKnife.inject(this);
+
+		/*
         GridLayout grid = (GridLayout)findViewById(R.id.gameGrid);
         int numberOfPairs = (grid.getColumnCount()*(grid.getRowCount()-1))/2;
         Log.d("onCreate", "numberOfPairs: " + numberOfPairs);
-		/*
 		// TODO will be fixed once the GameManager API is a little more stable ...
         this.manager = new GameManager(numberOfPairs,2);
         this.txtPlayer = (TextView)findViewById(R.id.playerText);
@@ -150,9 +162,25 @@ public class GameActivity extends BaseActivity implements ClientGameListener {
 
 	@Override
 	public void onGameStarted() {
-		if (waitingForHostDialog != null) {
-			waitingForHostDialog.cancel();
-			waitingForHostDialog = null;
+		// setup cards
+		cards.clear();
+		cards.addAll(clientGameManager.getClosedCards());
+
+		int xIdx = 0, yIdx = 0;
+		int columns = gridLayout.getColumnCount();
+		for (Card card : cards) {
+			Button button = (Button) gridLayout.getChildAt(xIdx + yIdx * columns);
+			button.setText(card.getValue() + " (" + card.getId() + ")");
+			++xIdx;
+			if (xIdx >= columns) {
+				xIdx = 0;
+				++yIdx;
+			}
 		}
+
+		// cancel waiting dialog
+		waitingForHostDialog.cancel();
+		waitingForHostDialog = null;
 	}
+
 }

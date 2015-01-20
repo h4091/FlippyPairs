@@ -97,7 +97,7 @@ public class JoinGameActivity extends BaseListActivity implements ClientNetworkL
 		startService(serviceIntent);
 		*/
 
-		clientGameManager.registerDevice(connectionHandler, Build.DEVICE, 42);
+		clientGameManager.registerDevice(connectionHandler, Build.DEVICE, 36);
 
 		Intent intent = new Intent(this, GameActivity.class);
 		startActivity(intent);

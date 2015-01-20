@@ -6,6 +6,13 @@ import android.os.Looper;
 import org.faudroids.distributedmemory.network.ConnectionHandler;
 import org.faudroids.distributedmemory.utils.Assert;
 
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -14,6 +21,11 @@ import timber.log.Timber;
 
 @Singleton
 public final class ClientGameManager implements ConnectionHandler.MessageListener {
+
+	private final Pattern setupCardPattern = Pattern.compile("\\((\\d+),(\\d+)\\)");
+
+	private final Map<Integer, Card> closedCards = new HashMap<>();
+	private final Map<Integer, Card> matchedCards = new HashMap<>();
 
 	private ConnectionHandler connectionHandler;
 	private String deviceName;
@@ -43,6 +55,16 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 
 	public GameState getCurrentState() {
 		return currentState;
+	}
+
+
+	public List<Card> getClosedCards() {
+		return new LinkedList<>(closedCards.values());
+	}
+
+
+	public List<Card> getMatchedCards() {
+		return new LinkedList<>(matchedCards.values());
 	}
 
 
@@ -83,8 +105,12 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 				break;
 
 			case SETUP:
-				// TODO this should only be called when receiving game state msg from server!
-				// setup -> select_1st_card
+				Matcher matcher = setupCardPattern.matcher(msg);
+				while (matcher.find()) {
+					Card card = new Card(Integer.valueOf(matcher.group(1)), Integer.valueOf(matcher.group(2)));
+					closedCards.put(card.getId(), card);
+				}
+
 				if (clientGameListener != null) clientGameListener.onGameStarted();
 				break;
 		}

@@ -1,18 +1,11 @@
 <GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
-            android:id="@+id/gameGrid"
+            android:id="@+id/cards_grid"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:columnCount="4"
-            android:rowCount="10"
+            android:rowCount="9"
             android:orientation="horizontal" >
-
-    <TextView android:layout_columnSpan="2"
-              android:id="@+id/playerText"
-              android:layout_gravity="center"/>
-    <TextView android:layout_columnSpan="2"
-              android:id="@+id/playerPoints"
-              android:layout_gravity="center"/>
 
     <Button android:text="\?"
             android:onClick="onCardSelect"/>
