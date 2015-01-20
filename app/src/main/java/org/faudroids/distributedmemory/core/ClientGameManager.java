@@ -25,6 +25,7 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 
 	/**
 	 * Registers a device with this manager.
+	 * Call in state {@link GameState#CONNECTING}.
 	 */
 	public void register(ConnectionHandler connectionHandler, String deviceName, int pairsCount) {
 		assertValidState(GameState.CONNECTING);
@@ -43,7 +44,7 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 	}
 
 
-	public void  finish() {
+	public void stopGame() {
 		connectionHandler.stop();
 	}
 
@@ -59,9 +60,11 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 		switch(currentState) {
 			case CONNECTING:
 				connectionHandler.sendMessage(deviceName + " " + pairsCount);
+				changeState(GameState.SETUP);
 				break;
 
 			case SETUP:
+				break;
 		}
 	}
 

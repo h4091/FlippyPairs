@@ -12,7 +12,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.Set;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -29,12 +28,12 @@ public final class HostGameManager {
 
 	private final Map<Integer, ConnectionHandler> connectionHandlers = new HashMap<>();
 	private final Map<Integer, Device> devices = new HashMap<>();
-	private int setupDevices = 0;
 
 	private GameState currentState = GameState.CONNECTING;
 
 	// used to postpone execution of tasks until method is finished (dirty hack?!)
 	private final Handler handler = new Handler(Looper.getMainLooper());
+
 
 	@Inject
 	public HostGameManager() { }
@@ -52,6 +51,8 @@ public final class HostGameManager {
 		connectionHandler.registerMessageListener(new HostMessageListener(deviceId), handler);
 		connectionHandler.start();
 		connectionHandler.sendMessage("hello world!"); // chicken and egg problem otherwise?
+
+		Timber.i("Adding connection handler with id " + deviceId);
 	}
 
 
@@ -77,13 +78,7 @@ public final class HostGameManager {
             Timber.i("Value " + (id + 1) + " : " + closedCards.get(id + 1).getValue());
         }
 
-		// remove those clients which have not sent any device info
-		Set<Integer> invalidDeviceIds = connectionHandlers.keySet();
-		invalidDeviceIds.removeAll(devices.keySet());
-		for (Integer id : invalidDeviceIds) {
-			Timber.w("Dropping client with id " + id + " due to missing device info");
-			connectionHandlers.remove(id);
-		}
+		// TODO race condition between connections beeing added and clients seding device info
 
 		// send card details to devices
 		int currentPairCount = 0;
@@ -181,6 +176,7 @@ public final class HostGameManager {
 
 		@Override
 		public void onNewMessage(String msg) {
+			Timber.i("Server received msg from device " + deviceId + ": " + msg);
 			switch(currentState) {
 				case CONNECTING:
 					String[] tokens = msg.split(" ");
