@@ -99,7 +99,9 @@ public class GameActivity extends BaseActivity implements ClientGameListener {
             Button b = (Button)v;
             GridLayout g = (GridLayout)b.getParent();
 
-            int id = (int)(b.getY()/b.getHeight()+g.getRowCount()*(int)(b.getX()/b.getWidth()));
+            //int id = (int)(b.getY()/b.getHeight()+g.getRowCount()*(int)(b.getX()/b.getWidth()));
+            int id = (int)(b.getY()/(g.getHeight()/g.getRowCount())+g.getRowCount()*(int)(b.getX
+                    ()/(g.getWidth()/g.getColumnCount())));
 
             if(toggle) {
                 second = id;
