@@ -122,13 +122,17 @@ public final class HostGameManager {
 	 */
 	public void selectFirstCard(int cardId) {
 		assertValidState(GameState.SELECT_1ST_CARD);
-		Assert.assertTrue(closedCards.containsKey(cardId), "invalid or close card with id " + cardId);
+		//Assert.assertTrue(closedCards.containsKey(cardId), "invalid or close card with id " +
+        //        cardId);
 
-		Card card = closedCards.remove(cardId);
-		selectedCards.add(card);
-        broadcast(Integer.toString(cardId));
-
-		changeState(GameState.SELECT_2ND_CARD);
+        if(!closedCards.containsKey(cardId)) {
+            broadcast(Message.SELECTION_INVALID);
+        } else {
+            Card card = closedCards.remove(cardId);
+            selectedCards.add(card);
+            broadcast(Integer.toString(cardId));
+            changeState(GameState.SELECT_2ND_CARD);
+        }
 	}
 
 
@@ -137,12 +141,17 @@ public final class HostGameManager {
 	 */
 	public void selectSecondCard(int cardId) {
 		assertValidState(GameState.SELECT_2ND_CARD);
-		Assert.assertTrue(closedCards.containsKey(cardId), "invalid or close card with id " + cardId);
+		//Assert.assertTrue(closedCards.containsKey(cardId), "invalid or close card with id " +
+        //        cardId);
 
-		Card card = closedCards.remove(cardId);
-		selectedCards.add(card);
-        broadcast(Integer.toString(cardId));
-		changeState(GameState.UPDATE_CARDS);
+        if(!closedCards.containsKey(cardId)) {
+            broadcast(Message.SELECTION_INVALID);
+        } else {
+            Card card = closedCards.remove(cardId);
+            selectedCards.add(card);
+            broadcast(Integer.toString(cardId));
+            changeState(GameState.UPDATE_CARDS);
+        }
 	}
 
 
@@ -152,7 +161,6 @@ public final class HostGameManager {
 	 */
 	public GameState evaluateCardSelection() {
 		assertValidState(GameState.UPDATE_CARDS);
-        Timber.d("Let me check this!");
 
 		if (selectedCards.get(0).getValue() == selectedCards.get(1).getValue()) {
 			for (Card card : selectedCards) matchedCards.put(card.getId(), card);
@@ -271,6 +279,7 @@ public final class HostGameManager {
 
                 case UPDATE_CARDS:
                     GameState next = evaluateCardSelection();
+                    Timber.d("Remaining open pairs: " + closedCards.size()/2);
                     if(checkForAck(msg)) {
                         changeState(next);
                     }

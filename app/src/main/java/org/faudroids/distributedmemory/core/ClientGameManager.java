@@ -117,19 +117,29 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 				break;
 
 			case SELECT_1ST_CARD:
-				int card1Id = Integer.valueOf(msg);
-				// TODO update UI / cards!
-				Timber.i("selected first card with id " + card1Id);
-				connectionHandler.sendMessage(Message.ACK);
-				changeState(GameState.SELECT_2ND_CARD);
+                if(Message.SELECTION_INVALID.equals(msg)) {
+                    Timber.i("Invalid selection");
+                    //TODO: update ui / cards
+                } else {
+                    int card1Id = Integer.valueOf(msg);
+                    // TODO update UI / cards!
+                    Timber.i("selected first card with id " + card1Id);
+                    connectionHandler.sendMessage(Message.ACK);
+                    changeState(GameState.SELECT_2ND_CARD);
+                }
 				break;
 
 			case SELECT_2ND_CARD:
-				int card2Id = Integer.valueOf(msg);
-				// TODO update UI / cards!
-				Timber.i("selected second card with id " + card2Id);
-				connectionHandler.sendMessage(Message.ACK);
-				changeState(GameState.UPDATE_CARDS);
+                if(Message.SELECTION_INVALID.equals(msg)) {
+                    Timber.i("Invalid selection");
+                    //TODO: update ui / cards
+                } else {
+                    int card2Id = Integer.valueOf(msg);
+                    // TODO update UI / cards!
+                    Timber.i("selected second card with id " + card2Id);
+                    connectionHandler.sendMessage(Message.ACK);
+                    changeState(GameState.UPDATE_CARDS);
+                }
 				break;
 
 			case UPDATE_CARDS:
