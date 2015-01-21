@@ -74,7 +74,7 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 
 
 	public void registerClientGameListener(ClientGameListener clientGameListener) {
-		Assert.assertTrue(this.clientGameListener ==  null, "already registered");
+		Assert.assertTrue(this.clientGameListener == null, "already registered");
 		this.clientGameListener = clientGameListener;
 	}
 
@@ -91,9 +91,9 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 
 
 	private void changeState(final GameState nextState) {
+        Timber.d("Switching to state: " + nextState);
 		currentState = nextState;
 	}
-
 
 	@Override
 	public void onNewMessage(String msg) {
@@ -124,7 +124,6 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 				changeState(GameState.SELECT_2ND_CARD);
 				break;
 
-
 			case SELECT_2ND_CARD:
 				int card2Id = Integer.valueOf(msg);
 				// TODO update UI / cards!
@@ -134,6 +133,7 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 				break;
 
 			case UPDATE_CARDS:
+                Timber.d("Result: " + msg);
 				switch (msg) {
 					case Message.EVALUATION_MATCH_CONTINUE:
 						// TODO update UI / cards!
@@ -150,8 +150,9 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 	}
 
     public void sendCard(int cardId) {
-        Integer payload = new Integer(cardId);
-        connectionHandler.sendMessage(payload.toString());
+        String payload = new String();
+        payload = String.valueOf(cardId);
+        connectionHandler.sendMessage(payload);
     }
 
 }

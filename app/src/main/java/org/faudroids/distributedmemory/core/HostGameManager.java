@@ -111,8 +111,8 @@ public final class HostGameManager {
 				msgBuilder.append("(").append(card.getId()).append(",").append(card.getValue()).append(")");
 			}
 			connectionHandler.sendMessage(msgBuilder.toString());
+            changeState(GameState.SELECT_1ST_CARD);
 		}
-        //changeState(GameState.SELECT_1ST_CARD);
     }
 
 
@@ -142,9 +142,7 @@ public final class HostGameManager {
 		Card card = closedCards.remove(cardId);
 		selectedCards.add(card);
         broadcast(Integer.toString(cardId));
-
 		changeState(GameState.UPDATE_CARDS);
-        evaluateCardSelection();
 	}
 
 
@@ -152,24 +150,25 @@ public final class HostGameManager {
 	 * Evaluate the two cards that were selected and either start next round or
 	 * finish the game if no cards are left.
 	 */
-	public void evaluateCardSelection() {
+	public GameState evaluateCardSelection() {
 		assertValidState(GameState.UPDATE_CARDS);
+        Timber.d("Let me check this!");
 
 		if (selectedCards.get(0).getValue() == selectedCards.get(1).getValue()) {
 			for (Card card : selectedCards) matchedCards.put(card.getId(), card);
 			selectedCards.clear();
             if (closedCards.size() == 0) {
-                changeState(GameState.FINISHED);
                 broadcast(Message.EVALUATION_MATCH_FINISH);
+                return GameState.FINISHED;
             } else {
-                changeState(GameState.SELECT_1ST_CARD);
                 broadcast(Message.EVALUATION_MATCH_CONTINUE);
+                return GameState.SELECT_1ST_CARD;
             }
 		} else {
             for (Card card : selectedCards) closedCards.put(card.getId(), card);
             selectedCards.clear();
-            changeState(GameState.SELECT_1ST_CARD);
             broadcast(Message.EVALUATION_MISS);
+            return GameState.SELECT_1ST_CARD;
         }
 	}
 
@@ -190,6 +189,7 @@ public final class HostGameManager {
 
 
 	private void changeState(final GameState nextState) {
+        Timber.d("Switching to state: " + nextState);
         this.acks=0;
         currentState = nextState;
 	}
@@ -228,7 +228,7 @@ public final class HostGameManager {
 
 		@Override
 		public void onNewMessage(String msg) {
-			Timber.i("Server received msg from device " + deviceId + ": " + msg);
+            Timber.d("Got mail: " + msg);
 			switch(currentState) {
 				case CONNECTING:
 					String[] tokens = msg.split(" ");
@@ -258,8 +258,6 @@ public final class HostGameManager {
                         int id = Integer.parseInt(msg);
                         Timber.i("Received first card " + id);
                         selectFirstCard(id);
-                    } else {
-                        Timber.i("I can haz ACK?");
                     }
                     break;
 
@@ -268,14 +266,13 @@ public final class HostGameManager {
                         int id = Integer.parseInt(msg);
                         Timber.i("Received second card " + id);
                         selectSecondCard(id);
-                    } else {
-                        Timber.i("I can haz ACK?");
                     }
                     break;
 
                 case UPDATE_CARDS:
+                    GameState next = evaluateCardSelection();
                     if(checkForAck(msg)) {
-                        Timber.i("I can haz ACK?");
+                        changeState(next);
                     }
                     break;
 			}
