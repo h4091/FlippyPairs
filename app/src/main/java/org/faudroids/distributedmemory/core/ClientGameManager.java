@@ -26,6 +26,7 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 
 	private final Map<Integer, Card> closedCards = new HashMap<>();
 	private final Map<Integer, Card> matchedCards = new HashMap<>();
+	private final Map<Integer, Card> selectedCards = new HashMap<>();
 
 	private ConnectionHandler connectionHandler;
 	private String deviceName;
@@ -68,6 +69,11 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 	}
 
 
+	public List<Card> getSelectedCards() {
+		return new LinkedList<>(selectedCards.values());
+	}
+
+
 	public void stopGame() {
 		connectionHandler.stop();
 	}
@@ -85,15 +91,11 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 	}
 
 
-	private void assertValidState(GameState state) {
-		if (!currentState.equals(state)) throw new IllegalStateException("must be in state " + state + " to perform this action");
+	public void selectCard(int cardId) {
+		selectedCards.put(cardId, closedCards.remove(cardId));
+		connectionHandler.sendMessage(String.valueOf(cardId));
 	}
 
-
-	private void changeState(final GameState nextState) {
-        Timber.d("Switching to state: " + nextState);
-		currentState = nextState;
-	}
 
 	@Override
 	public void onNewMessage(String msg) {
@@ -117,38 +119,35 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 				break;
 
 			case SELECT_1ST_CARD:
-                if(Message.SELECTION_INVALID.equals(msg)) {
-                    Timber.i("Invalid selection");
-                    //TODO: update ui / cards
-                } else {
-                    int card1Id = Integer.valueOf(msg);
-                    // TODO update UI / cards!
-                    Timber.i("selected first card with id " + card1Id);
-                    connectionHandler.sendMessage(Message.ACK);
-                    changeState(GameState.SELECT_2ND_CARD);
-                }
+				int card1Id = Integer.valueOf(msg);
+				Timber.i("selected first card with id " + card1Id);
+				connectionHandler.sendMessage(Message.ACK);
+				changeState(GameState.SELECT_2ND_CARD);
 				break;
 
 			case SELECT_2ND_CARD:
-                if(Message.SELECTION_INVALID.equals(msg)) {
-                    Timber.i("Invalid selection");
-                    //TODO: update ui / cards
-                } else {
-                    int card2Id = Integer.valueOf(msg);
-                    // TODO update UI / cards!
-                    Timber.i("selected second card with id " + card2Id);
-                    connectionHandler.sendMessage(Message.ACK);
-                    changeState(GameState.UPDATE_CARDS);
-                }
+				int card2Id = Integer.valueOf(msg);
+				Timber.i("selected second card with id " + card2Id);
+				connectionHandler.sendMessage(Message.ACK);
+				changeState(GameState.UPDATE_CARDS);
 				break;
 
 			case UPDATE_CARDS:
                 Timber.d("Result: " + msg);
 				switch (msg) {
 					case Message.EVALUATION_MATCH_CONTINUE:
-						// TODO update UI / cards!
-					case Message.EVALUATION_MISS:
+						matchedCards.putAll(selectedCards);
+						selectedCards.clear();
 						changeState(GameState.SELECT_1ST_CARD);
+						// TODO update UI
+						break;
+
+					case Message.EVALUATION_MISS:
+						closedCards.putAll(selectedCards);
+						selectedCards.clear();
+						changeState(GameState.SELECT_1ST_CARD);
+						// TODO update UI
+
 						break;
 					case Message.EVALUATION_MATCH_FINISH:
 						changeState(GameState.FINISHED);
@@ -159,10 +158,15 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 		}
 	}
 
-    public void sendCard(int cardId) {
-        String payload = new String();
-        payload = String.valueOf(cardId);
-        connectionHandler.sendMessage(payload);
-    }
+
+	private void assertValidState(GameState state) {
+		if (!currentState.equals(state)) throw new IllegalStateException("must be in state " + state + " to perform this action");
+	}
+
+
+	private void changeState(final GameState nextState) {
+		Timber.d("Switching to state: " + nextState);
+		currentState = nextState;
+	}
 
 }

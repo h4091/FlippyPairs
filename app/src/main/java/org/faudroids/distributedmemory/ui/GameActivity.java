@@ -1,7 +1,6 @@
 package org.faudroids.distributedmemory.ui;
 
 import android.app.ProgressDialog;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -106,14 +105,14 @@ public class GameActivity extends BaseActivity implements ClientGameListener {
             if(toggle) {
                 second = id;
                 Timber.d("selected id: " + id);
-                clientGameManager.sendCard(id);
+                clientGameManager.selectCard(id);
                 sndBtn = b;
                 //b.setText(""+manager.getCardValue(id));
                 toggle = false;
             } else {
                 first = id;
                 Timber.d("selected id: " + id);
-                clientGameManager.sendCard(id);
+                clientGameManager.selectCard(id);
                 firstBtn = b;
                 //b.setText(""+manager.getCardValue(id));
                 toggle = true;

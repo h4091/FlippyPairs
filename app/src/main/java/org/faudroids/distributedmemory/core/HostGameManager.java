@@ -116,42 +116,15 @@ public final class HostGameManager {
     }
 
 
-
 	/**
-	 * Store the first card selected.
+	 * Select one card and transition to the next state
 	 */
-	public void selectFirstCard(int cardId) {
-		assertValidState(GameState.SELECT_1ST_CARD);
-		//Assert.assertTrue(closedCards.containsKey(cardId), "invalid or close card with id " +
-        //        cardId);
-
-        if(!closedCards.containsKey(cardId)) {
-            broadcast(Message.SELECTION_INVALID);
-        } else {
-            Card card = closedCards.remove(cardId);
-            selectedCards.add(card);
-            broadcast(Integer.toString(cardId));
-            changeState(GameState.SELECT_2ND_CARD);
-        }
-	}
-
-
-	/**
-	 * Store the second card selected.
-	 */
-	public void selectSecondCard(int cardId) {
-		assertValidState(GameState.SELECT_2ND_CARD);
-		//Assert.assertTrue(closedCards.containsKey(cardId), "invalid or close card with id " +
-        //        cardId);
-
-        if(!closedCards.containsKey(cardId)) {
-            broadcast(Message.SELECTION_INVALID);
-        } else {
-            Card card = closedCards.remove(cardId);
-            selectedCards.add(card);
-            broadcast(Integer.toString(cardId));
-            changeState(GameState.UPDATE_CARDS);
-        }
+	private void selectCard(int cardId, GameState currentState, GameState nextState) {
+		assertValidState(currentState);
+		Card card = closedCards.remove(cardId);
+		selectedCards.add(card);
+		broadcast(Integer.toString(cardId));
+		changeState(nextState);
 	}
 
 
@@ -159,7 +132,7 @@ public final class HostGameManager {
 	 * Evaluate the two cards that were selected and either start next round or
 	 * finish the game if no cards are left.
 	 */
-	public GameState evaluateCardSelection() {
+	private GameState evaluateCardSelection() {
 		assertValidState(GameState.UPDATE_CARDS);
 
 		if (selectedCards.get(0).getValue() == selectedCards.get(1).getValue()) {
@@ -181,7 +154,7 @@ public final class HostGameManager {
 	}
 
 
-	public void  finish() {
+	public void finish() {
 		for (ConnectionHandler handler : connectionHandlers.values()) handler.stop();
 	}
 
@@ -198,21 +171,22 @@ public final class HostGameManager {
 
 	private void changeState(final GameState nextState) {
         Timber.d("Switching to state: " + nextState);
-        this.acks=0;
+        this.acks = 0;
         currentState = nextState;
 	}
 
-    public void registerHostGameListener(HostGameListener l) {
-        if(this.hostGameListener!=null) {
-            throw new IllegalArgumentException("There's already a listener registered.");
-        } else {
-            this.hostGameListener = l;
-        }
+
+    public void registerHostGameListener(HostGameListener listener) {
+		Assert.assertTrue(this.hostGameListener == null, "already registered");
+		this.hostGameListener = listener;
     }
 
+
     public void unregisterHostGameListener() {
+		Assert.assertTrue(this.hostGameListener != null, "not registered");
         this.hostGameListener = null;
     }
+
 
     private final class HostMessageListener implements ConnectionHandler.MessageListener {
 
@@ -222,16 +196,8 @@ public final class HostGameManager {
 			this.deviceId = deviceId;
 		}
 
-        public boolean checkForAck(String msg) {
-            if(Message.ACK.equals(msg)) {
-                if (++acks == devices.size()) {
-                    return true;
-                } else {
-                    return false;
-                }
-            } else {
-                return false;
-            }
+        public boolean allAcksReceived(String msg) {
+			return Message.ACK.equals(msg) && ++acks == devices.size();
         }
 
 		@Override
@@ -252,7 +218,7 @@ public final class HostGameManager {
 
 				case SETUP:
                     Timber.i("SETUP");
-                    if(checkForAck(msg)) {
+                    if(allAcksReceived(msg)) {
                         changeState(GameState.SELECT_1ST_CARD);
                     } else {
                         Timber.d("current acks: " + acks);
@@ -262,25 +228,25 @@ public final class HostGameManager {
 					break;
 
                 case SELECT_1ST_CARD:
-                    if(!checkForAck(msg)) {
+                    if(!allAcksReceived(msg)) {
                         int id = Integer.parseInt(msg);
                         Timber.i("Received first card " + id);
-                        selectFirstCard(id);
+                        selectCard(id, GameState.SELECT_1ST_CARD, GameState.SELECT_2ND_CARD);
                     }
                     break;
 
                 case SELECT_2ND_CARD:
-                    if(!checkForAck(msg)) {
+                    if(!allAcksReceived(msg)) {
                         int id = Integer.parseInt(msg);
                         Timber.i("Received second card " + id);
-                        selectSecondCard(id);
+						selectCard(id, GameState.SELECT_2ND_CARD, GameState.UPDATE_CARDS);
                     }
                     break;
 
                 case UPDATE_CARDS:
                     GameState next = evaluateCardSelection();
                     Timber.d("Remaining open pairs: " + closedCards.size()/2);
-                    if(checkForAck(msg)) {
+                    if(allAcksReceived(msg)) {
                         changeState(next);
                     }
                     break;
