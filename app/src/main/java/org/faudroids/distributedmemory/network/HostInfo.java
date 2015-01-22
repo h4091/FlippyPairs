@@ -49,4 +49,10 @@ public final class HostInfo {
 		return Objects.hashCode(name, address, port);
 	}
 
+
+	@Override
+	public String toString() {
+		return name;
+	}
+
 }
