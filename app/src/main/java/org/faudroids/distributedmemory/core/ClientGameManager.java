@@ -7,8 +7,6 @@ import org.faudroids.distributedmemory.network.ConnectionHandler;
 import org.faudroids.distributedmemory.utils.Assert;
 
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -59,18 +57,18 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 	}
 
 
-	public List<Card> getClosedCards() {
-		return new LinkedList<>(closedCards.values());
+	public Map<Integer, Card> getClosedCards() {
+		return closedCards;
 	}
 
 
-	public List<Card> getMatchedCards() {
-		return new LinkedList<>(matchedCards.values());
+	public Map<Integer, Card> getMatchedCards() {
+		return matchedCards;
 	}
 
 
-	public List<Card> getSelectedCards() {
-		return new LinkedList<>(selectedCards.values());
+	public Map<Integer, Card> getSelectedCards() {
+		return selectedCards;
 	}
 
 
@@ -93,6 +91,7 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 
 	public void selectCard(int cardId) {
 		selectedCards.put(cardId, closedCards.remove(cardId));
+		if (clientGameListener != null) clientGameListener.onCardsChanged();
 		connectionHandler.sendMessage(String.valueOf(cardId));
 	}
 
@@ -136,17 +135,27 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
                 Timber.d("Result: " + msg);
 				switch (msg) {
 					case Message.EVALUATION_MATCH_CONTINUE:
-						matchedCards.putAll(selectedCards);
-						selectedCards.clear();
 						changeState(GameState.SELECT_1ST_CARD);
-						// TODO update UI
+						if (!selectedCards.isEmpty()) {
+							matchedCards.putAll(selectedCards);
+							selectedCards.clear();
+							if (clientGameListener != null) {
+								clientGameListener.onCardsChanged();
+								clientGameListener.onCardsMatch();
+							}
+						}
 						break;
 
 					case Message.EVALUATION_MISS:
-						closedCards.putAll(selectedCards);
-						selectedCards.clear();
 						changeState(GameState.SELECT_1ST_CARD);
-						// TODO update UI
+						if (!selectedCards.isEmpty()) {
+							closedCards.putAll(selectedCards);
+							selectedCards.clear();
+							if (clientGameListener != null) {
+								clientGameListener.onCardsChanged();
+								clientGameListener.onCardsMismatch();
+							}
+						}
 
 						break;
 					case Message.EVALUATION_MATCH_FINISH:

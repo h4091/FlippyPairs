@@ -15,11 +15,12 @@ import org.faudroids.distributedmemory.core.Card;
 import org.faudroids.distributedmemory.core.ClientGameListener;
 import org.faudroids.distributedmemory.core.ClientGameManager;
 import org.faudroids.distributedmemory.core.GameState;
-import org.faudroids.distributedmemory.core.HostGameManager;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.TreeSet;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -28,29 +29,15 @@ import butterknife.InjectView;
 import timber.log.Timber;
 
 
-public class GameActivity extends BaseActivity implements ClientGameListener {
+public class GameActivity extends BaseActivity implements ClientGameListener, View.OnClickListener {
 
 	@Inject ClientGameManager clientGameManager;
 
 	private ProgressDialog waitingForHostDialog;
-	private final TreeSet<Card> cards = new TreeSet<>(new Comparator<Card>() {
-		@Override
-		public int compare(Card lhs, Card rhs) {
-			return Integer.valueOf(lhs.getId()).compareTo(rhs.getId());
-		}
-	});
+	private final List<Card> cards = new ArrayList<>();
 
 	@InjectView(R.id.cards_grid) GridLayout gridLayout;
 
-    private int first = -1;
-    private int second = -1;
-
-    private Button firstBtn;
-    private Button sndBtn;
-
-    private boolean toggle = false;
-
-    private HostGameManager manager;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -58,32 +45,21 @@ public class GameActivity extends BaseActivity implements ClientGameListener {
 		setContentView(R.layout.activity_game);
 		ButterKnife.inject(this);
 
+		int rowCount = getResources().getInteger(R.integer.grid_row_count);
+		int columnCount = getResources().getInteger(R.integer.grid_column_count);
+
 		// fill grid layout with buttons
-		for (int column = 0; column < getResources().getInteger(R.integer.grid_column_count); ++column) {
-			for (int row = 0; row < getResources().getInteger(R.integer.grid_row_count); ++row) {
-                Button btn = new Button(this);
-                btn.setOnClickListener(onCardSelect);
+		for (int column = 0; column < columnCount; ++column) {
+			for (int row = 0; row < rowCount; ++row) {
+                Button button = new Button(this);
+                button.setOnClickListener(this);
 				gridLayout.addView(
-						btn,
+						button,
 						new GridLayout.LayoutParams(
 								GridLayout.spec(row, 1),
 								GridLayout.spec(column, 1)));
 			}
 		}
-
-		/*
-        GridLayout grid = (GridLayout)findViewById(R.id.gameGrid);
-        int numberOfPairs = (grid.getColumnCount()*(grid.getRowCount()-1))/2;
-        Log.d("onCreate", "numberOfPairs: " + numberOfPairs);
-		// TODO will be fixed once the GameManager API is a little more stable ...
-        this.manager = new GameManager(numberOfPairs,2);
-        this.txtPlayer = (TextView)findViewById(R.id.playerText);
-        txtPlayer.setText(manager.getPlayerName(manager.getCurrentPlayer()));
-        this.txtPoints = (TextView)findViewById(R.id.playerPoints);
-        txtPoints.setText("Points: " + manager.getPlayerPoints(manager.getCurrentPlayer()));
-        this.first = -1;
-        this.second = -1;
-        */
 	}
 
 	@Override
@@ -91,132 +67,12 @@ public class GameActivity extends BaseActivity implements ClientGameListener {
 		return Lists.<Object>newArrayList(new UiModule());
 	}
 
-    private Button.OnClickListener onCardSelect = new Button.OnClickListener() {
-
-        @Override
-        public void onClick(View v) {
-            Button b = (Button)v;
-            GridLayout g = (GridLayout)b.getParent();
-
-            //int id = (int)(b.getY()/b.getHeight()+g.getRowCount()*(int)(b.getX()/b.getWidth()));
-            int id = (int)(b.getY()/(g.getHeight()/g.getRowCount())+g.getRowCount()*(int)(b.getX
-                    ()/(g.getWidth()/g.getColumnCount())));
-
-            if(toggle) {
-                second = id;
-                Timber.d("selected id: " + id);
-                clientGameManager.selectCard(id);
-                sndBtn = b;
-                //b.setText(""+manager.getCardValue(id));
-                toggle = false;
-            } else {
-                first = id;
-                Timber.d("selected id: " + id);
-                clientGameManager.selectCard(id);
-                firstBtn = b;
-                //b.setText(""+manager.getCardValue(id));
-                toggle = true;
-            }
-
-            if(first>=0 && second>=0) {
-                if (first != second) {
-                    if(clientGameManager.getClosedCards().get(first).getValue()
-                            ==clientGameManager.getClosedCards().get(second).getValue()) {
-                        Timber.i("Matching pair!");
-                    }
-//                GameManager.gameEvents events = manager.run(first, second);
-//                if (events == GameManager.gameEvents.FINISH) {
-//                    Toast winnerToast = Toast.makeText(getApplicationContext(),
-//                            "Winner: " + manager.getPlayerName(manager.getWinnerId()),
-//                            Toast.LENGTH_LONG);
-//                    winnerToast.show();
-//                } else if (events == GameManager.gameEvents.MATCH) {
-//                    Log.d("run", "match");
-//                    this.first = -1;
-//                    this.second = -1;
-//                } else if (events == GameManager.gameEvents.SWITCH) {
-//                    android.os.Handler handler = new android.os.Handler();
-//                    handler.postDelayed(new Runnable() {
-//                        public void run() {
-//                            firstBtn.setText("?");
-//                            sndBtn.setText("?");
-//                            first = -1;
-//                            second = -1;
-//                            txtPlayer.setText(manager.getPlayerName(manager.getCurrentPlayer()));
-//                            txtPoints.setText("Points: " + manager.getPlayerPoints(manager.getCurrentPlayer()));
-//                        }
-//                    }, 300);
-//                } else if (events == GameManager.gameEvents.ERROR) {
-//                    Log.e("Error", "An error occured!");
-//                }
-                } else {
-                    Toast errorToast = Toast.makeText(getApplicationContext(), "Invalid selection!", Toast.LENGTH_LONG);
-                    errorToast.show();
-                }
-            }
-
-        }
-    };
-
-//    void onCardSelect(View v) {
-//        Button b = (Button)v;
-//        GridLayout g = (GridLayout)b.getParent();
-//
-//        int id = (int)(b.getX()/b.getWidth()+g.getColumnCount()*(int)(b.getY()/b.getHeight()));
-//
-//        if(this.toggle) {
-//            this.second = id;
-//            Timber.d("select", "id: " + id);
-//            this.sndBtn = b;
-//            //b.setText(""+manager.getCardValue(id));
-//            this.toggle = false;
-//        } else {
-//            this.first = id;
-//            Timber.d("select", "id: " + id);
-//            this.firstBtn = b;
-//            //b.setText(""+manager.getCardValue(id));
-//            this.toggle = true;
-//        }
-//
-//        if(first>=0 && second>=0) {
-//            if (first != second) {
-//                GameManager.gameEvents events = manager.run(first, second);
-//                if (events == GameManager.gameEvents.FINISH) {
-//                    Toast winnerToast = Toast.makeText(getApplicationContext(),
-//                            "Winner: " + manager.getPlayerName(manager.getWinnerId()),
-//                            Toast.LENGTH_LONG);
-//                    winnerToast.show();
-//                } else if (events == GameManager.gameEvents.MATCH) {
-//                    Log.d("run", "match");
-//                    this.first = -1;
-//                    this.second = -1;
-//                } else if (events == GameManager.gameEvents.SWITCH) {
-//                    android.os.Handler handler = new android.os.Handler();
-//                    handler.postDelayed(new Runnable() {
-//                        public void run() {
-//                            firstBtn.setText("?");
-//                            sndBtn.setText("?");
-//                            first = -1;
-//                            second = -1;
-//                            txtPlayer.setText(manager.getPlayerName(manager.getCurrentPlayer()));
-//                            txtPoints.setText("Points: " + manager.getPlayerPoints(manager.getCurrentPlayer()));
-//                        }
-//                    }, 300);
-//                } else if (events == GameManager.gameEvents.ERROR) {
-//                    Log.e("Error", "An error occured!");
-//                }
-//            } else {
-//                Toast errorToast = Toast.makeText(getApplicationContext(), "Invalid selection!", Toast.LENGTH_LONG);
-//                errorToast.show();
-//            }
-//        }
-//    }
-
 
 	@Override
 	public void onResume() {
 		super.onResume();
 		clientGameManager.registerClientGameListener(this);
+		onCardsChanged();
 
 		if (clientGameManager.getCurrentState() == GameState.SETUP
 				|| clientGameManager.getCurrentState() == GameState.CONNECTING) {
@@ -239,12 +95,20 @@ public class GameActivity extends BaseActivity implements ClientGameListener {
 	public void onGameStarted() {
 		// setup cards
 		cards.clear();
-		cards.addAll(clientGameManager.getClosedCards());
+		cards.addAll(clientGameManager.getClosedCards().values());
+		Collections.sort(cards, new Comparator<Card>() {
+			@Override
+			public int compare(Card lhs, Card rhs) {
+				return Integer.valueOf(lhs.getId()).compareTo(rhs.getId());
+			}
+		});
+
 
 		int xIdx = 0, yIdx = 0;
 		int columns = gridLayout.getColumnCount();
 		for (Card card : cards) {
 			Button button = (Button) gridLayout.getChildAt(xIdx + yIdx * columns);
+			button.setTag(R.id.cardId, card.getId());
 			button.setText(card.getValue() + " (" + card.getId() + ")");
 			++xIdx;
 			if (xIdx >= columns) {
@@ -258,4 +122,79 @@ public class GameActivity extends BaseActivity implements ClientGameListener {
 		waitingForHostDialog = null;
 	}
 
+
+	@Override
+	public void onCardsChanged() {
+		Map<Integer, Card> matchedCards = clientGameManager.getMatchedCards();
+		Map<Integer, Card> selectedCards = clientGameManager.getSelectedCards();
+
+		// iterate over all cards and update UI accordingly
+		int xIdx = 0, yIdx = 0;
+		int columns = gridLayout.getColumnCount();
+		for (Card card : cards) {
+			Button button = (Button) gridLayout.getChildAt(xIdx + yIdx * columns);
+			if (matchedCards.containsKey(card.getId()) || selectedCards.containsKey(card.getId())) {
+				button.setEnabled(false);
+			} else {
+				button.setEnabled(true);
+			}
+			++xIdx;
+			if (xIdx >= columns) {
+				xIdx = 0;
+				++yIdx;
+			}
+		}
+	}
+
+
+	@Override
+	public void onCardsMatch() {
+		Toast.makeText(this, "Match!", Toast.LENGTH_SHORT).show();
+	}
+
+
+	@Override
+	public void onCardsMismatch() {
+		Toast.makeText(this, "nope ...", Toast.LENGTH_SHORT).show();
+	}
+
+
+	@Override
+	public void onClick(View view) {
+		if (clientGameManager.getCurrentState() != GameState.SELECT_1ST_CARD
+				&& clientGameManager.getCurrentState() != GameState.SELECT_2ND_CARD) {
+			Timber.w("Dropped click request due to wrong state");
+			return;
+		}
+
+		Button button = (Button) view;
+		int cardId = (int) button.getTag(R.id.cardId);
+		clientGameManager.selectCard(cardId);
+
+		/*
+		if(toggle) {
+			second = id;
+			Timber.d("selected id: " + id);
+			clientGameManager.selectCard(id);
+			toggle = false;
+		} else {
+			first = id;
+			Timber.d("selected id: " + id);
+			clientGameManager.selectCard(id);
+			toggle = true;
+		}
+
+		if(first>=0 && second>=0) {
+			if (first != second) {
+				if(clientGameManager.getClosedCards().get(first).getValue()
+						==clientGameManager.getClosedCards().get(second).getValue()) {
+					Timber.i("Matching pair!");
+				}
+			} else {
+				Toast errorToast = Toast.makeText(getApplicationContext(), "Invalid selection!", Toast.LENGTH_LONG);
+				errorToast.show();
+			}
+		}
+		*/
+	}
 }
