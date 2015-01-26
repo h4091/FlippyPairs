@@ -22,6 +22,8 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 
 	private final Pattern setupCardPattern = Pattern.compile("\\((\\d+),(\\d+)\\)");
 
+	private final GameStateManager gameStateManager;
+
 	private final Map<Integer, Card> closedCards = new HashMap<>();
 	private final Map<Integer, Card> matchedCards = new HashMap<>();
 	private final Map<Integer, Card> selectedCards = new HashMap<>();
@@ -31,10 +33,11 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 	private int pairsCount;
 	private ClientGameListener clientGameListener;
 
-	private GameState currentState = GameState.CONNECTING;
-
 	@Inject
-	public ClientGameManager() { }
+	public ClientGameManager(GameStateManager gameStateManager) {
+		this.gameStateManager = gameStateManager;
+	}
+
 
 	/**
 	 * Registers a device with this manager.
@@ -53,7 +56,7 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 
 
 	public GameState getCurrentState() {
-		return currentState;
+		return gameStateManager.getState();
 	}
 
 
@@ -99,7 +102,7 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 	@Override
 	public void onNewMessage(String msg) {
 		Timber.i("received msg from host" + msg);
-		switch(currentState) {
+		switch(gameStateManager.getState()) {
 			case CONNECTING:
 				connectionHandler.sendMessage(deviceName + " " + pairsCount);
 				changeState(GameState.SETUP);
@@ -169,13 +172,13 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 
 
 	private void assertValidState(GameState state) {
-		if (!currentState.equals(state)) throw new IllegalStateException("must be in state " + state + " to perform this action");
+		if (!gameStateManager.getState().equals(state)) throw new IllegalStateException("must be in state " + state + " to perform this action");
 	}
 
 
-	private void changeState(final GameState nextState) {
-		Timber.d("Switching to state: " + nextState);
-		currentState = nextState;
+	private void changeState(GameState nextState) {
+		Timber.d("Changing client game state to " + nextState);
+		gameStateManager.changeState(nextState);
 	}
 
 }

@@ -23,14 +23,14 @@ import timber.log.Timber;
 @Singleton
 public final class HostGameManager {
 
+	private final GameStateManager gameStateManager;
+
 	private final Map<Integer, Card> closedCards = new HashMap<>();
 	private final List<Card> selectedCards = new LinkedList<>();
 	private final Map<Integer, Card> matchedCards = new HashMap<>();
 
 	private final Map<Integer, ConnectionHandler> connectionHandlers = new HashMap<>();
 	private final Map<Integer, Device> devices = new HashMap<>();
-
-	private GameState currentState = GameState.CONNECTING;
 
     private HostGameListener hostGameListener;
 
@@ -41,7 +41,10 @@ public final class HostGameManager {
 
 
 	@Inject
-	public HostGameManager() { }
+	public HostGameManager(GameStateManager gameStateManager) {
+		this.gameStateManager = gameStateManager;
+	}
+
 
     public void broadcast(String msg) {
         for (Integer id : devices.keySet()) {
@@ -165,14 +168,14 @@ public final class HostGameManager {
 
 
 	private void assertValidState(GameState state) {
-		if (!currentState.equals(state)) throw new IllegalStateException("must be in state " + state + " to perform this action");
+		if (!gameStateManager.getState().equals(state)) throw new IllegalStateException("must be in state " + state + " to perform this action");
 	}
 
 
-	private void changeState(final GameState nextState) {
-        Timber.d("Switching to state: " + nextState);
+	private void changeState(GameState nextState) {
+		Timber.d("Changing host game state to " + nextState);
         this.acks = 0;
-        currentState = nextState;
+		gameStateManager.changeState(nextState);
 	}
 
 
@@ -203,7 +206,7 @@ public final class HostGameManager {
 		@Override
 		public void onNewMessage(String msg) {
             Timber.d("Got mail: " + msg);
-			switch(currentState) {
+			switch(gameStateManager.getState()) {
 				case CONNECTING:
 					String[] tokens = msg.split(" ");
 					String deviceName = tokens[0];
