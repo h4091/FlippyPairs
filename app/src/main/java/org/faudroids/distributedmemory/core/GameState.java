@@ -1,6 +1,7 @@
 package org.faudroids.distributedmemory.core;
 
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.Set;
 
 public enum GameState {
@@ -20,7 +21,7 @@ public enum GameState {
 		UPDATE_CARDS.nextStates.addAll(EnumSet.of(GameState.SELECT_1ST_CARD, GameState.FINISHED));
 	}
 
-	private final Set<GameState> nextStates = EnumSet.noneOf(GameState.class);
+	private final Set<GameState> nextStates = new HashSet<>();
 
 
 	public boolean isValidNextState(GameState state) {

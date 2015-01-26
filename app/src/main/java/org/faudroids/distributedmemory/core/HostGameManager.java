@@ -3,6 +3,7 @@ package org.faudroids.distributedmemory.core;
 import android.os.Handler;
 import android.os.Looper;
 
+import org.faudroids.distributedmemory.network.BroadcastMessage;
 import org.faudroids.distributedmemory.network.ConnectionHandler;
 import org.faudroids.distributedmemory.utils.Assert;
 
@@ -13,6 +14,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.TreeMap;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -21,7 +23,7 @@ import timber.log.Timber;
 
 
 @Singleton
-public final class HostGameManager {
+public final class HostGameManager implements HostStateTransition.TransitionListener {
 
 	private final GameStateManager gameStateManager;
 
@@ -29,12 +31,12 @@ public final class HostGameManager {
 	private final List<Card> selectedCards = new LinkedList<>();
 	private final Map<Integer, Card> matchedCards = new HashMap<>();
 
-	private final Map<Integer, ConnectionHandler> connectionHandlers = new HashMap<>();
-	private final Map<Integer, Device> devices = new HashMap<>();
+	private final TreeMap<Integer, ConnectionHandler> connectionHandlers = new TreeMap<>();
+	private final TreeMap<Integer, Device> devices = new TreeMap<>();
+
+	private HostStateTransition stateTransition = null; // no transition in progress
 
     private HostGameListener hostGameListener;
-
-    private int acks = 0;
 
 	// used to postpone execution of tasks until method is finished (dirty hack?!)
 	private final Handler handler = new Handler(Looper.getMainLooper());
@@ -45,13 +47,6 @@ public final class HostGameManager {
 		this.gameStateManager = gameStateManager;
 	}
 
-
-    public void broadcast(String msg) {
-        for (Integer id : devices.keySet()) {
-            ConnectionHandler connectionHandler = connectionHandlers.get(id);
-            connectionHandler.sendMessage(msg);
-        }
-    }
 
 	/**
 	 * Registers a device with this manager.
@@ -65,7 +60,6 @@ public final class HostGameManager {
 		connectionHandler.registerMessageListener(new HostMessageListener(deviceId), handler);
 		connectionHandler.start();
 		connectionHandler.sendMessage("hello world!"); // chicken and egg problem otherwise?
-
 		Timber.i("Adding connection handler with id " + deviceId);
 	}
 
@@ -76,12 +70,11 @@ public final class HostGameManager {
 	 */
 	public void startGame() {
 		assertValidState(GameState.CONNECTING);
-		changeState(GameState.SETUP);
-
-		int pairsCount = 0;
-		for (Device device : devices.values()) pairsCount += device.getPairsCount();
+		gameStateManager.changeState(GameState.SETUP); // manual new game state, no ack from clients required
 
 		// setup cards locally
+		int pairsCount = 0;
+		for (Device device : devices.values()) pairsCount += device.getPairsCount();
         Timber.i("Pairs: " + pairsCount);
 		Random rand = new Random();
 		int cardId = 0;
@@ -103,8 +96,8 @@ public final class HostGameManager {
 		List<Card> allCards = new ArrayList<>(closedCards.values());
 		Collections.shuffle(allCards);
 
+		List<String> cardDetailMessages = new LinkedList<>();
 		for (Integer id : devices.keySet()) {
-			ConnectionHandler connectionHandler = connectionHandlers.get(id);
 			Device device = devices.get(id);
 			StringBuilder msgBuilder = new StringBuilder();
 
@@ -113,51 +106,13 @@ public final class HostGameManager {
 				++currentCardCount;
 				msgBuilder.append("(").append(card.getId()).append(",").append(card.getValue()).append(")");
 			}
-			connectionHandler.sendMessage(msgBuilder.toString());
-            changeState(GameState.SELECT_1ST_CARD);
+			cardDetailMessages.add(msgBuilder.toString());
 		}
+		transitionState(GameState.SELECT_1ST_CARD, cardDetailMessages);
     }
 
 
-	/**
-	 * Select one card and transition to the next state
-	 */
-	private void selectCard(int cardId, GameState currentState, GameState nextState) {
-		assertValidState(currentState);
-		Card card = closedCards.remove(cardId);
-		selectedCards.add(card);
-		broadcast(Integer.toString(cardId));
-		changeState(nextState);
-	}
-
-
-	/**
-	 * Evaluate the two cards that were selected and either start next round or
-	 * finish the game if no cards are left.
-	 */
-	private GameState evaluateCardSelection() {
-		assertValidState(GameState.UPDATE_CARDS);
-
-		if (selectedCards.get(0).getValue() == selectedCards.get(1).getValue()) {
-			for (Card card : selectedCards) matchedCards.put(card.getId(), card);
-			selectedCards.clear();
-            if (closedCards.size() == 0) {
-                broadcast(Message.EVALUATION_MATCH_FINISH);
-                return GameState.FINISHED;
-            } else {
-                broadcast(Message.EVALUATION_MATCH_CONTINUE);
-                return GameState.SELECT_1ST_CARD;
-            }
-		} else {
-            for (Card card : selectedCards) closedCards.put(card.getId(), card);
-            selectedCards.clear();
-            broadcast(Message.EVALUATION_MISS);
-            return GameState.SELECT_1ST_CARD;
-        }
-	}
-
-
-	public void finish() {
+	public void shutdown() {
 		for (ConnectionHandler handler : connectionHandlers.values()) handler.stop();
 	}
 
@@ -167,31 +122,107 @@ public final class HostGameManager {
 	}
 
 
+	public void registerHostGameListener(HostGameListener listener) {
+		Assert.assertTrue(this.hostGameListener == null, "already registered");
+		this.hostGameListener = listener;
+	}
+
+
+	public void unregisterHostGameListener() {
+		Assert.assertTrue(this.hostGameListener != null, "not registered");
+		this.hostGameListener = null;
+	}
+
+
+	/**
+	 * Select one card and transition to the next state
+	 */
+	private void selectCard(int cardId, GameState selectionState) {
+		assertValidState(selectionState);
+		Card card = closedCards.remove(cardId);
+		selectedCards.add(card);
+	}
+
+
+	/**
+	 * Compare the two cards that were selected and update internal card data structures
+	 * accordingly.
+	 * @return true if the selected cards matched, false otherwise
+	 */
+	private boolean evaluateCardSelection() {
+		assertValidState(GameState.UPDATE_CARDS);
+
+		if (selectedCards.get(0).getValue() == selectedCards.get(1).getValue()) {
+			for (Card card : selectedCards) matchedCards.put(card.getId(), card);
+			selectedCards.clear();
+			return true;
+		} else {
+            for (Card card : selectedCards) closedCards.put(card.getId(), card);
+            selectedCards.clear();
+			return false;
+        }
+	}
+
+
+	private boolean isGameFinished() {
+		return closedCards.size() == 0;
+	}
+
+
 	private void assertValidState(GameState state) {
 		if (!gameStateManager.getState().equals(state)) throw new IllegalStateException("must be in state " + state + " to perform this action");
 	}
 
 
-	private void changeState(GameState nextState) {
-		Timber.d("Changing host game state to " + nextState);
-        this.acks = 0;
+	@Override
+	public void onTransitionFinished(GameState nextState) {
+		Timber.d("Finished host game state transition to " + nextState);
 		gameStateManager.changeState(nextState);
+
+		switch (nextState) {
+			case UPDATE_CARDS:
+				// once all clients have acked the last selected card evaluate selection
+				boolean match = evaluateCardSelection();
+				String responseMsg;
+				GameState responseState;
+
+				if (match && isGameFinished()) {
+					responseMsg = Message.EVALUATION_MATCH_FINISH;
+					responseState = GameState.FINISHED;
+				} else if (match) {
+					responseMsg = Message.EVALUATION_MATCH_CONTINUE;
+					responseState = GameState.SELECT_1ST_CARD;
+				} else {
+					responseMsg = Message.EVALUATION_MISS;
+					responseState = GameState.SELECT_1ST_CARD;
+				}
+
+				transitionState(responseState, responseMsg);
+				Timber.d("Remaining open pairs: " + closedCards.size()/2);
+				break;
+		}
 	}
 
 
-    public void registerHostGameListener(HostGameListener listener) {
-		Assert.assertTrue(this.hostGameListener == null, "already registered");
-		this.hostGameListener = listener;
-    }
+	private void transitionState(GameState nextState, String message) {
+		transitionState(nextState, new BroadcastMessage(connectionHandlers.values(), message));
+	}
 
 
-    public void unregisterHostGameListener() {
-		Assert.assertTrue(this.hostGameListener != null, "not registered");
-        this.hostGameListener = null;
-    }
+	private void transitionState(GameState nextState, List<String> messages) {
+		transitionState(nextState, new BroadcastMessage(connectionHandlers.values(), messages));
+	}
 
 
-    private final class HostMessageListener implements ConnectionHandler.MessageListener {
+	private void transitionState(GameState nextState, BroadcastMessage broadcastMessage) {
+		Assert.assertTrue(stateTransition == null || stateTransition.isComplete(), "previous state transition not yet finished!");
+		Timber.d("Starting host game state transition to " + nextState);
+		stateTransition = new HostStateTransition(this, nextState, broadcastMessage);
+		stateTransition.startTransition();
+	}
+
+
+	private final class HostMessageListener implements ConnectionHandler.MessageListener {
 
 		private final int deviceId;
 
@@ -199,61 +230,50 @@ public final class HostGameManager {
 			this.deviceId = deviceId;
 		}
 
-        public boolean allAcksReceived(String msg) {
-			return Message.ACK.equals(msg) && ++acks == devices.size();
-        }
 
 		@Override
 		public void onNewMessage(String msg) {
-            Timber.d("Got mail: " + msg);
+            Timber.d("Host received message: " + msg);
+
+			// if ack than take note and do nothing
+			if (msg.equals(Message.ACK)) {
+				if (stateTransition.onAckReceived()) stateTransition = null;
+				return;
+			}
+
 			switch(gameStateManager.getState()) {
 				case CONNECTING:
 					String[] tokens = msg.split(" ");
 					String deviceName = tokens[0];
 					int pairsCount = Integer.valueOf(tokens[1]);
 					devices.put(deviceId, new Device(deviceId, deviceName, pairsCount));
-                    ++acks;
-                    if(hostGameListener!=null) {
-                        hostGameListener.onClientAdded();
-                    }
-                    Timber.i("CONNECTING");
+                    if (hostGameListener != null) hostGameListener.onClientAdded();
 					break;
 
 				case SETUP:
-                    Timber.i("SETUP");
-                    if(allAcksReceived(msg)) {
-                        changeState(GameState.SELECT_1ST_CARD);
-                    } else {
-                        Timber.d("current acks: " + acks);
-                        Timber.d("needed acks: " + devices.size());
-                        Timber.i("I can haz ACK?");
-                    }
+					// nothing to do, clients will only send ack
 					break;
 
                 case SELECT_1ST_CARD:
-                    if(!allAcksReceived(msg)) {
-                        int id = Integer.parseInt(msg);
-                        Timber.i("Received first card " + id);
-                        selectCard(id, GameState.SELECT_1ST_CARD, GameState.SELECT_2ND_CARD);
-                    }
+					int firstCardId = Integer.parseInt(msg);
+					Timber.i("Received first card " + firstCardId);
+					selectCard(firstCardId, GameState.SELECT_1ST_CARD);
+					transitionState(GameState.SELECT_2ND_CARD, String.valueOf(firstCardId));
                     break;
 
                 case SELECT_2ND_CARD:
-                    if(!allAcksReceived(msg)) {
-                        int id = Integer.parseInt(msg);
-                        Timber.i("Received second card " + id);
-						selectCard(id, GameState.SELECT_2ND_CARD, GameState.UPDATE_CARDS);
-                    }
+					int secondCardId = Integer.parseInt(msg);
+					Timber.i("Received second card " + secondCardId);
+					selectCard(secondCardId, GameState.SELECT_2ND_CARD);
+					transitionState(GameState.UPDATE_CARDS, String.valueOf(secondCardId));
                     break;
 
                 case UPDATE_CARDS:
-                    GameState next = evaluateCardSelection();
-                    Timber.d("Remaining open pairs: " + closedCards.size()/2);
-                    if(allAcksReceived(msg)) {
-                        changeState(next);
-                    }
+					// nothing to do, client will only send ack
                     break;
 			}
 		}
 	}
+
+
 }

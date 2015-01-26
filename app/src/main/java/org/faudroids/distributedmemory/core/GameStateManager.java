@@ -21,7 +21,7 @@ public final class GameStateManager {
 
 
 	public void changeState(GameState state) {
-		Assert.assertTrue(currentState.isValidNextState(state), "invalid next state");
+		Assert.assertTrue(currentState.isValidNextState(state), "cannot change state from " + currentState + " to " + state);
 		this.currentState = state;
 	}
 
