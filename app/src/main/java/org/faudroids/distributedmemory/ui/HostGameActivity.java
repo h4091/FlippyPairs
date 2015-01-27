@@ -76,13 +76,20 @@ public class HostGameActivity extends BaseActivity {
 
 	@OnClick(R.id.start_hosting)
 	public void startHosting() {
-		startHostingButton.setEnabled(false);
+        if(playerList.size()>1) {
+            startHostingButton.setEnabled(false);
 
-		Intent hostIntent = new Intent(this, HostService.class);
-		startService(hostIntent);
+            Intent hostIntent = new Intent(this, HostService.class);
+            startService(hostIntent);
 
-		Intent lobbyIntent = new Intent(this, LobbyActivity.class);
-		startActivity(lobbyIntent);
+            Intent lobbyIntent = new Intent(this, LobbyActivity.class);
+            startActivity(lobbyIntent);
+        } else {
+            Toast errorToast = Toast.makeText(getApplicationContext(),
+                    "Players missing!",
+                    Toast.LENGTH_SHORT);
+            errorToast.show();
+        }
 	}
 
 
