@@ -152,16 +152,6 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 		}
 	}
 
-    private void backFlipCard(final Button toFlip) {
-        Interpolator decelerator = new DecelerateInterpolator();
-
-        ObjectAnimator backFlipper = ObjectAnimator.ofFloat(toFlip, "rotationY", -180f, 0f);
-        backFlipper.setDuration(500);
-        backFlipper.setInterpolator(decelerator);
-
-        backFlipper.start();
-    }
-
     private void flipCard(final Button toFlip) {
         Interpolator accelerator = new AccelerateInterpolator();
 
@@ -170,6 +160,17 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
         buttonFlipper.setInterpolator(accelerator);
 
         buttonFlipper.start();
+    }
+
+    private void backFlipCard(final Button toFlip) {
+        Interpolator decelerator = new DecelerateInterpolator();
+
+        ObjectAnimator backFlipper = ObjectAnimator.ofFloat(toFlip, "rotationY", -180f, 0f);
+        backFlipper.setDuration(500);
+        backFlipper.setInterpolator(decelerator);
+        toFlip.setEnabled(true);
+
+        backFlipper.start();
     }
 
 	@Override
@@ -182,15 +183,21 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 	public void onCardsMismatch() {
         Map<Integer, Card> selectedCards = clientGameManager.getSelectedCards();
 
-        int rows = gridLayout.getRowCount();
-        for (Card card : selectedCards.values()) {
-            int xIdx = card.getId()/rows;
-            int yIdx = card.getId()-(rows*xIdx);
-            Timber.d("x: " + xIdx*rows + " y: " + yIdx);
-            Button button = (Button) gridLayout.getChildAt(yIdx + xIdx * rows);
-            backFlipCard(button);
-            button.setEnabled(true);
+        int xIdx = 0, yIdx = 0;
+        int columns = gridLayout.getColumnCount();
+        for (Card card : cards) {
+            Button button = (Button) gridLayout.getChildAt(xIdx + yIdx * columns);
+            if (selectedCards.containsKey(card.getId())) {
+                backFlipCard(button);
+            }
+
+            ++xIdx;
+            if (xIdx >= columns) {
+                xIdx = 0;
+                ++yIdx;
+            }
         }
+
 		Toast.makeText(this, "nope ...", Toast.LENGTH_SHORT).show();
 	}
 
