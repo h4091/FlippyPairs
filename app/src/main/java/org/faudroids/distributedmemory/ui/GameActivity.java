@@ -1,7 +1,5 @@
 package org.faudroids.distributedmemory.ui;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.app.ProgressDialog;
 import android.os.Bundle;
@@ -93,7 +91,7 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 
 	@Override
 	public void onPause() {
-		clientGameManager.unregisterClientGameListener();
+		clientGameManager.unregisterClientGameListener(this);
 		super.onPause();
 	}
 
@@ -199,6 +197,12 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
         }
 
 		Toast.makeText(this, "nope ...", Toast.LENGTH_SHORT).show();
+	}
+
+
+	@Override
+	public void onGameStopped() {
+		Toast.makeText(this, "Game over!", Toast.LENGTH_LONG).show();
 	}
 
 

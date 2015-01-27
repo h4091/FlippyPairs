@@ -5,7 +5,7 @@ public interface ClientGameListener {
 
 	/**
 	 * Called once when the host hast started the game and this client
-	 * is about to receive select the first card.
+	 * can start selecting cards.
 	 */
 	public void onGameStarted();
 
@@ -29,4 +29,9 @@ public interface ClientGameListener {
 	 */
 	public void onCardsMismatch();
 
+
+	/**
+	 * Called once when the game has stopped.
+	 */
+	public void onGameStopped();
 }

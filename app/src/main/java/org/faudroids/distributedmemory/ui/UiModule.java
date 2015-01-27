@@ -13,8 +13,7 @@ import dagger.Module;
 				JoinGameActivity.class,
 				LobbyActivity.class,
 				GameActivity.class,
-				HostService.class,
-				ClientService.class
+				HostService.class
 		}
 )
 public final class UiModule {

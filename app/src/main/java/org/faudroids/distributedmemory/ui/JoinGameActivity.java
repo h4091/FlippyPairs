@@ -93,11 +93,6 @@ public class JoinGameActivity extends BaseListActivity implements ClientNetworkL
 		connectingToHostDialog.cancel();
 		connectingToHostDialog = null;
 
-		/*
-		Intent serviceIntent = new Intent(this, ClientService.class);
-		startService(serviceIntent);
-		*/
-
 		int cardsCount = getResources().getInteger(R.integer.grid_column_count)
 				* getResources().getInteger(R.integer.grid_row_count);
 		clientGameManager.registerDevice(connectionHandler, Build.DEVICE, cardsCount / 2);
