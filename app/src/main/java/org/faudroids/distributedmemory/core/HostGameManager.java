@@ -270,6 +270,13 @@ public final class HostGameManager implements HostStateTransitionListener {
                     break;
 			}
 		}
+
+
+		@Override
+		public void onConnectionError() {
+			for (HostGameListener listener : hostGameListeners) listener.onClientLost(devices.get(deviceId));
+		}
+
 	}
 
 

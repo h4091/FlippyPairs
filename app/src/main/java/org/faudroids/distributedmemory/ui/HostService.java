@@ -150,6 +150,14 @@ public final class HostService extends BaseService {
 			stopSelf();
 		}
 
+
+		@Override
+		public void onClientLost(Device device) {
+			// TODO Panic! For now simply shut down server ...
+			Toast.makeText(HostService.this, "lost connection to client " + device.getName() + ", shutting down server", Toast.LENGTH_LONG).show();
+			stopSelf();
+		}
+
 	}
 
 }

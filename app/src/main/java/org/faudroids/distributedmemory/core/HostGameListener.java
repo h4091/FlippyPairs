@@ -20,4 +20,10 @@ public interface HostGameListener {
 	 */
 	public void onGameStopped();
 
+
+	/**
+	 * There was an error communicating with a client.
+	 */
+	public void onClientLost(Device device);
+
 }

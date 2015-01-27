@@ -18,7 +18,15 @@ public interface ConnectionHandler {
 
 	static interface MessageListener {
 
+		/**
+		 * A new message from the other side is available.
+		 */
 		public void onNewMessage(String msg);
+
+		/**
+		 * The connection to the other side is broken and will be closed.
+		 */
+		public void onConnectionError();
 
 	}
 }

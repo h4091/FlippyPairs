@@ -34,4 +34,10 @@ public interface ClientGameListener {
 	 * Called once when the game has stopped.
 	 */
 	public void onGameStopped();
+
+
+	/**
+	 * There was an error communicating with the host.
+	 */
+	public void onHostLost();
 }

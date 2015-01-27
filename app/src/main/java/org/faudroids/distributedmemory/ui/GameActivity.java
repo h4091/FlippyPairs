@@ -207,6 +207,12 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 
 
 	@Override
+	public void onHostLost() {
+		Toast.makeText(this, "Lost connection to host, shutting down game!", Toast.LENGTH_LONG).show();
+	}
+
+
+	@Override
 	public void onClick(View view) {
 		if (clientGameManager.getCurrentState() != GameState.SELECT_1ST_CARD
 				&& clientGameManager.getCurrentState() != GameState.SELECT_2ND_CARD) {

@@ -84,9 +84,11 @@ public class LobbyActivity extends BaseActivity implements  HostGameListener {
 
 
 	@Override
-	public void onGameStopped() {
-		// TODO probably won't be called here ... and in case it does we are going to do what exactly?
-	}
+	public void onGameStopped() { }
+
+
+	@Override
+	public void onClientLost(Device device) { }
 
 
 	@Override

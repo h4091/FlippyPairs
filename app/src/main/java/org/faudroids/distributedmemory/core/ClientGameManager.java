@@ -179,6 +179,12 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 	}
 
 
+	@Override
+	public void onConnectionError() {
+		for (ClientGameListener listener : clientGameListeners) listener.onHostLost();
+	}
+
+
 	private void assertValidState(GameState state) {
 		if (!gameStateManager.getState().equals(state)) throw new IllegalStateException("must be in state " + state + " to perform this action");
 	}

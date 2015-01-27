@@ -29,7 +29,7 @@ final class SimpleConnectionHandler implements ConnectionHandler {
 
 	SimpleConnectionHandler(Socket socket) throws IOException {
 		this.socket = socket;
-		this.outputThread = new OutputThread(socket.getOutputStream());
+		this.outputThread = new OutputThread(socket.getOutputStream(), messageListenerAdapter);
 		this.inputThread = new InputThread(socket.getInputStream(), messageListenerAdapter);
 	}
 
@@ -38,7 +38,7 @@ final class SimpleConnectionHandler implements ConnectionHandler {
 		this.socket = new Socket();
 		this.socket.bind(null);
 		this.socket.connect(new InetSocketAddress(inetAddress.getHostAddress(), port));
-		this.outputThread = new OutputThread(socket.getOutputStream());
+		this.outputThread = new OutputThread(socket.getOutputStream(), messageListenerAdapter);
 		this.inputThread = new InputThread(socket.getInputStream(), messageListenerAdapter);
 	}
 
@@ -89,9 +89,19 @@ final class SimpleConnectionHandler implements ConnectionHandler {
 	}
 
 
+	/**
+	 * Returns whether there was a connection error that has not been delivered due to no listener
+	 * beeing registered.
+	 */
+	public boolean getUnsentConnectionError() {
+		return messageListenerAdapter.getUnsentConnectionError();
+	}
+
+
 	private static final class MessageListenerAdapter implements MessageListener {
 
 		private final List<String> unsentMessages = new LinkedList<>();
+		private boolean unsentConnectionError = false;
 
 		private Handler handler = null;
 		private MessageListener targetListener = null;
@@ -108,6 +118,23 @@ final class SimpleConnectionHandler implements ConnectionHandler {
 					});
 				} else {
 					unsentMessages.add(msg);
+				}
+			}
+		}
+
+		@Override
+		public void onConnectionError() {
+			synchronized (this) {
+				unsentMessages.clear();
+				if (handler != null && targetListener != null) {
+					handler.post(new Runnable() {
+						@Override
+						public void run() {
+							targetListener.onConnectionError();
+						}
+					});
+				} else {
+					unsentConnectionError = true;
 				}
 			}
 		}
@@ -131,8 +158,14 @@ final class SimpleConnectionHandler implements ConnectionHandler {
 				List<String> messages = new LinkedList<>(unsentMessages);
 				unsentMessages.clear();
 				return messages;
-
 			}
+		}
+
+
+		public boolean getUnsentConnectionError() {
+			boolean connectionError = unsentConnectionError;
+			unsentConnectionError = false;
+			return connectionError;
 		}
 
 	}
@@ -140,27 +173,42 @@ final class SimpleConnectionHandler implements ConnectionHandler {
 
 	private static final class OutputThread extends Thread {
 
-		private final ObjectOutputStream outputStream;
+		private final MessageListener messageListener;
+		private final ObjectOutputStream objectOutputStream;
 		private final BlockingQueue<String> messageQueue;
+		private final BackoffStrategy strategy;
 
-		public OutputThread(OutputStream outputStream) throws IOException {
-			this.outputStream = new ObjectOutputStream(outputStream);
+		public OutputThread(final OutputStream outputStream, final MessageListener messageListener) throws IOException {
+			this.objectOutputStream = new ObjectOutputStream(outputStream);
+			this.messageListener = messageListener;
 			this.messageQueue = new LinkedBlockingDeque<>();
+			this.strategy = new BackoffStrategy() {
+				@Override
+				protected void doWork() throws Throwable {
+					try {
+						String msg = messageQueue.take();
+						objectOutputStream.writeObject(msg);
+						objectOutputStream.flush();
+					} catch (InterruptedException ie) {
+						interrupt();
+					}
+				}
+			};
 		}
 
 		@Override
 		public void run() {
-			while (!isInterrupted()) {
-				try {
-					String msg = messageQueue.take();
-					outputStream.writeObject(msg);
-					outputStream.flush();
-
-				} catch (InterruptedException ie) {
-					interrupt();
-				} catch (IOException ioe) {
-					Timber.e(ioe, "failed send mesage");
+			try {
+				while (!isInterrupted()) {
+					strategy.work();
 				}
+			} catch (Throwable t) {
+				try {
+					objectOutputStream.close();
+				} catch (IOException ioe) {
+					Timber.w("failed to close connection", ioe);
+				}
+				messageListener.onConnectionError();
 			}
 		}
 
@@ -173,28 +221,77 @@ final class SimpleConnectionHandler implements ConnectionHandler {
 
 	private static final class InputThread extends Thread {
 
-		private final ObjectInputStream inputStream;
 		private final MessageListener messageListener;
+		private final ObjectInputStream objectInputStream;
+		private final BackoffStrategy strategy;
 
-		public InputThread(InputStream inputStream, MessageListener messageListener) throws IOException {
-			this.inputStream = new ObjectInputStream(inputStream);
+		public InputThread(final InputStream inputStream, final MessageListener messageListener) throws IOException {
+			this.objectInputStream = new ObjectInputStream(inputStream);
 			this.messageListener = messageListener;
+			this.strategy = new BackoffStrategy() {
+				@Override
+				protected void doWork() throws Throwable {
+					String msg = (String) objectInputStream.readObject();
+					messageListener.onNewMessage(msg);
+				}
+			};
 		}
 
 		@Override
 		public void run() {
-			while (!isInterrupted()) {
+			try {
+				while (!isInterrupted()) {
+					strategy.work();
+				}
+			} catch (Throwable t) {
 				try {
-					String msg = (String) inputStream.readObject();
-					messageListener.onNewMessage(msg);
-
+					objectInputStream.close();
 				} catch (IOException ioe) {
-					Timber.e(ioe, "failed to receive message");
-				} catch (ClassNotFoundException cnfe) {
-					Timber.e(cnfe, "failed to deserialize message");
+					Timber.w("failed to close connection", ioe);
+				}
+				messageListener.onConnectionError();
+			}
+		}
+
+	}
+
+
+	/**
+	 * Implements a simple backoff strategy in case of errors.
+	 */
+	private static abstract class BackoffStrategy {
+
+		private static final int MAX_RETRY = 3;
+		private static final int INITIAL_BACKOFF = 20;
+		private static final int BACKOFF_EXPONENT = 2;
+
+		private int currentRetry = 0;
+		private int currentBackoff = INITIAL_BACKOFF;
+
+		public void work() throws Throwable {
+			try {
+				doWork();
+
+				// reset since doWork was successful
+				currentRetry = 0;
+				currentBackoff = 0;
+
+			} catch (Throwable t) {
+				Timber.w(t, "failed to perform work");
+				if (currentRetry > MAX_RETRY) throw new Exception("failed after " + MAX_RETRY + "retries", t);
+
+				// backoff and retry
+				++currentRetry;
+				currentBackoff *= BACKOFF_EXPONENT;
+				try {
+					Thread.sleep(currentBackoff);
+				} catch (InterruptedException e) {
+					throw new Exception(e);
 				}
 			}
 		}
+
+		protected abstract void doWork() throws Throwable;
 
 	}
 
