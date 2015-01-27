@@ -29,8 +29,7 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 	private final Map<Integer, Card> selectedCards = new HashMap<>();
 
 	private ConnectionHandler connectionHandler;
-	private String deviceName;
-	private int pairsCount;
+	private Device device;
 	private ClientGameListener clientGameListener;
 
 	@Inject
@@ -40,15 +39,14 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 
 
 	/**
-	 * Registers a device with this manager.
+	 * Registers the local device with this manager.
 	 * Call in state {@link GameState#CONNECTING}.
 	 */
 	public void registerDevice(ConnectionHandler connectionHandler, String deviceName, int pairsCount) {
 		assertValidState(GameState.CONNECTING);
 
 		this.connectionHandler = connectionHandler;
-		this.deviceName = deviceName;
-		this.pairsCount = pairsCount;
+		this.device = new Device(0, deviceName, pairsCount); // dummy id, not needed on client side
 
 		connectionHandler.registerMessageListener(this, new Handler(Looper.myLooper()));
 		connectionHandler.start();
@@ -104,7 +102,7 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 		Timber.i("received msg from host" + msg);
 		switch(gameStateManager.getState()) {
 			case CONNECTING:
-				connectionHandler.sendMessage(deviceName + " " + pairsCount);
+				connectionHandler.sendMessage(device.getName() + " " + device.getPairsCount());
 				changeState(GameState.SETUP);
 				break;
 
