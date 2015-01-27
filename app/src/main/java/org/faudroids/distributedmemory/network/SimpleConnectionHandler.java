@@ -277,7 +277,7 @@ final class SimpleConnectionHandler implements ConnectionHandler {
 				currentBackoff = 0;
 
 			} catch (Throwable t) {
-				Timber.w(t, "failed to perform work");
+				Timber.d(t, "failed to perform work");
 				if (currentRetry > MAX_RETRY) throw new Exception("failed after " + MAX_RETRY + "retries", t);
 
 				// backoff and retry
