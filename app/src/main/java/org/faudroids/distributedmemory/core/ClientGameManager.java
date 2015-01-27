@@ -153,11 +153,11 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 						changeState(GameState.SELECT_1ST_CARD);
 						if (!selectedCards.isEmpty()) {
 							closedCards.putAll(selectedCards);
-							selectedCards.clear();
 							if (clientGameListener != null) {
 								clientGameListener.onCardsChanged();
 								clientGameListener.onCardsMismatch();
 							}
+                            selectedCards.clear();
 						}
 
 						break;

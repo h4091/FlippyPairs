@@ -1,8 +1,14 @@
 package org.faudroids.distributedmemory.ui;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
 import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.view.View;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.DecelerateInterpolator;
+import android.view.animation.Interpolator;
 import android.widget.Button;
 import android.widget.GridLayout;
 import android.widget.Toast;
@@ -146,6 +152,25 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 		}
 	}
 
+    private void backFlipCard(final Button toFlip) {
+        Interpolator decelerator = new DecelerateInterpolator();
+
+        ObjectAnimator backFlipper = ObjectAnimator.ofFloat(toFlip, "rotationY", -180f, 0f);
+        backFlipper.setDuration(500);
+        backFlipper.setInterpolator(decelerator);
+
+        backFlipper.start();
+    }
+
+    private void flipCard(final Button toFlip) {
+        Interpolator accelerator = new AccelerateInterpolator();
+
+        ObjectAnimator buttonFlipper = ObjectAnimator.ofFloat(toFlip, "rotationY", 0f, 180f);
+        buttonFlipper.setDuration(500);
+        buttonFlipper.setInterpolator(accelerator);
+
+        buttonFlipper.start();
+    }
 
 	@Override
 	public void onCardsMatch() {
@@ -155,6 +180,17 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 
 	@Override
 	public void onCardsMismatch() {
+        Map<Integer, Card> selectedCards = clientGameManager.getSelectedCards();
+
+        int rows = gridLayout.getRowCount();
+        for (Card card : selectedCards.values()) {
+            int xIdx = card.getId()/rows;
+            int yIdx = card.getId()-(rows*xIdx);
+            Timber.d("x: " + xIdx*rows + " y: " + yIdx);
+            Button button = (Button) gridLayout.getChildAt(yIdx + xIdx * rows);
+            backFlipCard(button);
+            button.setEnabled(true);
+        }
 		Toast.makeText(this, "nope ...", Toast.LENGTH_SHORT).show();
 	}
 
@@ -168,6 +204,7 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 		}
 
 		Button button = (Button) view;
+        flipCard(button);
 		int cardId = (int) button.getTag(R.id.cardId);
 		clientGameManager.selectCard(cardId);
 
