@@ -34,6 +34,9 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 	private Device device;
 	private final List<ClientGameListener> clientGameListeners = new LinkedList<>();
 
+	// used to delay actions that should run on the main (UI) thread
+	private final Handler handler = new Handler(Looper.getMainLooper());
+
 	@Inject
 	public ClientGameManager(GameStateManager gameStateManager) {
 		this.gameStateManager = gameStateManager;
@@ -173,7 +176,13 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 				switch (msg) {
 					case Message.EVALUATION_MATCH_FINISH:
 						gameStateManager.changeState(GameState.FINISHED);
-						stopGame();
+						// delay closing of connection such that server can receive ack
+						handler.postDelayed(new Runnable() {
+							@Override
+							public void run() {
+								stopGame();
+							}
+						}, 100);
 						break;
 
 					case Message.EVALUATION_MATCH_CONTINUE:
@@ -189,6 +198,8 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 
 	@Override
 	public void onConnectionError() {
+		// if already finished this is expected as connections are being closed
+		if (gameStateManager.getState() == GameState.FINISHED) return;
 		for (ClientGameListener listener : clientGameListeners) listener.onHostLost();
 	}
 

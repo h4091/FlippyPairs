@@ -284,6 +284,8 @@ public final class HostGameManager implements HostStateTransitionListener {
 
 		@Override
 		public void onConnectionError() {
+			// if already finished this is expected as connections are being closed
+			if (gameStateManager.getState() == GameState.FINISHED) return;
 			for (HostGameListener listener : hostGameListeners) listener.onClientLost(devices.get(deviceId));
 		}
 
