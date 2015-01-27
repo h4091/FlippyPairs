@@ -31,12 +31,15 @@ public final class HostGameManager implements HostStateTransition.TransitionList
 	private final List<Card> selectedCards = new LinkedList<>();
 	private final Map<Integer, Card> matchedCards = new HashMap<>();
 
+    private final Map<Integer, Player> players = new HashMap<>();
+
 	private final TreeMap<Integer, ConnectionHandler> connectionHandlers = new TreeMap<>();
 	private final TreeMap<Integer, Device> devices = new TreeMap<>();
 
 	private HostStateTransition stateTransition = null; // no transition in progress
 
     private HostGameListener hostGameListener;
+    private PlayerListListener playerListListener;
 
 	// used to postpone execution of tasks until method is finished (dirty hack?!)
 	private final Handler handler = new Handler(Looper.getMainLooper());
@@ -121,6 +124,10 @@ public final class HostGameManager implements HostStateTransition.TransitionList
 		return new LinkedList<>(devices.values());
 	}
 
+    public List<Player> getPlayers() {
+        return new LinkedList<>(players.values());
+    }
+
 
 	public void registerHostGameListener(HostGameListener listener) {
 		Assert.assertTrue(this.hostGameListener == null, "already registered");
@@ -132,6 +139,18 @@ public final class HostGameManager implements HostStateTransition.TransitionList
 		Assert.assertTrue(this.hostGameListener != null, "not registered");
 		this.hostGameListener = null;
 	}
+
+
+    public void registerPlayerListListener(PlayerListListener listener) {
+        Assert.assertTrue(this.playerListListener == null, "already registered");
+        this.playerListListener = listener;
+    }
+
+
+    public void unregisterPlayerListListener() {
+        Assert.assertTrue(this.playerListListener != null, "not registered");
+        this.playerListListener = null;
+    }
 
 
 	/**
@@ -221,6 +240,18 @@ public final class HostGameManager implements HostStateTransition.TransitionList
 		stateTransition.startTransition();
 	}
 
+
+    public void addPlayer(String name) {
+        Player p = new Player(this.players.size(), name);
+        this.players.put(p.getId(), p);
+        playerListListener.onListChanged();
+    }
+
+
+    public void removePlayer(int id) {
+        this.players.remove(id);
+        playerListListener.onListChanged();
+    }
 
 	private final class HostMessageListener implements ConnectionHandler.MessageListener {
 
