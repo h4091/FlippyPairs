@@ -37,7 +37,7 @@ public final class HostGameManager implements HostStateTransitionListener {
 	// used to postpone execution of tasks until method is finished (dirty hack?!)
 	private final Handler handler = new Handler(Looper.getMainLooper());
 
-	private HostGameListener hostGameListener = null;
+	private final List<HostGameListener> hostGameListeners = new LinkedList<>();
 
 	@Inject
 	public HostGameManager(HostGameStateManager gameStateManager) {
@@ -69,6 +69,7 @@ public final class HostGameManager implements HostStateTransitionListener {
 	public void startGame() {
 		assertValidState(GameState.CONNECTING);
 		gameStateManager.changeState(GameState.SETUP); // manual new game state, no ack from clients required
+		for (HostGameListener listener : hostGameListeners) listener.onGameStarted();
 
 		// setup cards locally
 		int pairsCount = 0;
@@ -110,8 +111,9 @@ public final class HostGameManager implements HostStateTransitionListener {
     }
 
 
-	public void shutdown() {
+	public void stopGame() {
 		for (ConnectionHandler handler : connectionHandlers.values()) handler.stop();
+		for (HostGameListener listener : hostGameListeners) listener.onGameStopped();
 	}
 
 
@@ -121,14 +123,14 @@ public final class HostGameManager implements HostStateTransitionListener {
 
 
 	public void registerHostGameListener(HostGameListener listener) {
-		Assert.assertTrue(this.hostGameListener == null, "already registered");
-		this.hostGameListener = listener;
+		Assert.assertTrue(!hostGameListeners.contains(listener), "already registered");
+		hostGameListeners.add(listener);
 	}
 
 
-	public void unregisterHostGameListener() {
-		Assert.assertTrue(this.hostGameListener != null, "not registered");
-		this.hostGameListener = null;
+	public void unregisterHostGameListener(HostGameListener listener) {
+		Assert.assertTrue(hostGameListeners.contains(listener), "not registered");
+		hostGameListeners.remove(listener);
 	}
 
 
@@ -198,6 +200,10 @@ public final class HostGameManager implements HostStateTransitionListener {
 				transitionState(responseState, responseMsg);
 				Timber.d("Remaining open pairs: " + closedCards.size()/2);
 				break;
+
+			case FINISHED:
+				stopGame();
+				break;
 		}
 	}
 
@@ -236,8 +242,9 @@ public final class HostGameManager implements HostStateTransitionListener {
 					String[] tokens = msg.split(" ");
 					String deviceName = tokens[0];
 					int pairsCount = Integer.valueOf(tokens[1]);
-					devices.put(deviceId, new Device(deviceId, deviceName, pairsCount));
-                    if (hostGameListener != null) hostGameListener.onClientAdded();
+					Device device = new Device(deviceId, deviceName, pairsCount);
+					devices.put(deviceId, device);
+					for (HostGameListener listener : hostGameListeners) listener.onClientAdded(device);
 					break;
 
 				case SETUP:

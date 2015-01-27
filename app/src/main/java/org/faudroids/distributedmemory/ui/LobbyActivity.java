@@ -46,9 +46,10 @@ public class LobbyActivity extends BaseActivity implements  HostGameListener {
 		hostGameManager.startGame();
 	}
 
+
     @Override
     public void onPause() {
-        hostGameManager.unregisterHostGameListener();
+        hostGameManager.unregisterHostGameListener(this);
         super.onPause();
     }
 
@@ -67,13 +68,25 @@ public class LobbyActivity extends BaseActivity implements  HostGameListener {
 
 
 	@Override
-	public void onClientAdded() {
+	public void onClientAdded(Device device) {
         adapter.clear();
         List<Device> devices = hostGameManager.getConnectedDevices();
-        for (Device device : devices) adapter.add(device.getName());
+        for (Device d : devices) adapter.add(d.getName());
         adapter.notifyDataSetChanged();
         Timber.i("Called refresh and found " + adapter.getCount() + " elements");
     }
+
+
+	@Override
+	public void onGameStarted() {
+		// TODO go to client screen?
+	}
+
+
+	@Override
+	public void onGameStopped() {
+		// TODO probably won't be called here ... and in case it does we are going to do what exactly?
+	}
 
 
 	@Override

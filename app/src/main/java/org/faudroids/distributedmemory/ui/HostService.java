@@ -11,6 +11,8 @@ import android.widget.Toast;
 import com.google.common.collect.Lists;
 
 import org.faudroids.distributedmemory.common.BaseService;
+import org.faudroids.distributedmemory.core.Device;
+import org.faudroids.distributedmemory.core.HostGameListener;
 import org.faudroids.distributedmemory.core.HostGameManager;
 import org.faudroids.distributedmemory.network.ConnectionHandler;
 import org.faudroids.distributedmemory.network.HostNetworkListener;
@@ -21,7 +23,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-public final class HostService extends BaseService implements HostNetworkListener {
+public final class HostService extends BaseService implements HostNetworkListener, HostGameListener {
 
 	private static final int NOTIFICATION_ID = 422;
 
@@ -39,6 +41,8 @@ public final class HostService extends BaseService implements HostNetworkListene
 	public void onCreate() {
 		super.onCreate();
 		networkManager.startServer("AwesomeGame", this, new Handler(getMainLooper()));
+		hostGameManager.registerHostGameListener(this);
+
 		Notification notification = notificationUtils.createOngoingNotification(
 				"Game starting",
 				"Distributed memory game is about to be hosted ...",
@@ -57,6 +61,7 @@ public final class HostService extends BaseService implements HostNetworkListene
 	public void onDestroy() {
 		notificationManager.cancel(NOTIFICATION_ID);
 		if (networkManager.isServerRunning()) networkManager.stopServer();
+		hostGameManager.unregisterHostGameListener(this);
 		super.onDestroy();
 	}
 
@@ -114,6 +119,25 @@ public final class HostService extends BaseService implements HostNetworkListene
 		Intent intent = new Intent(ACTION_SERVER_STATE_CHANGED);
 		intent.putExtra(EXTRA_SERVER_RUNNING, false);
 		sendBroadcast(intent);
+	}
+
+
+	@Override
+	public void onClientAdded(Device device) {
+		// nothing to do
+	}
+
+
+	@Override
+	public void onGameStarted() {
+		// stop accepting new client connections --> close server socket
+		networkManager.stopServer();
+	}
+
+
+	@Override
+	public void onGameStopped() {
+		stopSelf();
 	}
 
 
