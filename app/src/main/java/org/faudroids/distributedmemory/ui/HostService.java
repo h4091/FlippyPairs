@@ -44,6 +44,7 @@ public final class HostService extends BaseService {
 	public void onCreate() {
 		super.onCreate();
 		networkManager.startServer("AwesomeGame", networkListener, new Handler(getMainLooper()));
+		hostGameManager.initGame();
 		hostGameManager.registerHostGameListener(gameListener);
 
 		Notification notification = notificationUtils.createOngoingNotification(

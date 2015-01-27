@@ -11,7 +11,12 @@ class GameStateManager {
 
 	@Inject
 	public GameStateManager() {
-		this.currentState = GameState.CONNECTING;
+		reset();
+	}
+
+
+	public void reset() {
+		currentState = GameState.CONNECTING;
 	}
 
 

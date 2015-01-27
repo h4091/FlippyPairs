@@ -95,6 +95,8 @@ public class JoinGameActivity extends BaseListActivity implements ClientNetworkL
 
 		int cardsCount = getResources().getInteger(R.integer.grid_column_count)
 				* getResources().getInteger(R.integer.grid_row_count);
+
+		clientGameManager.initGame();
 		clientGameManager.registerDevice(connectionHandler, Build.DEVICE, cardsCount / 2);
 
 		Intent intent = new Intent(this, GameActivity.class);

@@ -40,6 +40,14 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 	}
 
 
+	public void initGame() {
+		gameStateManager.reset();
+		closedCards.clear();
+		matchedCards.clear();
+		selectedCards.clear();
+	}
+
+
 	/**
 	 * Registers the local device with this manager.
 	 * Call in state {@link GameState#CONNECTING}.

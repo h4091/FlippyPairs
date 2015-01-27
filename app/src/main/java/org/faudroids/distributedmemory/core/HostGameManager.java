@@ -46,6 +46,16 @@ public final class HostGameManager implements HostStateTransitionListener {
 	}
 
 
+	public void initGame() {
+		gameStateManager.reset();
+		closedCards.clear();
+		selectedCards.clear();
+		matchedCards.clear();
+		connectionHandlers.clear();
+		devices.clear();
+	}
+
+
 	/**
 	 * Registers a device with this manager.
 	 * State {@link GameState#CONNECTING}.

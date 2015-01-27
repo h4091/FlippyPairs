@@ -18,7 +18,13 @@ final class HostGameStateManager extends GameStateManager {
 	private HostStateTransitionListener stateTransitionListener = null;
 
 	@Inject
-	public HostGameStateManager() {
+	public HostGameStateManager() { }
+
+
+	@Override
+	public void reset() {
+		super.reset();
+		stateTransition = null;
 	}
 
 
