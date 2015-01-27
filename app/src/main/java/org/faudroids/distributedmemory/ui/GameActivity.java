@@ -224,31 +224,6 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
         flipCard(button);
 		int cardId = (int) button.getTag(R.id.cardId);
 		clientGameManager.selectCard(cardId);
-
-		/*
-		if(toggle) {
-			second = id;
-			Timber.d("selected id: " + id);
-			clientGameManager.selectCard(id);
-			toggle = false;
-		} else {
-			first = id;
-			Timber.d("selected id: " + id);
-			clientGameManager.selectCard(id);
-			toggle = true;
-		}
-
-		if(first>=0 && second>=0) {
-			if (first != second) {
-				if(clientGameManager.getClosedCards().get(first).getValue()
-						==clientGameManager.getClosedCards().get(second).getValue()) {
-					Timber.i("Matching pair!");
-				}
-			} else {
-				Toast errorToast = Toast.makeText(getApplicationContext(), "Invalid selection!", Toast.LENGTH_LONG);
-				errorToast.show();
-			}
-		}
-		*/
 	}
+
 }
