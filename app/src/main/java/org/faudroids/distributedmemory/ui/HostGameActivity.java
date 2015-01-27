@@ -28,9 +28,7 @@ import javax.inject.Inject;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
-import butterknife.OnItemClick;
 import butterknife.OnItemLongClick;
-import timber.log.Timber;
 
 
 public class HostGameActivity extends BaseActivity {
@@ -51,7 +49,7 @@ public class HostGameActivity extends BaseActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_host_game);
 		ButterKnife.inject(this);
-        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, playerList);
+        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, playerList);
         ListView lv = (ListView)findViewById(R.id.playersList);
         lv.setAdapter(adapter);
         adapter.add("Player1");
@@ -62,7 +60,7 @@ public class HostGameActivity extends BaseActivity {
 	@Override
 	public void onResume() {
 		super.onResume();
-		registerReceiver(serverStateReceiver, new IntentFilter(HostService.ACTION_SERVER_STATE_CHANGED));
+		registerReceiver(serverStateReceiver, new IntentFilter(HostService.ACTION_HOST_STATE_CHANGED));
 		toggleStartStopButtons(serviceUtils.isServiceRunning(HostService.class));
 	}
 
@@ -90,6 +88,15 @@ public class HostGameActivity extends BaseActivity {
                     Toast.LENGTH_SHORT);
             errorToast.show();
         }
+	}
+
+
+	@OnClick(R.id.stop_hosting)
+	public void stopHosting() {
+		stopHostingButton.setEnabled(false);
+
+		Intent hostIntent = new Intent(this, HostService.class);
+		stopService(hostIntent);
 	}
 
 
@@ -150,15 +157,6 @@ public class HostGameActivity extends BaseActivity {
     }
 
 
-	@OnClick(R.id.stop_hosting)
-	public void stopHosting() {
-		stopHostingButton.setEnabled(false);
-
-		Intent hostIntent = new Intent(this, HostService.class);
-		stopService(hostIntent);
-	}
-
-
 	private void toggleStartStopButtons(boolean serverRunning) {
 		if (serverRunning) {
 			startHostingButton.setEnabled(false);
@@ -180,7 +178,7 @@ public class HostGameActivity extends BaseActivity {
 
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			boolean started = intent.getBooleanExtra(HostService.EXTRA_SERVER_RUNNING, false);
+			boolean started = intent.getBooleanExtra(HostService.EXTRA_HOST_RUNNING, false);
 			toggleStartStopButtons(started);
 		}
 

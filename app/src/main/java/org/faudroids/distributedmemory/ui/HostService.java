@@ -23,12 +23,15 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-public final class HostService extends BaseService implements HostNetworkListener, HostGameListener {
+public final class HostService extends BaseService {
 
 	private static final int NOTIFICATION_ID = 422;
 
-	static final String ACTION_SERVER_STATE_CHANGED = "org.faudroids.distributedmemory.ACTION_SERVER_STATE_CHANGED";
-	static final String EXTRA_SERVER_RUNNING = "EXTRA_SERVER_RUNNING";
+	static final String ACTION_HOST_STATE_CHANGED = "org.faudroids.distributedmemory.ACTION_HOST_STATE_CHANGED";
+	static final String EXTRA_HOST_RUNNING = "EXTRA_HOST_RUNNING";
+
+	private final HostNetworkListener networkListener = new NetworkListener();
+	private final HostGameListener gameListener = new GameListener();
 
 
 	@Inject NetworkManager networkManager;
@@ -40,14 +43,16 @@ public final class HostService extends BaseService implements HostNetworkListene
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		networkManager.startServer("AwesomeGame", this, new Handler(getMainLooper()));
-		hostGameManager.registerHostGameListener(this);
+		networkManager.startServer("AwesomeGame", networkListener, new Handler(getMainLooper()));
+		hostGameManager.registerHostGameListener(gameListener);
 
 		Notification notification = notificationUtils.createOngoingNotification(
 				"Game starting",
 				"Distributed memory game is about to be hosted ...",
 				HostGameActivity.class);
 		notificationManager.notify(NOTIFICATION_ID, notification);
+
+		sendHostStartedBroadcast();
 	}
 
 
@@ -61,7 +66,9 @@ public final class HostService extends BaseService implements HostNetworkListene
 	public void onDestroy() {
 		notificationManager.cancel(NOTIFICATION_ID);
 		if (networkManager.isServerRunning()) networkManager.stopServer();
-		hostGameManager.unregisterHostGameListener(this);
+		hostGameManager.unregisterHostGameListener(gameListener);
+		if (hostGameManager.isGameRunning()) hostGameManager.stopGame();
+		sendHostStoppedBroadcast();
 		super.onDestroy();
 	}
 
@@ -72,78 +79,77 @@ public final class HostService extends BaseService implements HostNetworkListene
 	}
 
 
-	@Override
-	public void onServerStartSuccess() {
-		Notification notification = notificationUtils.createOngoingNotification(
-				"Game Running",
-				"You are hosting a distributed memory game!",
-				HostGameActivity.class);
-		notificationManager.notify(NOTIFICATION_ID, notification);
-		sendServerStartedBroadcast();
-	}
-
-
-	@Override
-	public void onServerStartError() {
-		Toast.makeText(this, "Failed to start server!", Toast.LENGTH_LONG).show();
-		stopSelf();
-	}
-
-
-	@Override
-	public void onConnectedToClient(ConnectionHandler connectionHandler) {
-		hostGameManager.addDevice(connectionHandler);
-	}
-
-
-	@Override
-	public void onServerStoppedSuccess() {
-		sendServerStoppedBroadcast();
-	}
-
-
-	@Override
-	public void onServerStoppedError() {
-		sendServerStoppedBroadcast();
-	}
-
-
-	private void sendServerStartedBroadcast() {
-		Intent intent = new Intent(ACTION_SERVER_STATE_CHANGED);
-		intent.putExtra(EXTRA_SERVER_RUNNING, true);
+	private void sendHostStartedBroadcast() {
+		Intent intent = new Intent(ACTION_HOST_STATE_CHANGED);
+		intent.putExtra(EXTRA_HOST_RUNNING, true);
 		sendBroadcast(intent);
 	}
 
 
-	private void sendServerStoppedBroadcast() {
-		Intent intent = new Intent(ACTION_SERVER_STATE_CHANGED);
-		intent.putExtra(EXTRA_SERVER_RUNNING, false);
+	private void sendHostStoppedBroadcast() {
+		Intent intent = new Intent(ACTION_HOST_STATE_CHANGED);
+		intent.putExtra(EXTRA_HOST_RUNNING, false);
 		sendBroadcast(intent);
-	}
-
-
-	@Override
-	public void onClientAdded(Device device) {
-		// nothing to do
-	}
-
-
-	@Override
-	public void onGameStarted() {
-		// stop accepting new client connections --> close server socket
-		networkManager.stopServer();
-	}
-
-
-	@Override
-	public void onGameStopped() {
-		stopSelf();
 	}
 
 
 	@Override
 	protected List<Object> getModules() {
 		return Lists.<Object>newArrayList(new UiModule());
+	}
+
+
+	private final class NetworkListener implements HostNetworkListener {
+
+		@Override
+		public void onServerStartSuccess() {
+			Notification notification = notificationUtils.createOngoingNotification(
+					"Game Running",
+					"You are hosting a distributed memory game!",
+					HostGameActivity.class);
+			notificationManager.notify(NOTIFICATION_ID, notification);
+		}
+
+		@Override
+		public void onServerStartError() {
+			Toast.makeText(HostService.this, "Failed to start server!", Toast.LENGTH_LONG).show();
+			stopSelf();
+		}
+
+		@Override
+		public void onConnectedToClient(ConnectionHandler connectionHandler) {
+			hostGameManager.addDevice(connectionHandler);
+		}
+
+		@Override
+		public void onServerStoppedSuccess() {
+			// server socket is closed, nothing to do
+		}
+
+		@Override
+		public void onServerStoppedError() {
+			// server socket is closed, nothing to do
+		}
+
+	}
+
+
+	private final class GameListener implements HostGameListener {
+
+		@Override
+		public void onClientAdded(Device device) { }
+
+		@Override
+		public void onGameStarted() {
+			// stop accepting new client connections --> close server socket
+			networkManager.stopServer();
+		}
+
+		@Override
+		public void onGameStopped() {
+			stopSelf();
+		}
+
 	}
 
 }

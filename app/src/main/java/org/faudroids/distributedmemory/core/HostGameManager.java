@@ -117,6 +117,11 @@ public final class HostGameManager implements HostStateTransitionListener {
 	}
 
 
+	public boolean isGameRunning() {
+		return gameStateManager.getState() != GameState.FINISHED;
+	}
+
+
 	public List<Device> getConnectedDevices() {
 		return new LinkedList<>(devices.values());
 	}
@@ -164,11 +169,6 @@ public final class HostGameManager implements HostStateTransitionListener {
 	}
 
 
-	private boolean isGameFinished() {
-		return closedCards.size() == 0;
-	}
-
-
 	private void assertValidState(GameState state) {
 		if (!gameStateManager.getState().equals(state)) throw new IllegalStateException("must be in state " + state + " to perform this action");
 	}
@@ -186,7 +186,7 @@ public final class HostGameManager implements HostStateTransitionListener {
 				String responseMsg;
 				GameState responseState;
 
-				if (match && isGameFinished()) {
+				if (match && closedCards.size() == 0) {
 					responseMsg = Message.EVALUATION_MATCH_FINISH;
 					responseState = GameState.FINISHED;
 				} else if (match) {
