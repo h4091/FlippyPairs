@@ -1,11 +1,18 @@
 package org.faudroids.distributedmemory.ui;
 
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.text.InputType;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ListView;
+import android.widget.Toast;
 
 import com.google.common.collect.Lists;
 
@@ -13,6 +20,7 @@ import org.faudroids.distributedmemory.R;
 import org.faudroids.distributedmemory.common.BaseActivity;
 import org.faudroids.distributedmemory.utils.ServiceUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -20,6 +28,9 @@ import javax.inject.Inject;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
+import butterknife.OnItemClick;
+import butterknife.OnItemLongClick;
+import timber.log.Timber;
 
 
 public class HostGameActivity extends BaseActivity {
@@ -31,12 +42,20 @@ public class HostGameActivity extends BaseActivity {
 
 	private final BroadcastReceiver serverStateReceiver = new ServerStateBroadcastReceiver();
 
+    private ArrayList<String> playerList = new ArrayList<>();
+    private ArrayAdapter<String> adapter;
+
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_host_game);
 		ButterKnife.inject(this);
+        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, playerList);
+        ListView lv = (ListView)findViewById(R.id.playersList);
+        lv.setAdapter(adapter);
+        adapter.add("Player1");
+        adapter.add("Player2");
 	}
 
 
@@ -65,6 +84,63 @@ public class HostGameActivity extends BaseActivity {
 		Intent lobbyIntent = new Intent(this, LobbyActivity.class);
 		startActivity(lobbyIntent);
 	}
+
+
+    @OnItemLongClick(R.id.playersList)
+    public boolean removePlayer(final ListView lv, final int index) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Remove player?");
+
+        builder.setPositiveButton("Remove", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                adapter.remove(lv.getItemAtPosition(index).toString());
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        builder.show();
+        return true;
+    }
+
+
+    @OnClick(R.id.add_player)
+    public void addPlayer() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Enter player name:");
+
+        final EditText input = new EditText(this);
+        input.setInputType(InputType.TYPE_CLASS_TEXT);
+        builder.setView(input);
+
+        builder.setPositiveButton("Add", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String playerName = input.getText().toString();
+                if(!playerName.isEmpty()) {
+                    adapter.add(playerName);
+                } else {
+                    Toast errorToast = Toast.makeText(getApplicationContext(),
+                            "Discarded invalid input!",
+                            Toast.LENGTH_SHORT);
+				errorToast.show();
+                }
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        builder.show();
+    }
 
 
 	@OnClick(R.id.stop_hosting)
