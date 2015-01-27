@@ -18,6 +18,9 @@ import com.google.common.collect.Lists;
 
 import org.faudroids.distributedmemory.R;
 import org.faudroids.distributedmemory.common.BaseActivity;
+import org.faudroids.distributedmemory.core.HostGameManager;
+import org.faudroids.distributedmemory.core.Player;
+import org.faudroids.distributedmemory.core.PlayerListListener;
 import org.faudroids.distributedmemory.utils.ServiceUtils;
 
 import java.util.ArrayList;
@@ -31,9 +34,11 @@ import butterknife.OnClick;
 import butterknife.OnItemLongClick;
 
 
-public class HostGameActivity extends BaseActivity {
+public class HostGameActivity extends BaseActivity implements PlayerListListener {
 
 	@Inject ServiceUtils serviceUtils;
+    @Inject
+    HostGameManager hostGameManager;
 
 	@InjectView(R.id.start_hosting) Button startHostingButton;
 	@InjectView(R.id.stop_hosting) Button stopHostingButton;
@@ -52,8 +57,6 @@ public class HostGameActivity extends BaseActivity {
         adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, playerList);
         ListView lv = (ListView)findViewById(R.id.playersList);
         lv.setAdapter(adapter);
-        adapter.add("Player1");
-        adapter.add("Player2");
 	}
 
 
@@ -62,12 +65,14 @@ public class HostGameActivity extends BaseActivity {
 		super.onResume();
 		registerReceiver(serverStateReceiver, new IntentFilter(HostService.ACTION_HOST_STATE_CHANGED));
 		toggleStartStopButtons(serviceUtils.isServiceRunning(HostService.class));
+        hostGameManager.registerPlayerListListener(this);
 	}
 
 
 	@Override
 	public void onPause() {
 		unregisterReceiver(serverStateReceiver);
+        hostGameManager.unregisterPlayerListListener();
 		super.onPause();
 	}
 
@@ -108,7 +113,7 @@ public class HostGameActivity extends BaseActivity {
         builder.setPositiveButton("Remove", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                adapter.remove(lv.getItemAtPosition(index).toString());
+                hostGameManager.removePlayer(index);
             }
         });
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -137,7 +142,7 @@ public class HostGameActivity extends BaseActivity {
             public void onClick(DialogInterface dialog, int which) {
                 String playerName = input.getText().toString();
                 if(!playerName.isEmpty()) {
-                    adapter.add(playerName);
+                    hostGameManager.addPlayer(playerName);
                 } else {
                     Toast errorToast = Toast.makeText(getApplicationContext(),
                             "Discarded invalid input!",
@@ -174,7 +179,18 @@ public class HostGameActivity extends BaseActivity {
 	}
 
 
-	private class ServerStateBroadcastReceiver extends BroadcastReceiver {
+    @Override
+    public void onListChanged() {
+        List<Player> players = hostGameManager.getPlayers();
+        adapter.clear();
+
+        for(Player p : players) {
+            adapter.add(p.getName());
+        }
+    }
+
+
+    private class ServerStateBroadcastReceiver extends BroadcastReceiver {
 
 		@Override
 		public void onReceive(Context context, Intent intent) {
