@@ -23,9 +23,9 @@ import timber.log.Timber;
 
 
 @Singleton
-public final class HostGameManager implements HostStateTransition.TransitionListener {
+public final class HostGameManager implements HostStateTransitionListener {
 
-	private final GameStateManager gameStateManager;
+	private final HostGameStateManager gameStateManager;
 
 	private final Map<Integer, Card> closedCards = new HashMap<>();
 	private final List<Card> selectedCards = new LinkedList<>();
@@ -34,17 +34,15 @@ public final class HostGameManager implements HostStateTransition.TransitionList
 	private final TreeMap<Integer, ConnectionHandler> connectionHandlers = new TreeMap<>();
 	private final TreeMap<Integer, Device> devices = new TreeMap<>();
 
-	private HostStateTransition stateTransition = null; // no transition in progress
-
-    private HostGameListener hostGameListener;
-
 	// used to postpone execution of tasks until method is finished (dirty hack?!)
 	private final Handler handler = new Handler(Looper.getMainLooper());
 
+	private HostGameListener hostGameListener = null;
 
 	@Inject
-	public HostGameManager(GameStateManager gameStateManager) {
+	public HostGameManager(HostGameStateManager gameStateManager) {
 		this.gameStateManager = gameStateManager;
+		this.gameStateManager.registerStateTransitionListener(this);
 	}
 
 
@@ -205,20 +203,12 @@ public final class HostGameManager implements HostStateTransition.TransitionList
 
 
 	private void transitionState(GameState nextState, String message) {
-		transitionState(nextState, new BroadcastMessage(connectionHandlers.values(), message));
+		gameStateManager.startStateTransition(new BroadcastMessage(connectionHandlers.values(), message), nextState);
 	}
 
 
 	private void transitionState(GameState nextState, List<String> messages) {
-		transitionState(nextState, new BroadcastMessage(connectionHandlers.values(), messages));
-	}
-
-
-	private void transitionState(GameState nextState, BroadcastMessage broadcastMessage) {
-		Assert.assertTrue(stateTransition == null || stateTransition.isComplete(), "previous state transition not yet finished!");
-		Timber.d("Starting host game state transition to " + nextState);
-		stateTransition = new HostStateTransition(this, nextState, broadcastMessage);
-		stateTransition.startTransition();
+		gameStateManager.startStateTransition(new BroadcastMessage(connectionHandlers.values(), messages), nextState);
 	}
 
 
@@ -237,7 +227,7 @@ public final class HostGameManager implements HostStateTransition.TransitionList
 
 			// if ack than take note and do nothing
 			if (msg.equals(Message.ACK)) {
-				if (stateTransition.onAckReceived()) stateTransition = null;
+				gameStateManager.onAckReceived();
 				return;
 			}
 

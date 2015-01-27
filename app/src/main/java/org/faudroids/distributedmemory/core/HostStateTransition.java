@@ -14,11 +14,11 @@ final class HostStateTransition {
 	// Used to postpone callbacks to the listener
 	private static final Handler handler = new Handler(Looper.myLooper());
 
-	private final TransitionListener transitionListener;
+	private final HostStateTransitionListener transitionListener;
 	private final GameState nextState;
 	private final BroadcastMessage broadcastMessage;
 
-	public HostStateTransition(TransitionListener transitionListener, GameState nextState, BroadcastMessage broadcastMessage) {
+	public HostStateTransition(HostStateTransitionListener transitionListener, GameState nextState, BroadcastMessage broadcastMessage) {
 		this.transitionListener = transitionListener;
 		this.nextState = nextState;
 		this.broadcastMessage = broadcastMessage;
@@ -47,15 +47,4 @@ final class HostStateTransition {
 	}
 
 
-	/**
-	 * Called whenever the current state transition has finished.
-	 */
-	public static interface TransitionListener {
-
-		/**
-		 * @param nextState the next state that was associated with the transition.
-		 */
-		public void onTransitionFinished(GameState nextState);
-
-	}
 }

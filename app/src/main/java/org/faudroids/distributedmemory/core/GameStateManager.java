@@ -5,7 +5,7 @@ import org.faudroids.distributedmemory.utils.Assert;
 
 import javax.inject.Inject;
 
-public final class GameStateManager {
+class GameStateManager {
 
 	private GameState currentState;
 
@@ -15,12 +15,15 @@ public final class GameStateManager {
 	}
 
 
-	public GameState getState() {
+	public final GameState getState() {
 		return currentState;
 	}
 
 
-	public void changeState(GameState state) {
+	/**
+	 * Sets the new local game state.
+	 */
+	public final void changeState(GameState state) {
 		Assert.assertTrue(currentState.isValidNextState(state), "cannot change state from " + currentState + " to " + state);
 		this.currentState = state;
 	}
