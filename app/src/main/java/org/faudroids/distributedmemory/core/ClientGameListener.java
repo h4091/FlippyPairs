@@ -1,8 +1,6 @@
 package org.faudroids.distributedmemory.core;
 
 
-import java.util.List;
-
 public interface ClientGameListener {
 
 	/**
@@ -33,16 +31,15 @@ public interface ClientGameListener {
 
 
 	/**
-	 * Called when the (final) leader board (which shows the winning players))
-	 * becomes available. Usually called right before a game stops.
+	 * Called when a new round is about to start.
 	 */
-	public void onLeaderBoardAvailable(List<Player> players);
+	public void onNewRound();
 
 
 	/**
-	 * Called once when the game has stopped.
+	 * Called once when the game has finished (no errors).
 	 */
-	public void onGameStopped();
+	public void onGameFinished();
 
 
 	/**

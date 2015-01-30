@@ -30,6 +30,7 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 
 	private int currentPlayerIdx;
 	private final List<Player> players = new LinkedList<>();
+	private final List<Integer> playerPoints = new LinkedList<>();
 
 	private final MessageWriter messageWriter;
 	private final MessageReader messageReader;
@@ -54,7 +55,6 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 		closedCards.clear();
 		matchedCards.clear();
 		selectedCards.clear();
-		players.clear();
 	}
 
 
@@ -93,9 +93,19 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 	}
 
 
+	public List<Player> getPlayers() {
+		return players;
+	}
+
+
+	public List<Integer> getPlayerPoints() {
+		return playerPoints;
+	}
+
+
 	public void stopGame() {
 		if (connectionHandler != null) connectionHandler.stop();
-		for (ClientGameListener listener : clientGameListeners) listener.onGameStopped();
+		for (ClientGameListener listener : clientGameListeners) listener.onGameFinished();
 	}
 
 
@@ -135,11 +145,14 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 				}
 
 				currentPlayerIdx = setupInfo.getStartingPlayerIdx();
+				players.clear();
 				players.addAll(setupInfo.getPlayers());
+				for (int i = 0; i < players.size(); ++i) playerPoints.add(0);
 
                 connectionHandler.sendMessage(messageWriter.createAck());
 				for (ClientGameListener listener : clientGameListeners) listener.onGameStarted();
 				gameStateManager.changeState(GameState.SELECT_1ST_CARD);
+				for (ClientGameListener listener : clientGameListeners) listener.onNewRound();
 				break;
 
 			case SELECT_1ST_CARD:
@@ -159,7 +172,11 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 			case UPDATE_CARDS:
                 Timber.d("Result: " + msg);
 				Evaluation evaluation = messageReader.readEvaluation(msg);
+
+				// update players
 				currentPlayerIdx = evaluation.getNextPlayerId();
+				playerPoints.clear();
+				playerPoints.addAll(evaluation.getPlayerPoints());
 
 				// update cards
 				if (evaluation.getCardsMatched()) {
@@ -181,7 +198,6 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 				// change state
 				if (!evaluation.getContinueGame()) {
 					gameStateManager.changeState(GameState.FINISHED);
-					for (ClientGameListener listener : clientGameListeners) listener.onLeaderBoardAvailable(evaluation.getWinners());
 					// delay closing of connection such that server can receive ack
 					handler.postDelayed(new Runnable() {
 						@Override
@@ -191,6 +207,7 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 					}, 100);
 				} else {
 					gameStateManager.changeState(GameState.SELECT_1ST_CARD);
+					for (ClientGameListener listener : clientGameListeners) listener.onNewRound();
 				}
 
 				connectionHandler.sendMessage(messageWriter.createAck());

@@ -202,17 +202,19 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 
 
 	@Override
-	public void onLeaderBoardAvailable(List<Player> players) {
+	public void onNewRound() {
+		List<Player> players = clientGameManager.getPlayers();
+		List<Integer> playerPoints = clientGameManager.getPlayerPoints();
 		StringBuilder builder = new StringBuilder();
-		for (Player player : players) {
-			builder.append(player.getName()).append(" ");
+		for (int i = 0; i < players.size(); ++i) {
+			builder.append(players.get(i)).append(" (").append(playerPoints.get(i)).append(")");
 		}
 		Toast.makeText(this, builder.toString(), Toast.LENGTH_LONG).show();
 	}
 
 
 	@Override
-	public void onGameStopped() {
+	public void onGameFinished() {
 		Toast.makeText(this, "Game over!", Toast.LENGTH_LONG).show();
 	}
 

@@ -11,7 +11,7 @@ final class Evaluation {
 	private final boolean cardsMatched;
 	private final boolean continueGame;
 	private final int nextPlayerId;
-	private final List<Player> winners;
+	private final List<Integer> playerPoints; // mapped to index of players list
 
 
 	@JsonCreator
@@ -19,12 +19,12 @@ final class Evaluation {
 			@JsonProperty("cardsMatched") boolean cardsMatched,
 			@JsonProperty("continueGame") boolean continueGame,
 			@JsonProperty("nextPlayerId") int nextPlayerId,
-			@JsonProperty("winners") List<Player> winners) {
+			@JsonProperty("playerPoints") List<Integer> playerPoints) {
 
 		this.cardsMatched = cardsMatched;
 		this.continueGame = continueGame;
 		this.nextPlayerId = nextPlayerId;
-		this.winners = winners;
+		this.playerPoints = playerPoints;
 	}
 
 
@@ -43,8 +43,8 @@ final class Evaluation {
 	}
 
 
-	public List<Player> getWinners() {
-		return winners;
+	public List<Integer> getPlayerPoints() {
+		return playerPoints;
 	}
 
 }
