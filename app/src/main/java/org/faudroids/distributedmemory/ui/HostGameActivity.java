@@ -1,7 +1,6 @@
 package org.faudroids.distributedmemory.ui;
 
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.NumberPicker;
@@ -56,8 +55,9 @@ public class HostGameActivity extends BaseActivity {
 
 	@OnClick(R.id.start_hosting)
 	public void startHosting() {
+		hostGameManager.initGame();
         NumberPicker np = (NumberPicker)findViewById(R.id.playerCountPicker);
-        for(int i=0; i<np.getValue(); ++i) {
+        for(int i=0; i < np.getValue(); ++i) {
             hostGameManager.addPlayer(new Player(i, "Player" + (i + 1)));
         }
         Intent hostIntent = new Intent(this, HostService.class);

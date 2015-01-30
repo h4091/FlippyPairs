@@ -62,7 +62,7 @@ public final class HostGameManager implements HostStateTransitionListener {
 		matchedCards.clear();
 		connectionHandlers.clear();
 		devices.clear();
-        // players.clear();
+        players.clear();
         playerPoints.clear();
 	}
 
