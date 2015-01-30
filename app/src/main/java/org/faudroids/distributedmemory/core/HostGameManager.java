@@ -281,7 +281,7 @@ public final class HostGameManager implements HostStateTransitionListener {
 					String[] tokens = msg.split(" ");
 					String deviceName = tokens[0];
 					int pairsCount = Integer.valueOf(tokens[1]);
-					Device device = new Device(deviceId, deviceName, pairsCount);
+					Device device = new Device(deviceName, pairsCount);
 					devices.put(deviceId, device);
 					for (HostGameListener listener : hostGameListeners) listener.onClientAdded(device);
 					break;

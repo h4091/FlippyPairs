@@ -59,7 +59,7 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 		assertValidState(GameState.CONNECTING);
 
 		this.connectionHandler = connectionHandler;
-		this.device = new Device(0, deviceName, pairsCount); // dummy id, not needed on client side
+		this.device = new Device(deviceName, pairsCount);
 
 		connectionHandler.registerMessageListener(this, new Handler(Looper.myLooper()));
 		connectionHandler.start();
