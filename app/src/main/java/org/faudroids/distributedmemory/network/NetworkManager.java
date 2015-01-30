@@ -24,14 +24,20 @@ public final class NetworkManager {
 
 	private final NsdManager nsdManager;
 	private final HostSocketHandler hostSocketHandler;
+	private final ConnectionHandlerFactory connectionHandlerFactory;
 
 	private NsdManager.RegistrationListener serviceRegistrationListener;
 	private NsdManager.DiscoveryListener discoveryListener;
 
 	@Inject
-	public NetworkManager(NsdManager nsdManager, HostSocketHandler hostSocketHandler) {
+	public NetworkManager(
+			NsdManager nsdManager,
+			HostSocketHandler hostSocketHandler,
+			ConnectionHandlerFactory connectionHandlerFactory) {
+
 		this.nsdManager = nsdManager;
 		this.hostSocketHandler = hostSocketHandler;
+		this.connectionHandlerFactory = connectionHandlerFactory;
 	}
 
 
@@ -43,7 +49,7 @@ public final class NetworkManager {
 				@Override
 				public void onClientConnected(Socket socket) {
 					try {
-						final ConnectionHandler<String> connectionHandler = new StringConnectionHandler(socket);
+						final ConnectionHandler<String> connectionHandler = connectionHandlerFactory.createStringConnectionHandler(socket);
 						handler.post(new Runnable() {
 							@Override
 							public void run() {
@@ -110,7 +116,7 @@ public final class NetworkManager {
 			@Override
 			public void run() {
 				try {
-					final ConnectionHandler<String> connectionHandler = new StringConnectionHandler(hostInfo.getAddress(), hostInfo.getPort());
+					final ConnectionHandler<String> connectionHandler = connectionHandlerFactory.createStringConnectionHandler(hostInfo.getAddress(), hostInfo.getPort());
 					handler.post(new Runnable() {
 						@Override
 						public void run() {
