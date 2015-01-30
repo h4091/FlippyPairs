@@ -39,6 +39,10 @@ public final class HostGameManager implements HostStateTransitionListener {
 	private final List<HostGameListener> hostGameListeners = new LinkedList<>();
 	private PlayerListListener playerListListener;
 
+    private int currentPlayer;
+    private int totalPlayers;
+    private TreeMap<Integer, Integer> playerPoints = new TreeMap<>();
+
 	// used to postpone execution of tasks that should run on the same thread (UI / main thread)
 	private final Handler handler = new Handler(Looper.getMainLooper());
 
@@ -56,6 +60,8 @@ public final class HostGameManager implements HostStateTransitionListener {
 		matchedCards.clear();
 		connectionHandlers.clear();
 		devices.clear();
+        players.clear();
+        playerPoints.clear();
 	}
 
 
@@ -84,21 +90,28 @@ public final class HostGameManager implements HostStateTransitionListener {
 		gameStateManager.changeState(GameState.SETUP); // manual new game state, no ack from clients required
 		for (HostGameListener listener : hostGameListeners) listener.onGameStarted();
 
+        // setup players
+        totalPlayers = players.size();
+        currentPlayer = 0;
+        for(Player p : players.values()) {
+            playerPoints.put(p.getId(), 0);
+        }
+
 		// setup cards locally
 		int pairsCount = 0;
 		for (Device device : devices.values()) pairsCount += device.getPairsCount();
         Timber.i("Pairs: " + pairsCount);
-		Random rand = new Random();
+		//Random rand = new Random();
 		int cardId = 0;
         for(int i = 0; i < pairsCount; ++i) {
-            int randomValue = rand.nextInt(pairsCount);
-			closedCards.put(cardId, new Card(cardId, randomValue));
+            //int randomValue = rand.nextInt(pairsCount*3);
+			closedCards.put(cardId, new Card(cardId, i));
 			++cardId;
-			closedCards.put(cardId, new Card(cardId, randomValue));
+			closedCards.put(cardId, new Card(cardId, i));
 			++cardId;
 
-            Timber.i("Added card " + randomValue + " (" + (cardId - 2) + ")");
-			Timber.i("Added card " + randomValue + " (" + (cardId - 1) + ")");
+            Timber.i("Added card " + i + " (" + (cardId - 2) + ")");
+			Timber.i("Added card " + i + " (" + (cardId - 1) + ")");
         }
 
 		// TODO race condition between connections being added and clients sending device info
@@ -198,6 +211,28 @@ public final class HostGameManager implements HostStateTransitionListener {
 	}
 
 
+    /**
+     * Estimates the highest score and returns the corresponding player id.
+     * @return Positive value if there's a winner, -1 if it's a draw.
+     */
+    private int estimateWinner() {
+        int maxValue = Collections.max(playerPoints.values());
+        int winner = 0;
+        boolean alreadyFound = false;
+        for(int i=0; i<playerPoints.values().size(); ++i) {
+            if(playerPoints.get(i)==maxValue && alreadyFound==false) {
+                winner = i;
+                alreadyFound=true;
+            } else if(playerPoints.get(i)==maxValue && alreadyFound==true) {
+                winner = -1;
+                return winner;
+            }
+        }
+
+        return winner;
+    }
+
+
 	private void assertValidState(GameState state) {
 		if (!gameStateManager.getState().equals(state)) throw new IllegalStateException("must be in state " + state + " to perform this action");
 	}
@@ -207,26 +242,36 @@ public final class HostGameManager implements HostStateTransitionListener {
 	public void onTransitionFinished(GameState nextState) {
 		Timber.d("Finished host game state transition to " + nextState);
 		gameStateManager.changeState(nextState);
+        StringBuilder msgBuilder = new StringBuilder();
 
 		switch (nextState) {
 			case UPDATE_CARDS:
 				// once all clients have acked the last selected card evaluate selection
 				boolean match = evaluateCardSelection();
-				String responseMsg;
 				GameState responseState;
 
 				if (match && closedCards.size() == 0) {
-					responseMsg = Message.EVALUATION_MATCH_FINISH;
+					msgBuilder.append(Message.EVALUATION_MATCH_FINISH);
+                    int points = playerPoints.containsKey(currentPlayer) ? playerPoints.get
+                            (currentPlayer) : 0;
+                    playerPoints.put(currentPlayer, ++points);
+                    int winner = estimateWinner();
+                    msgBuilder.append(" "+winner);
 					responseState = GameState.FINISHED;
 				} else if (match) {
-					responseMsg = Message.EVALUATION_MATCH_CONTINUE;
+					msgBuilder.append(Message.EVALUATION_MATCH_CONTINUE).append(" "+currentPlayer);
+                    int points = playerPoints.containsKey(currentPlayer) ? playerPoints.get
+                            (currentPlayer) : 0;
+                    playerPoints.put(currentPlayer, ++points);
 					responseState = GameState.SELECT_1ST_CARD;
 				} else {
-					responseMsg = Message.EVALUATION_MISS;
+                    ++currentPlayer;
+                    currentPlayer%=totalPlayers;
+					msgBuilder.append(Message.EVALUATION_MISS).append(" "+currentPlayer);
 					responseState = GameState.SELECT_1ST_CARD;
 				}
 
-				transitionState(responseState, responseMsg);
+				transitionState(responseState, msgBuilder.toString());
 				Timber.d("Remaining open pairs: " + closedCards.size()/2);
 				break;
 
@@ -254,8 +299,8 @@ public final class HostGameManager implements HostStateTransitionListener {
     }
 
 
-    public void removePlayer(int id) {
-        this.players.remove(id);
+    public void removePlayer(Player person) {
+        this.players.remove(person.getId());
         playerListListener.onListChanged();
     }
 
