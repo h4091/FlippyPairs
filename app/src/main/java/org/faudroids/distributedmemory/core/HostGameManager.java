@@ -206,8 +206,6 @@ public final class HostGameManager implements HostStateTransitionListener {
 	@Override
 	public void onTransitionFinished(GameState nextState) {
 		Timber.d("Finished host game state transition to " + nextState);
-		gameStateManager.changeState(nextState);
-
 		switch (nextState) {
 			case UPDATE_CARDS:
 				// once all clients have acked the last selected card evaluate selection

@@ -50,6 +50,7 @@ final class HostGameStateManager extends GameStateManager {
 		stateTransition = new HostStateTransition(new HostStateTransitionListener() {
 			@Override
 			public void onTransitionFinished(GameState nextState) {
+				changeState(nextState);
 				if (stateTransitionListener != null) stateTransitionListener.onTransitionFinished(nextState);
 			}
 		},  nextState,  broadcastMessage);
