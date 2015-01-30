@@ -1,5 +1,7 @@
 package org.faudroids.distributedmemory.core;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Objects;
 
 public class Player {
@@ -7,10 +9,14 @@ public class Player {
     private final String name;
     private final int id;
 
-    Player(int id, String name) {
-        this.name = name;
-        this.id = id;
-    }
+	@JsonCreator
+    Player(
+			@JsonProperty("id") int id,
+			@JsonProperty("name") String name) {
+
+		this.id = id;
+		this.name = name;
+	}
 
 
 	public int getId() {

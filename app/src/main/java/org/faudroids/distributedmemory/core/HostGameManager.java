@@ -283,8 +283,6 @@ public final class HostGameManager implements HostStateTransitionListener {
 					responseMsg = messageWriter.createEvaluationMessage(false, players.get(currentPlayerIdx).getId());
 					responseState = GameState.SELECT_1ST_CARD;
 				}
-
-				transitionState(responseState, responseMsg);
 				Timber.d("Remaining open pairs: " + closedCards.size()/2);
 				break;
 
