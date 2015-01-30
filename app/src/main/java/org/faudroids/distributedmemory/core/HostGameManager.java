@@ -54,6 +54,7 @@ public final class HostGameManager implements HostStateTransitionListener {
 		this.gameStateManager.registerStateTransitionListener(this);
 		this.messageWriter = messageWriter;
 		this.messageReader = messageReader;
+        setupPlayers();
 	}
 
 
@@ -67,6 +68,11 @@ public final class HostGameManager implements HostStateTransitionListener {
         // players.clear();
         playerPoints.clear();
 	}
+
+    private void setupPlayers() {
+        players.add(0, new Player(0, "Player1"));
+        players.add(1, new Player(1, "Player2"));
+    }
 
 
 	/**

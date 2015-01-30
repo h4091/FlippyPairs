@@ -63,8 +63,7 @@ public class HostGameActivity extends BaseActivity implements PlayerListListener
 		registerReceiver(serverStateReceiver, new IntentFilter(HostService.ACTION_HOST_STATE_CHANGED));
 		toggleStartStopButtons(serviceUtils.isServiceRunning(HostService.class));
         hostGameManager.registerPlayerListListener(this);
-		adapter.clear();
-		adapter.addAll(hostGameManager.getPlayers());
+        onListChanged();
 	}
 
 
