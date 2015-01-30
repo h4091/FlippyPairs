@@ -122,28 +122,7 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 	@Override
 	public void onGameStarted() {
 		// setup cards
-		cards.clear();
-		cards.addAll(clientGameManager.getClosedCards().values());
-		Collections.sort(cards, new Comparator<Card>() {
-			@Override
-			public int compare(Card lhs, Card rhs) {
-				return Integer.valueOf(lhs.getId()).compareTo(rhs.getId());
-			}
-		});
-
-
-		int xIdx = 0, yIdx = 0;
-		int columns = gridLayout.getColumnCount();
-		for (Card card : cards) {
-			Button button = (Button) gridLayout.getChildAt(xIdx + yIdx * columns);
-			button.setTag(R.id.cardId, card.getId());
-			button.setText(card.getValue() + " (" + card.getId() + ")");
-			++xIdx;
-			if (xIdx >= columns) {
-				xIdx = 0;
-				++yIdx;
-			}
-		}
+		onCardsChanged();
 
 		// cancel waiting dialog
 		waitingForHostDialog.cancel();
@@ -153,14 +132,26 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 
 	@Override
 	public void onCardsChanged() {
+		cards.clear();
 		Map<Integer, Card> matchedCards = clientGameManager.getMatchedCards();
 		Map<Integer, Card> selectedCards = clientGameManager.getSelectedCards();
+		cards.addAll(clientGameManager.getClosedCards().values());
+		cards.addAll(matchedCards.values());
+		cards.addAll(selectedCards.values());
+		Collections.sort(cards, new Comparator<Card>() {
+			@Override
+			public int compare(Card lhs, Card rhs) {
+				return Integer.valueOf(lhs.getId()).compareTo(rhs.getId());
+			}
+		});
 
 		// iterate over all cards and update UI accordingly
 		int xIdx = 0, yIdx = 0;
 		int columns = gridLayout.getColumnCount();
 		for (Card card : cards) {
 			Button button = (Button) gridLayout.getChildAt(xIdx + yIdx * columns);
+			button.setTag(R.id.cardId, card.getId());
+			button.setText(card.getValue() + " (" + card.getId() + ")");
 			if (matchedCards.containsKey(card.getId()) || selectedCards.containsKey(card.getId())) {
 				button.setEnabled(false);
 			} else {

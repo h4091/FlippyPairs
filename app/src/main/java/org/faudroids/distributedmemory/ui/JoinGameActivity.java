@@ -2,7 +2,6 @@ package org.faudroids.distributedmemory.ui;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
@@ -13,9 +12,7 @@ import android.widget.Toast;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Lists;
 
-import org.faudroids.distributedmemory.R;
 import org.faudroids.distributedmemory.common.BaseListActivity;
-import org.faudroids.distributedmemory.core.ClientGameManager;
 import org.faudroids.distributedmemory.network.ClientNetworkListener;
 import org.faudroids.distributedmemory.network.ConnectionHandler;
 import org.faudroids.distributedmemory.network.HostInfo;
@@ -28,7 +25,7 @@ import javax.inject.Inject;
 
 public class JoinGameActivity extends BaseListActivity implements ClientNetworkListener<JsonNode> {
 
-	@Inject ClientGameManager clientGameManager;
+	@Inject ClientUtils clientUtils;
 	@Inject NetworkManager networkManager;
 	private ArrayAdapter<HostInfo> adapter;
 	private ProgressDialog connectingToHostDialog;
@@ -94,11 +91,7 @@ public class JoinGameActivity extends BaseListActivity implements ClientNetworkL
 		connectingToHostDialog.cancel();
 		connectingToHostDialog = null;
 
-		int cardsCount = getResources().getInteger(R.integer.grid_column_count)
-				* getResources().getInteger(R.integer.grid_row_count);
-
-		clientGameManager.initGame();
-		clientGameManager.registerDevice(connectionHandler, Build.DEVICE, cardsCount / 2);
+		clientUtils.setupClient(connectionHandler);
 
 		Intent intent = new Intent(this, GameActivity.class);
 		startActivity(intent);

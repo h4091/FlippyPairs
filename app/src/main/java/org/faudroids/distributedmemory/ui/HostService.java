@@ -6,6 +6,7 @@ import android.app.NotificationManager;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.widget.Toast;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -16,6 +17,7 @@ import org.faudroids.distributedmemory.core.ClientGameManager;
 import org.faudroids.distributedmemory.core.Device;
 import org.faudroids.distributedmemory.core.HostGameListener;
 import org.faudroids.distributedmemory.core.HostGameManager;
+import org.faudroids.distributedmemory.network.ClientNetworkListener;
 import org.faudroids.distributedmemory.network.ConnectionHandler;
 import org.faudroids.distributedmemory.network.HostInfo;
 import org.faudroids.distributedmemory.network.HostNetworkListener;
@@ -42,6 +44,7 @@ public final class HostService extends BaseService {
 	@Inject NotificationUtils notificationUtils;
 	@Inject HostGameManager hostGameManager;
 	@Inject ClientGameManager clientGameManager;
+	@Inject ClientUtils clientUtils;
 
 
 	@Override
@@ -104,15 +107,19 @@ public final class HostService extends BaseService {
 	}
 
 
-	private final class NetworkListener implements HostNetworkListener<JsonNode> {
+	private final class NetworkListener implements HostNetworkListener<JsonNode>, ClientNetworkListener<JsonNode> {
 
 		@Override
 		public void onServerStartSuccess(HostInfo hostInfo) {
+			// start host notification
 			Notification notification = notificationUtils.createOngoingNotification(
 					"Game Running",
 					"You are hosting a distributed memory game!",
 					HostGameActivity.class);
 			notificationManager.notify(NOTIFICATION_ID, notification);
+
+			// start local client
+			networkManager.connectToHost(hostInfo, this, new Handler(Looper.getMainLooper()));
 		}
 
 		@Override
@@ -136,6 +143,31 @@ public final class HostService extends BaseService {
 			// server socket is closed, nothing to do
 		}
 
+		@Override
+		public void onServiceDiscovered(HostInfo hostInfo) {
+			// not used since there is no discovery for the local client
+		}
+
+		@Override
+		public void onServiceLost(String hostName) {
+			// not used since there is no discovery for the local client
+		}
+
+		@Override
+		public void onServiceDiscoveryError() {
+			// not used since there is no discovery for the local client
+		}
+
+		@Override
+		public void onConnectedToHostSuccess(ConnectionHandler<JsonNode> connectionHandler) {
+			clientUtils.setupClient(connectionHandler);
+		}
+
+		@Override
+		public void onConnectedToHostError() {
+			Toast.makeText(HostService.this, "Failed to join game!", Toast.LENGTH_LONG).show();
+			stopSelf();
+		}
 	}
 
 

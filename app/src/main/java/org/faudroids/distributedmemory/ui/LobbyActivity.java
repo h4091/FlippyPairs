@@ -1,5 +1,6 @@
 package org.faudroids.distributedmemory.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -79,7 +80,8 @@ public class LobbyActivity extends BaseActivity implements  HostGameListener {
 
 	@Override
 	public void onGameStarted() {
-		// TODO go to client screen?
+		Intent intent = new Intent(this, GameActivity.class);
+		startActivity(intent);
 	}
 
 
