@@ -10,7 +10,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import org.faudroids.distributedmemory.utils.Assert;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.Socket;
+import java.net.UnknownHostException;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -70,7 +72,7 @@ public final class NetworkManager {
 			serviceInfo.setServiceType(SERVICE_TYPE);
 			serviceInfo.setPort(serverPort);
 
-			serviceRegistrationListener = new RegistrationListener(fullServiceName, hostNetworkListener, handler);
+			serviceRegistrationListener = new RegistrationListener(fullServiceName, serverPort, hostNetworkListener, handler);
 			nsdManager.registerService(serviceInfo, NsdManager.PROTOCOL_DNS_SD, serviceRegistrationListener);
 
 		} catch (IOException ioe) {
@@ -142,26 +144,40 @@ public final class NetworkManager {
 	private static final class RegistrationListener implements NsdManager.RegistrationListener {
 
 		private final String serviceName;
+		private final int serverPort;
 		private final HostNetworkListener hostNetworkListener;
 		private final Handler handler;
 
-		public RegistrationListener(String serviceName, HostNetworkListener hostNetworkListener, Handler handler) {
+		public RegistrationListener(String serviceName, int serverPort, HostNetworkListener hostNetworkListener, Handler handler) {
 			this.serviceName = serviceName;
+			this.serverPort = serverPort;
 			this.hostNetworkListener = hostNetworkListener;
 			this.handler = handler;
 		}
 
 
 		@Override
-		public void onServiceRegistered(NsdServiceInfo serviceInfo) {
+		public void onServiceRegistered(final NsdServiceInfo serviceInfo) {
 			Timber.i("Service registration success");
 			if (serviceInfo.getServiceName().equals(serviceName)) {
-				handler.post(new Runnable() {
-					@Override
-					public void run() {
-						hostNetworkListener.onServerStartSuccess();
-					}
-				});
+				try {
+					final InetAddress localHost = InetAddress.getLocalHost();
+					handler.post(new Runnable() {
+						@Override
+						public void run() {
+							HostInfo hostInfo = new HostInfo(serviceName, localHost, serverPort);
+							hostNetworkListener.onServerStartSuccess(hostInfo);
+						}
+					});
+				} catch (UnknownHostException uhe) {
+					Timber.e("failed to get local host name", uhe);
+					handler.post(new Runnable() {
+						@Override
+						public void run() {
+							hostNetworkListener.onServerStartError();
+						}
+					});
+				}
 			} else {
 				Timber.e("Registered service name did not match");
 				handler.post(new Runnable() {

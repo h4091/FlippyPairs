@@ -12,10 +12,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Lists;
 
 import org.faudroids.distributedmemory.common.BaseService;
+import org.faudroids.distributedmemory.core.ClientGameManager;
 import org.faudroids.distributedmemory.core.Device;
 import org.faudroids.distributedmemory.core.HostGameListener;
 import org.faudroids.distributedmemory.core.HostGameManager;
 import org.faudroids.distributedmemory.network.ConnectionHandler;
+import org.faudroids.distributedmemory.network.HostInfo;
 import org.faudroids.distributedmemory.network.HostNetworkListener;
 import org.faudroids.distributedmemory.network.NetworkManager;
 import org.faudroids.distributedmemory.utils.NotificationUtils;
@@ -39,6 +41,7 @@ public final class HostService extends BaseService {
 	@Inject NotificationManager notificationManager;
 	@Inject NotificationUtils notificationUtils;
 	@Inject HostGameManager hostGameManager;
+	@Inject ClientGameManager clientGameManager;
 
 
 	@Override
@@ -104,7 +107,7 @@ public final class HostService extends BaseService {
 	private final class NetworkListener implements HostNetworkListener<JsonNode> {
 
 		@Override
-		public void onServerStartSuccess() {
+		public void onServerStartSuccess(HostInfo hostInfo) {
 			Notification notification = notificationUtils.createOngoingNotification(
 					"Game Running",
 					"You are hosting a distributed memory game!",
