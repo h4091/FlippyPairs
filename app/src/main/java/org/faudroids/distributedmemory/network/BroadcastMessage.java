@@ -7,23 +7,23 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
-public final class BroadcastMessage {
+public final class BroadcastMessage<T> {
 
-	private final List<ConnectionHandler> connectionHandlers = new LinkedList<>();
-	private final List<String> messages = new LinkedList<>();
+	private final List<ConnectionHandler<T>> connectionHandlers = new LinkedList<>();
+	private final List<T> messages = new LinkedList<>();
 
 	private int ackCount = 0;
 	private boolean messageSent = false;
 
 
-	public BroadcastMessage(Collection<ConnectionHandler> connectionHandlers, List<String> messages) {
+	public BroadcastMessage(Collection<ConnectionHandler<T>> connectionHandlers, List<T> messages) {
 		Assert.assertEquals(connectionHandlers.size(), messages.size(), "messages size must be equal to number of connections");
 		this.connectionHandlers.addAll(connectionHandlers);
 		this.messages.addAll(messages);
 	}
 
 
-	public BroadcastMessage(Collection<ConnectionHandler> connectionHandlers, String message) {
+	public BroadcastMessage(Collection<ConnectionHandler<T>> connectionHandlers, T message) {
 		this.connectionHandlers.addAll(connectionHandlers);
 		for (int i = 0; i < connectionHandlers.size(); ++i) messages.add(message);
 	}

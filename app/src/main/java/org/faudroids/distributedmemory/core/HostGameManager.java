@@ -33,7 +33,7 @@ public final class HostGameManager implements HostStateTransitionListener {
 
     private final Map<Integer, Player> players = new HashMap<>();
 
-	private final TreeMap<Integer, ConnectionHandler> connectionHandlers = new TreeMap<>();
+	private final TreeMap<Integer, ConnectionHandler<String>> connectionHandlers = new TreeMap<>();
 	private final TreeMap<Integer, Device> devices = new TreeMap<>();
 
 	private final List<HostGameListener> hostGameListeners = new LinkedList<>();
@@ -63,7 +63,7 @@ public final class HostGameManager implements HostStateTransitionListener {
 	 * Registers a device with this manager.
 	 * State {@link GameState#CONNECTING}.
 	 */
-	public void addDevice(ConnectionHandler connectionHandler) {
+	public void addDevice(ConnectionHandler<String> connectionHandler) {
 		assertValidState(GameState.CONNECTING);
 
 		int deviceId = connectionHandlers.size();
@@ -125,7 +125,7 @@ public final class HostGameManager implements HostStateTransitionListener {
 
 
 	public void stopGame() {
-		for (ConnectionHandler handler : connectionHandlers.values()) handler.stop();
+		for (ConnectionHandler<String> handler : connectionHandlers.values()) handler.stop();
 		for (HostGameListener listener : hostGameListeners) listener.onGameStopped();
 	}
 
@@ -236,12 +236,12 @@ public final class HostGameManager implements HostStateTransitionListener {
 
 
 	private void transitionState(GameState nextState, String message) {
-		gameStateManager.startStateTransition(new BroadcastMessage(connectionHandlers.values(), message), nextState);
+		gameStateManager.startStateTransition(new BroadcastMessage<>(connectionHandlers.values(), message), nextState);
 	}
 
 
 	private void transitionState(GameState nextState, List<String> messages) {
-		gameStateManager.startStateTransition(new BroadcastMessage(connectionHandlers.values(), messages), nextState);
+		gameStateManager.startStateTransition(new BroadcastMessage<>(connectionHandlers.values(), messages), nextState);
 	}
 
 
@@ -257,7 +257,7 @@ public final class HostGameManager implements HostStateTransitionListener {
         playerListListener.onListChanged();
     }
 
-	private final class HostMessageListener implements ConnectionHandler.MessageListener {
+	private final class HostMessageListener implements ConnectionHandler.MessageListener<String> {
 
 		private final int deviceId;
 

@@ -20,7 +20,7 @@ import timber.log.Timber;
 
 
 @Singleton
-public final class ClientGameManager implements ConnectionHandler.MessageListener {
+public final class ClientGameManager implements ConnectionHandler.MessageListener<String> {
 
 	private final Pattern setupCardPattern = Pattern.compile("\\((\\d+),(\\d+)\\)");
 
@@ -30,7 +30,7 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 	private final Map<Integer, Card> matchedCards = new HashMap<>();
 	private final Map<Integer, Card> selectedCards = new HashMap<>();
 
-	private ConnectionHandler connectionHandler;
+	private ConnectionHandler<String> connectionHandler;
 	private Device device;
 	private final List<ClientGameListener> clientGameListeners = new LinkedList<>();
 
@@ -55,7 +55,7 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 	 * Registers the local device with this manager.
 	 * Call in state {@link GameState#CONNECTING}.
 	 */
-	public void registerDevice(ConnectionHandler connectionHandler, String deviceName, int pairsCount) {
+	public void registerDevice(ConnectionHandler<String> connectionHandler, String deviceName, int pairsCount) {
 		assertValidState(GameState.CONNECTING);
 
 		this.connectionHandler = connectionHandler;

@@ -43,7 +43,7 @@ public final class NetworkManager {
 				@Override
 				public void onClientConnected(Socket socket) {
 					try {
-						final ConnectionHandler connectionHandler = new SimpleConnectionHandler(socket);
+						final ConnectionHandler<String> connectionHandler = new StringConnectionHandler(socket);
 						handler.post(new Runnable() {
 							@Override
 							public void run() {
@@ -110,7 +110,7 @@ public final class NetworkManager {
 			@Override
 			public void run() {
 				try {
-					final ConnectionHandler connectionHandler = new SimpleConnectionHandler(hostInfo.getAddress(), hostInfo.getPort());
+					final ConnectionHandler<String> connectionHandler = new StringConnectionHandler(hostInfo.getAddress(), hostInfo.getPort());
 					handler.post(new Runnable() {
 						@Override
 						public void run() {

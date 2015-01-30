@@ -18,7 +18,7 @@ import java.util.concurrent.LinkedBlockingDeque;
 
 import timber.log.Timber;
 
-final class SimpleConnectionHandler implements ConnectionHandler {
+final class StringConnectionHandler implements ConnectionHandler<String> {
 
 	private final Socket socket;
 	private final MessageListenerAdapter messageListenerAdapter = new MessageListenerAdapter();
@@ -27,14 +27,14 @@ final class SimpleConnectionHandler implements ConnectionHandler {
 	private final InputThread inputThread;
 
 
-	SimpleConnectionHandler(Socket socket) throws IOException {
+	StringConnectionHandler(Socket socket) throws IOException {
 		this.socket = socket;
 		this.outputThread = new OutputThread(socket.getOutputStream(), messageListenerAdapter);
 		this.inputThread = new InputThread(socket.getInputStream(), messageListenerAdapter);
 	}
 
 
-	SimpleConnectionHandler(InetAddress inetAddress, int port) throws IOException {
+	StringConnectionHandler(InetAddress inetAddress, int port) throws IOException {
 		this.socket = new Socket();
 		this.socket.bind(null);
 		this.socket.connect(new InetSocketAddress(inetAddress.getHostAddress(), port));
@@ -98,13 +98,13 @@ final class SimpleConnectionHandler implements ConnectionHandler {
 	}
 
 
-	private static final class MessageListenerAdapter implements MessageListener {
+	private static final class MessageListenerAdapter implements MessageListener<String> {
 
 		private final List<String> unsentMessages = new LinkedList<>();
 		private boolean unsentConnectionError = false;
 
 		private Handler handler = null;
-		private MessageListener targetListener = null;
+		private MessageListener<String> targetListener = null;
 
 		@Override
 		public void onNewMessage(final String msg) {
@@ -139,7 +139,7 @@ final class SimpleConnectionHandler implements ConnectionHandler {
 			}
 		}
 
-		public void registerTargetListener(MessageListener targetListener, Handler handler) {
+		public void registerTargetListener(MessageListener<String> targetListener, Handler handler) {
 			synchronized (this) {
 				this.targetListener = targetListener;
 				this.handler = handler;
@@ -221,7 +221,7 @@ final class SimpleConnectionHandler implements ConnectionHandler {
 
 	private static final class InputThread extends Thread {
 
-		private final MessageListener messageListener;
+		private final MessageListener<String> messageListener;
 		private final ObjectInputStream objectInputStream;
 		private final BackoffStrategy strategy;
 

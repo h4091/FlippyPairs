@@ -6,22 +6,22 @@ import android.os.Handler;
 /**
  * Handler for communication with another peer / host / client.
  */
-public interface ConnectionHandler {
+public interface ConnectionHandler<T> {
 
 	public void start();
 	public void stop();
 
-	public void sendMessage(String msg);
-	public void registerMessageListener(MessageListener listener, Handler handler);
+	public void sendMessage(T msg);
+	public void registerMessageListener(MessageListener<T> listener, Handler handler);
 	public void unregisterMessageListener();
 
 
-	static interface MessageListener {
+	static interface MessageListener<T> {
 
 		/**
 		 * A new message from the other side is available.
 		 */
-		public void onNewMessage(String msg);
+		public void onNewMessage(T msg);
 
 		/**
 		 * The connection to the other side is broken and will be closed.
