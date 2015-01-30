@@ -54,6 +54,7 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 		closedCards.clear();
 		matchedCards.clear();
 		selectedCards.clear();
+		players.clear();
 	}
 
 
