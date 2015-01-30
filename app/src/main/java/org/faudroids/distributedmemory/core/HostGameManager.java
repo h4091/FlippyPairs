@@ -43,7 +43,7 @@ public final class HostGameManager implements HostStateTransitionListener {
 
 	private int playerIdCounter = 0;
 	private int currentPlayerIdx;
-	private final List<Player> players = new LinkedList<>();
+	private List<Player> players = new LinkedList<>();
     private TreeMap<Integer, Integer> playerPoints = new TreeMap<>();
 
 	// used to postpone execution of tasks that should run on the same thread (UI / main thread)
@@ -55,6 +55,7 @@ public final class HostGameManager implements HostStateTransitionListener {
 		this.gameStateManager.registerStateTransitionListener(this);
 		this.messageWriter = messageWriter;
 		this.messageReader = messageReader;
+        setupPlayers();
 	}
 
 
@@ -68,6 +69,11 @@ public final class HostGameManager implements HostStateTransitionListener {
         // players.clear();
         playerPoints.clear();
 	}
+
+    private void setupPlayers() {
+        players.add(0, new Player(0, "Player1"));
+        players.add(1, new Player(1, "Player2"));
+    }
 
 
 	/**

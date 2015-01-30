@@ -31,6 +31,7 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
 import butterknife.OnItemLongClick;
+import timber.log.Timber;
 
 
 public class HostGameActivity extends BaseActivity implements PlayerListListener {
@@ -54,6 +55,7 @@ public class HostGameActivity extends BaseActivity implements PlayerListListener
         adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
         ListView lv = (ListView)findViewById(R.id.playersList);
         lv.setAdapter(adapter);
+        onListChanged();
 	}
 
 
@@ -63,8 +65,7 @@ public class HostGameActivity extends BaseActivity implements PlayerListListener
 		registerReceiver(serverStateReceiver, new IntentFilter(HostService.ACTION_HOST_STATE_CHANGED));
 		toggleStartStopButtons(serviceUtils.isServiceRunning(HostService.class));
         hostGameManager.registerPlayerListListener(this);
-		adapter.clear();
-		adapter.addAll(hostGameManager.getPlayers());
+        onListChanged();
 	}
 
 
