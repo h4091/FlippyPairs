@@ -1,6 +1,8 @@
 package org.faudroids.distributedmemory.core;
 
 
+import java.util.List;
+
 public interface ClientGameListener {
 
 	/**
@@ -28,6 +30,13 @@ public interface ClientGameListener {
 	 * Called when a local (!) card has failed to match with anther one.
 	 */
 	public void onCardsMismatch();
+
+
+	/**
+	 * Called when the (final) leader board (which shows the winning players))
+	 * becomes available. Usually called right before a game stops.
+	 */
+	public void onLeaderBoardAvailable(List<Player> players);
 
 
 	/**

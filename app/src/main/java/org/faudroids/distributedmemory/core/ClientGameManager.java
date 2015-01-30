@@ -28,6 +28,9 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 	private final Map<Integer, Card> matchedCards = new HashMap<>();
 	private final Map<Integer, Card> selectedCards = new HashMap<>();
 
+	private int currentPlayerIdx;
+	private final List<Player> players = new LinkedList<>();
+
 	private final MessageWriter messageWriter;
 	private final MessageReader messageReader;
 	private ConnectionHandler<JsonNode> connectionHandler;
@@ -51,6 +54,7 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 		closedCards.clear();
 		matchedCards.clear();
 		selectedCards.clear();
+		players.clear();
 	}
 
 
@@ -124,11 +128,14 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 				break;
 
 			case SETUP:
-				Map<Integer, Integer> cards = messageReader.readCardsMessage(msg);
-				for (Map.Entry<Integer, Integer> entry : cards.entrySet()) {
+				GameSetupInfo setupInfo = messageReader.readSetupMessage(msg);
+				for (Map.Entry<Integer, Integer> entry : setupInfo.getCards().entrySet()) {
 					Card card = new Card(entry.getKey(), entry.getValue());
 					closedCards.put(card.getId(), card);
 				}
+
+				currentPlayerIdx = setupInfo.getStartingPlayerIdx();
+				players.addAll(setupInfo.getPlayers());
 
                 connectionHandler.sendMessage(messageWriter.createAck());
 				for (ClientGameListener listener : clientGameListeners) listener.onGameStarted();
@@ -151,9 +158,11 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 
 			case UPDATE_CARDS:
                 Timber.d("Result: " + msg);
+				Evaluation evaluation = messageReader.readEvaluation(msg);
+				currentPlayerIdx = evaluation.getNextPlayerId();
 
 				// update cards
-				if (messageReader.readEvaluationCardsMatched(msg)) {
+				if (evaluation.getCardsMatched()) {
 					if (!selectedCards.isEmpty()) {
 						matchedCards.putAll(selectedCards);
 						selectedCards.clear();
@@ -170,8 +179,9 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 				}
 
 				// change state
-				if (!messageReader.readEvaluationContinueGame(msg)) {
+				if (!evaluation.getContinueGame()) {
 					gameStateManager.changeState(GameState.FINISHED);
+					for (ClientGameListener listener : clientGameListeners) listener.onLeaderBoardAvailable(evaluation.getWinners());
 					// delay closing of connection such that server can receive ack
 					handler.postDelayed(new Runnable() {
 						@Override

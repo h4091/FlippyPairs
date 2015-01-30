@@ -141,7 +141,7 @@ public final class HostGameManager implements HostStateTransitionListener {
 				++currentCardCount;
 				selectedCards.put(card.getId(), card.getValue());
 			}
-			cardDetailMessages.add(messageWriter.createCardsMessage(selectedCards));
+			cardDetailMessages.add(messageWriter.createSetupMessage(new GameSetupInfo(selectedCards, currentPlayerIdx, players)));
 		}
 		transitionState(GameState.SELECT_1ST_CARD, cardDetailMessages);
     }
@@ -270,6 +270,7 @@ public final class HostGameManager implements HostStateTransitionListener {
 					playerPoints.put(currentPlayerIdx, playerPoints.get(currentPlayerIdx) + 1);
 				}
 				currentPlayerIdx = (currentPlayerIdx + 1) % players.size();
+				int nextPlayerId = players.get(currentPlayerIdx).getId();
 
 
 				// send response and handle end of game
@@ -277,14 +278,14 @@ public final class HostGameManager implements HostStateTransitionListener {
 				GameState responseState;
 
 				if (match && closedCards.size() == 0) {
-					responseMsg = messageWriter.createEvaluationMessage(getLeaderboard());
+					responseMsg = messageWriter.createEvaluationMessage(new Evaluation(true, false, -1, getLeaderboard()));
 					responseState = GameState.FINISHED;
 				} else if (match) {
-					responseMsg = messageWriter.createEvaluationMessage(true, players.get(currentPlayerIdx).getId());
+					responseMsg = messageWriter.createEvaluationMessage(new Evaluation(true, true, nextPlayerId, null));
 					responseState = GameState.SELECT_1ST_CARD;
 					// include next player
 				} else {
-					responseMsg = messageWriter.createEvaluationMessage(false, players.get(currentPlayerIdx).getId());
+					responseMsg = messageWriter.createEvaluationMessage(new Evaluation(false, true, nextPlayerId, null));
 					responseState = GameState.SELECT_1ST_CARD;
 				}
 				transitionState(responseState, responseMsg);

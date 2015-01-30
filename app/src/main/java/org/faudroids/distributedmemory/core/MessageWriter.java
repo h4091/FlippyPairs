@@ -6,9 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import java.util.List;
-import java.util.Map;
-
 import javax.inject.Inject;
 
 final class MessageWriter implements MessageConstants {
@@ -35,12 +32,10 @@ final class MessageWriter implements MessageConstants {
 
 
 	/**
-	 * Message with multiple card IDs and their values.
+	 * Message info required for initial client setup.
 	 */
-	public JsonNode createCardsMessage(Map<Integer, Integer> cards) {
-		ObjectNode msg = createBaseMessage();
-		for (Map.Entry<Integer, Integer> e : cards.entrySet()) msg.put(e.getKey().toString(), e.getValue());
-		return msg;
+	public JsonNode createSetupMessage(GameSetupInfo gameSetupInfo) {
+		return mapper.valueToTree(gameSetupInfo);
 	}
 
 
@@ -55,26 +50,10 @@ final class MessageWriter implements MessageConstants {
 
 
 	/**
-	 * Message about result of evaluation state and continues game.
+	 * Message about result of evaluation.
 	 */
-	public JsonNode createEvaluationMessage(boolean cardsMatched, int nextPlayerId) {
-		ObjectNode msg = createBaseMessage();
-		msg.put(KEY_EVALUATION_CARDS_MATCHED, cardsMatched);
-		msg.put(KEY_EVALUATION_CONTINUE_GAME, true);
-		msg.put(KEY_EVALUATION_NEXT_PLAYER_ID, nextPlayerId);
-		return msg;
-	}
-
-
-	/**
-	 * Message about end of game.
-	 */
-	public JsonNode createEvaluationMessage(List<Player> winners) {
-		ObjectNode msg = createBaseMessage();
-		msg.put(KEY_EVALUATION_CARDS_MATCHED, true);
-		msg.put(KEY_EVALUATION_CONTINUE_GAME, false);
-		msg.put(KEY_EVALUATION_WINNERS, mapper.valueToTree(winners));
-		return msg;
+	public JsonNode createEvaluationMessage(Evaluation evaluation) {
+		return mapper.valueToTree(evaluation);
 	}
 
 
