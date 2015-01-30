@@ -1,8 +1,11 @@
 package org.faudroids.distributedmemory.ui;
 
 import android.animation.ObjectAnimator;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
+import android.util.Pair;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
@@ -24,6 +27,7 @@ import org.faudroids.distributedmemory.core.Player;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -203,11 +207,10 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 
 	@Override
 	public void onNewRound() {
-		List<Player> players = clientGameManager.getPlayers();
-		List<Integer> playerPoints = clientGameManager.getPlayerPoints();
+		List<Pair<Player, Integer>> leaderBoard = getLeaderBoard();
 		StringBuilder builder = new StringBuilder();
-		for (int i = 0; i < players.size(); ++i) {
-			builder.append(players.get(i)).append(" (").append(playerPoints.get(i)).append(")");
+		for (Pair<Player, Integer> pair : leaderBoard) {
+			builder.append(pair.first.getName()).append(" (").append(pair.second).append(") ");
 		}
 		Toast.makeText(this, builder.toString(), Toast.LENGTH_LONG).show();
 	}
@@ -215,7 +218,29 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 
 	@Override
 	public void onGameFinished() {
-		Toast.makeText(this, "Game over!", Toast.LENGTH_LONG).show();
+		List<Pair<Player, Integer>> leaderBoard = getLeaderBoard();
+		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.append("Leader Board:\n");
+		for (Pair<Player, Integer> pair : leaderBoard) {
+			stringBuilder.append(pair.first.getName()).append(": ").append(pair.second).append(" points\n");
+		}
+
+		new AlertDialog.Builder(this)
+				.setTitle("Game Over")
+				.setMessage(stringBuilder.toString())
+				.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+							@Override
+							public void onClick(DialogInterface dialog, int which) {
+								finish();
+							}
+						})
+								.setOnCancelListener(new DialogInterface.OnCancelListener() {
+							@Override
+							public void onCancel(DialogInterface dialog) {
+								finish();
+							}
+						})
+				.show();
 	}
 
 
@@ -237,6 +262,23 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
         flipCard(button);
 		int cardId = (int) button.getTag(R.id.cardId);
 		clientGameManager.selectCard(cardId);
+	}
+
+
+	private List<Pair<Player, Integer>> getLeaderBoard() {
+		List<Player> players = clientGameManager.getPlayers();
+		List<Integer> playerPoints = clientGameManager.getPlayerPoints();
+		List<Pair<Player, Integer>> leaderBoard = new LinkedList<>();
+		for (int i = 0; i < players.size(); ++i) {
+			leaderBoard.add(new Pair<>(players.get(i), playerPoints.get(i)));
+		}
+		Collections.sort(leaderBoard, new Comparator<Pair<Player, Integer>>() {
+			@Override
+			public int compare(Pair<Player, Integer> lhs, Pair<Player, Integer> rhs) {
+				return lhs.second.compareTo(rhs.second);
+			}
+		});
+		return leaderBoard;
 	}
 
 }
