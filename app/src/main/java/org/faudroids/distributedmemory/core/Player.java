@@ -42,4 +42,10 @@ public class Player {
 		return Objects.hashCode(id, name);
 	}
 
+
+	@Override
+	public String toString() {
+		return name;
+	}
+
 }

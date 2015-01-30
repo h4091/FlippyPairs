@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -66,7 +65,7 @@ public final class HostGameManager implements HostStateTransitionListener {
 		matchedCards.clear();
 		connectionHandlers.clear();
 		devices.clear();
-        players.clear();
+        // players.clear();
         playerPoints.clear();
 	}
 
@@ -189,9 +188,8 @@ public final class HostGameManager implements HostStateTransitionListener {
 
 	public void addPlayer(String name) {
 		assertValidState(GameState.CONNECTING);
-		Player player = new Player(playerIdCounter, name);
+		players.add(new Player(playerIdCounter, name));
 		++playerIdCounter;
-		players.add(player);
 		playerListListener.onListChanged();
 	}
 
@@ -283,6 +281,7 @@ public final class HostGameManager implements HostStateTransitionListener {
 					responseMsg = messageWriter.createEvaluationMessage(false, players.get(currentPlayerIdx).getId());
 					responseState = GameState.SELECT_1ST_CARD;
 				}
+				transitionState(responseState, responseMsg);
 				Timber.d("Remaining open pairs: " + closedCards.size()/2);
 				break;
 

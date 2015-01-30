@@ -23,7 +23,6 @@ import org.faudroids.distributedmemory.core.Player;
 import org.faudroids.distributedmemory.core.PlayerListListener;
 import org.faudroids.distributedmemory.utils.ServiceUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -37,16 +36,14 @@ import butterknife.OnItemLongClick;
 public class HostGameActivity extends BaseActivity implements PlayerListListener {
 
 	@Inject ServiceUtils serviceUtils;
-    @Inject
-    HostGameManager hostGameManager;
+    @Inject HostGameManager hostGameManager;
 
 	@InjectView(R.id.start_hosting) Button startHostingButton;
 	@InjectView(R.id.stop_hosting) Button stopHostingButton;
 
 	private final BroadcastReceiver serverStateReceiver = new ServerStateBroadcastReceiver();
 
-    private ArrayList<String> playerList = new ArrayList<>();
-    private ArrayAdapter<String> adapter;
+    private ArrayAdapter<Player> adapter;
 
 
 	@Override
@@ -54,7 +51,7 @@ public class HostGameActivity extends BaseActivity implements PlayerListListener
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_host_game);
 		ButterKnife.inject(this);
-        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, playerList);
+        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
         ListView lv = (ListView)findViewById(R.id.playersList);
         lv.setAdapter(adapter);
 	}
@@ -66,6 +63,8 @@ public class HostGameActivity extends BaseActivity implements PlayerListListener
 		registerReceiver(serverStateReceiver, new IntentFilter(HostService.ACTION_HOST_STATE_CHANGED));
 		toggleStartStopButtons(serviceUtils.isServiceRunning(HostService.class));
         hostGameManager.registerPlayerListListener(this);
+		adapter.clear();
+		adapter.addAll(hostGameManager.getPlayers());
 	}
 
 
@@ -79,7 +78,7 @@ public class HostGameActivity extends BaseActivity implements PlayerListListener
 
 	@OnClick(R.id.start_hosting)
 	public void startHosting() {
-        if(playerList.size()>1) {
+        if(adapter.getCount() > 1) {
             startHostingButton.setEnabled(false);
 
             Intent hostIntent = new Intent(this, HostService.class);
@@ -113,7 +112,7 @@ public class HostGameActivity extends BaseActivity implements PlayerListListener
         builder.setPositiveButton("Remove", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                hostGameManager.removePlayer();
+                hostGameManager.removePlayer(adapter.getItem(index));
             }
         });
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -181,12 +180,8 @@ public class HostGameActivity extends BaseActivity implements PlayerListListener
 
     @Override
     public void onListChanged() {
-        List<Player> players = hostGameManager.getPlayers();
         adapter.clear();
-
-        for(Player p : players) {
-            adapter.add(p.getName());
-        }
+		adapter.addAll(hostGameManager.getPlayers());
     }
 
 
