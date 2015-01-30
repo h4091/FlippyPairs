@@ -8,6 +8,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.widget.Toast;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Lists;
 
 import org.faudroids.distributedmemory.common.BaseService;
@@ -100,7 +101,7 @@ public final class HostService extends BaseService {
 	}
 
 
-	private final class NetworkListener implements HostNetworkListener {
+	private final class NetworkListener implements HostNetworkListener<JsonNode> {
 
 		@Override
 		public void onServerStartSuccess() {
@@ -118,7 +119,7 @@ public final class HostService extends BaseService {
 		}
 
 		@Override
-		public void onConnectedToClient(ConnectionHandler connectionHandler) {
+		public void onConnectedToClient(ConnectionHandler<JsonNode> connectionHandler) {
 			hostGameManager.addDevice(connectionHandler);
 		}
 

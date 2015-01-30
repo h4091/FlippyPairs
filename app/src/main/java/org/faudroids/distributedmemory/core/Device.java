@@ -1,6 +1,8 @@
 package org.faudroids.distributedmemory.core;
 
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Objects;
 
 /**
@@ -12,7 +14,11 @@ public final class Device {
 	private final String name;
 	private final int pairsCount;
 
-	public Device(String name, int pairsCount) {
+	@JsonCreator
+	public Device(
+			@JsonProperty("name") String name,
+			@JsonProperty("pairsCount") int pairsCount) {
+
 		this.name = name;
 		this.pairsCount = pairsCount;
 	}

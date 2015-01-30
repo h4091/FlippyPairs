@@ -3,6 +3,8 @@ package org.faudroids.distributedmemory.core;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 import org.faudroids.distributedmemory.network.BroadcastMessage;
 import org.faudroids.distributedmemory.network.ConnectionHandler;
 import org.faudroids.distributedmemory.utils.Assert;
@@ -33,7 +35,9 @@ public final class HostGameManager implements HostStateTransitionListener {
 
     private final Map<Integer, Player> players = new HashMap<>();
 
-	private final TreeMap<Integer, ConnectionHandler<String>> connectionHandlers = new TreeMap<>();
+	private final MessageWriter messageWriter;
+	private final MessageReader messageReader;
+	private final TreeMap<Integer, ConnectionHandler<JsonNode>> connectionHandlers = new TreeMap<>();
 	private final TreeMap<Integer, Device> devices = new TreeMap<>();
 
 	private final List<HostGameListener> hostGameListeners = new LinkedList<>();
@@ -43,9 +47,11 @@ public final class HostGameManager implements HostStateTransitionListener {
 	private final Handler handler = new Handler(Looper.getMainLooper());
 
 	@Inject
-	public HostGameManager(HostGameStateManager gameStateManager) {
+	public HostGameManager(HostGameStateManager gameStateManager, MessageWriter messageWriter, MessageReader messageReader) {
 		this.gameStateManager = gameStateManager;
 		this.gameStateManager.registerStateTransitionListener(this);
+		this.messageWriter = messageWriter;
+		this.messageReader = messageReader;
 	}
 
 
@@ -63,14 +69,14 @@ public final class HostGameManager implements HostStateTransitionListener {
 	 * Registers a device with this manager.
 	 * State {@link GameState#CONNECTING}.
 	 */
-	public void addDevice(ConnectionHandler<String> connectionHandler) {
+	public void addDevice(ConnectionHandler<JsonNode> connectionHandler) {
 		assertValidState(GameState.CONNECTING);
 
 		int deviceId = connectionHandlers.size();
 		connectionHandlers.put(deviceId, connectionHandler);
 		connectionHandler.registerMessageListener(new HostMessageListener(deviceId), handler);
 		connectionHandler.start();
-		connectionHandler.sendMessage("hello world!"); // chicken and egg problem otherwise?
+		connectionHandler.sendMessage(messageWriter.createAck()); // chicken and egg problem otherwise?
 		Timber.i("Adding connection handler with id " + deviceId);
 	}
 
@@ -108,24 +114,24 @@ public final class HostGameManager implements HostStateTransitionListener {
 		List<Card> allCards = new ArrayList<>(closedCards.values());
 		Collections.shuffle(allCards);
 
-		List<String> cardDetailMessages = new LinkedList<>();
+		List<JsonNode> cardDetailMessages = new LinkedList<>();
 		for (Integer id : devices.keySet()) {
 			Device device = devices.get(id);
-			StringBuilder msgBuilder = new StringBuilder();
+			Map<Integer, Integer> selectedCards = new HashMap<>();
 
 			for (int i = 0; i < device.getPairsCount() * 2; ++i) {
 				Card card = allCards.get(currentCardCount);
 				++currentCardCount;
-				msgBuilder.append("(").append(card.getId()).append(",").append(card.getValue()).append(")");
+				selectedCards.put(card.getId(), card.getValue());
 			}
-			cardDetailMessages.add(msgBuilder.toString());
+			cardDetailMessages.add(messageWriter.createCardsMessage(selectedCards));
 		}
 		transitionState(GameState.SELECT_1ST_CARD, cardDetailMessages);
     }
 
 
 	public void stopGame() {
-		for (ConnectionHandler<String> handler : connectionHandlers.values()) handler.stop();
+		for (ConnectionHandler<JsonNode> handler : connectionHandlers.values()) handler.stop();
 		for (HostGameListener listener : hostGameListeners) listener.onGameStopped();
 	}
 
@@ -210,17 +216,17 @@ public final class HostGameManager implements HostStateTransitionListener {
 			case UPDATE_CARDS:
 				// once all clients have acked the last selected card evaluate selection
 				boolean match = evaluateCardSelection();
-				String responseMsg;
+				JsonNode responseMsg;
 				GameState responseState;
 
 				if (match && closedCards.size() == 0) {
-					responseMsg = Message.EVALUATION_MATCH_FINISH;
+					responseMsg = messageWriter.createEvaluationMessage(true, false);
 					responseState = GameState.FINISHED;
 				} else if (match) {
-					responseMsg = Message.EVALUATION_MATCH_CONTINUE;
+					responseMsg = messageWriter.createEvaluationMessage(true, true);
 					responseState = GameState.SELECT_1ST_CARD;
 				} else {
-					responseMsg = Message.EVALUATION_MISS;
+					responseMsg = messageWriter.createEvaluationMessage(false, true);
 					responseState = GameState.SELECT_1ST_CARD;
 				}
 
@@ -235,12 +241,12 @@ public final class HostGameManager implements HostStateTransitionListener {
 	}
 
 
-	private void transitionState(GameState nextState, String message) {
+	private void transitionState(GameState nextState, JsonNode message) {
 		gameStateManager.startStateTransition(new BroadcastMessage<>(connectionHandlers.values(), message), nextState);
 	}
 
 
-	private void transitionState(GameState nextState, List<String> messages) {
+	private void transitionState(GameState nextState, List<JsonNode> messages) {
 		gameStateManager.startStateTransition(new BroadcastMessage<>(connectionHandlers.values(), messages), nextState);
 	}
 
@@ -257,7 +263,7 @@ public final class HostGameManager implements HostStateTransitionListener {
         playerListListener.onListChanged();
     }
 
-	private final class HostMessageListener implements ConnectionHandler.MessageListener<String> {
+	private final class HostMessageListener implements ConnectionHandler.MessageListener<JsonNode> {
 
 		private final int deviceId;
 
@@ -267,21 +273,18 @@ public final class HostGameManager implements HostStateTransitionListener {
 
 
 		@Override
-		public void onNewMessage(String msg) {
+		public void onNewMessage(JsonNode msg) {
             Timber.d("Host received message: " + msg);
 
 			// if ack than take note and do nothing
-			if (msg.equals(Message.ACK)) {
+			if (messageReader.isAck(msg)) {
 				gameStateManager.onAckReceived();
 				return;
 			}
 
 			switch(gameStateManager.getState()) {
 				case CONNECTING:
-					String[] tokens = msg.split(" ");
-					String deviceName = tokens[0];
-					int pairsCount = Integer.valueOf(tokens[1]);
-					Device device = new Device(deviceName, pairsCount);
+					Device device = messageReader.readDeviceInfoMessage(msg);
 					devices.put(deviceId, device);
 					for (HostGameListener listener : hostGameListeners) listener.onClientAdded(device);
 					break;
@@ -291,17 +294,17 @@ public final class HostGameManager implements HostStateTransitionListener {
 					break;
 
                 case SELECT_1ST_CARD:
-					int firstCardId = Integer.parseInt(msg);
+					int firstCardId = messageReader.readCardIdMessage(msg);
 					Timber.i("Received first card " + firstCardId);
 					selectCard(firstCardId, GameState.SELECT_1ST_CARD);
-					transitionState(GameState.SELECT_2ND_CARD, String.valueOf(firstCardId));
+					transitionState(GameState.SELECT_2ND_CARD, msg);
                     break;
 
                 case SELECT_2ND_CARD:
-					int secondCardId = Integer.parseInt(msg);
+					int secondCardId = messageReader.readCardIdMessage(msg);
 					Timber.i("Received second card " + secondCardId);
 					selectCard(secondCardId, GameState.SELECT_2ND_CARD);
-					transitionState(GameState.UPDATE_CARDS, String.valueOf(secondCardId));
+					transitionState(GameState.UPDATE_CARDS, msg);
                     break;
 
                 case UPDATE_CARDS:

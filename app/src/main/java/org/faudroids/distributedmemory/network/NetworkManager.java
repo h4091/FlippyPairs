@@ -5,6 +5,8 @@ import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
 import android.os.Handler;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 import org.faudroids.distributedmemory.utils.Assert;
 
 import java.io.IOException;
@@ -41,7 +43,7 @@ public final class NetworkManager {
 	}
 
 
-	public void startServer(String serviceName, final HostNetworkListener hostNetworkListener, final Handler handler) {
+	public void startServer(String serviceName, final HostNetworkListener<JsonNode> hostNetworkListener, final Handler handler) {
 		Assert.assertFalse(hostSocketHandler.isRunning(), "can only start one server");
 
 		try {
@@ -49,7 +51,7 @@ public final class NetworkManager {
 				@Override
 				public void onClientConnected(Socket socket) {
 					try {
-						final ConnectionHandler<String> connectionHandler = connectionHandlerFactory.createStringConnectionHandler(socket);
+						final ConnectionHandler<JsonNode> connectionHandler = connectionHandlerFactory.createJsonConnectionHandler(socket);
 						handler.post(new Runnable() {
 							@Override
 							public void run() {
@@ -111,12 +113,12 @@ public final class NetworkManager {
 	}
 
 
-	public void connectToHost(final HostInfo hostInfo, final ClientNetworkListener clientNetworkListener, final Handler handler) {
+	public void connectToHost(final HostInfo hostInfo, final ClientNetworkListener<JsonNode> clientNetworkListener, final Handler handler) {
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
 				try {
-					final ConnectionHandler<String> connectionHandler = connectionHandlerFactory.createStringConnectionHandler(hostInfo.getAddress(), hostInfo.getPort());
+					final ConnectionHandler<JsonNode> connectionHandler = connectionHandlerFactory.createJsonConnectionHandler(hostInfo.getAddress(), hostInfo.getPort());
 					handler.post(new Runnable() {
 						@Override
 						public void run() {

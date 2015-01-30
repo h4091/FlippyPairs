@@ -3,6 +3,8 @@ package org.faudroids.distributedmemory.core;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 import org.faudroids.distributedmemory.network.ConnectionHandler;
 import org.faudroids.distributedmemory.utils.Assert;
 
@@ -10,8 +12,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -20,9 +20,7 @@ import timber.log.Timber;
 
 
 @Singleton
-public final class ClientGameManager implements ConnectionHandler.MessageListener<String> {
-
-	private final Pattern setupCardPattern = Pattern.compile("\\((\\d+),(\\d+)\\)");
+public final class ClientGameManager implements ConnectionHandler.MessageListener<JsonNode> {
 
 	private final GameStateManager gameStateManager;
 
@@ -30,16 +28,21 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 	private final Map<Integer, Card> matchedCards = new HashMap<>();
 	private final Map<Integer, Card> selectedCards = new HashMap<>();
 
-	private ConnectionHandler<String> connectionHandler;
+	private final MessageWriter messageWriter;
+	private final MessageReader messageReader;
+	private ConnectionHandler<JsonNode> connectionHandler;
 	private Device device;
+
 	private final List<ClientGameListener> clientGameListeners = new LinkedList<>();
 
 	// used to delay actions that should run on the main (UI) thread
 	private final Handler handler = new Handler(Looper.getMainLooper());
 
 	@Inject
-	public ClientGameManager(GameStateManager gameStateManager) {
+	public ClientGameManager(GameStateManager gameStateManager, MessageWriter messageWriter, MessageReader messageReader) {
 		this.gameStateManager = gameStateManager;
+		this.messageWriter = messageWriter;
+		this.messageReader = messageReader;
 	}
 
 
@@ -55,7 +58,7 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 	 * Registers the local device with this manager.
 	 * Call in state {@link GameState#CONNECTING}.
 	 */
-	public void registerDevice(ConnectionHandler<String> connectionHandler, String deviceName, int pairsCount) {
+	public void registerDevice(ConnectionHandler<JsonNode> connectionHandler, String deviceName, int pairsCount) {
 		assertValidState(GameState.CONNECTING);
 
 		this.connectionHandler = connectionHandler;
@@ -107,42 +110,42 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 	public void selectCard(int cardId) {
 		selectedCards.put(cardId, closedCards.remove(cardId));
 		for (ClientGameListener listener : clientGameListeners) listener.onCardsChanged();
-		connectionHandler.sendMessage(String.valueOf(cardId));
+		connectionHandler.sendMessage(messageWriter.createCardIdMessage(cardId));
 	}
 
 
 	@Override
-	public void onNewMessage(String msg) {
+	public void onNewMessage(JsonNode msg) {
 		Timber.i("received msg from host" + msg);
 		switch(gameStateManager.getState()) {
 			case CONNECTING:
-				connectionHandler.sendMessage(device.getName() + " " + device.getPairsCount());
+				connectionHandler.sendMessage(messageWriter.createDeviceInfoMessage(device));
 				gameStateManager.changeState(GameState.SETUP);
 				break;
 
 			case SETUP:
-				Matcher matcher = setupCardPattern.matcher(msg);
-				while (matcher.find()) {
-					Card card = new Card(Integer.valueOf(matcher.group(1)), Integer.valueOf(matcher.group(2)));
+				Map<Integer, Integer> cards = messageReader.readCardsMessage(msg);
+				for (Map.Entry<Integer, Integer> entry : cards.entrySet()) {
+					Card card = new Card(entry.getKey(), entry.getValue());
 					closedCards.put(card.getId(), card);
 				}
 
-                connectionHandler.sendMessage(Message.ACK);
+                connectionHandler.sendMessage(messageWriter.createAck());
 				for (ClientGameListener listener : clientGameListeners) listener.onGameStarted();
 				gameStateManager.changeState(GameState.SELECT_1ST_CARD);
 				break;
 
 			case SELECT_1ST_CARD:
-				int card1Id = Integer.valueOf(msg);
+				int card1Id = messageReader.readCardIdMessage(msg);
 				Timber.i("selected first card with id " + card1Id);
-				connectionHandler.sendMessage(Message.ACK);
+				connectionHandler.sendMessage(messageWriter.createAck());
 				gameStateManager.changeState(GameState.SELECT_2ND_CARD);
 				break;
 
 			case SELECT_2ND_CARD:
-				int card2Id = Integer.valueOf(msg);
+				int card2Id = messageReader.readCardIdMessage(msg);
 				Timber.i("selected second card with id " + card2Id);
-				connectionHandler.sendMessage(Message.ACK);
+				connectionHandler.sendMessage(messageWriter.createAck());
 				gameStateManager.changeState(GameState.UPDATE_CARDS);
 				break;
 
@@ -150,47 +153,37 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
                 Timber.d("Result: " + msg);
 
 				// update cards
-				switch (msg) {
-					case Message.EVALUATION_MATCH_CONTINUE:
-					case Message.EVALUATION_MATCH_FINISH:
-						if (!selectedCards.isEmpty()) {
-							matchedCards.putAll(selectedCards);
-							selectedCards.clear();
-							for (ClientGameListener listener : clientGameListeners) listener.onCardsChanged();
-							for (ClientGameListener listener : clientGameListeners) listener.onCardsMatch();
-						}
-						break;
-
-					case Message.EVALUATION_MISS:
-						if (!selectedCards.isEmpty()) {
-							closedCards.putAll(selectedCards);
-							for (ClientGameListener listener : clientGameListeners) listener.onCardsChanged();
-							for (ClientGameListener listener : clientGameListeners) listener.onCardsMismatch();
-							selectedCards.clear();
-						}
-
-						break;
+				if (messageReader.readEvaluationCardsMatched(msg)) {
+					if (!selectedCards.isEmpty()) {
+						matchedCards.putAll(selectedCards);
+						selectedCards.clear();
+						for (ClientGameListener listener : clientGameListeners) listener.onCardsChanged();
+						for (ClientGameListener listener : clientGameListeners) listener.onCardsMatch();
+					}
+				} else {
+					if (!selectedCards.isEmpty()) {
+						closedCards.putAll(selectedCards);
+						for (ClientGameListener listener : clientGameListeners) listener.onCardsChanged();
+						for (ClientGameListener listener : clientGameListeners) listener.onCardsMismatch();
+						selectedCards.clear();
+					}
 				}
 
 				// change state
-				switch (msg) {
-					case Message.EVALUATION_MATCH_FINISH:
-						gameStateManager.changeState(GameState.FINISHED);
-						// delay closing of connection such that server can receive ack
-						handler.postDelayed(new Runnable() {
-							@Override
-							public void run() {
-								stopGame();
-							}
-						}, 100);
-						break;
-
-					case Message.EVALUATION_MATCH_CONTINUE:
-					case Message.EVALUATION_MISS:
-						gameStateManager.changeState(GameState.SELECT_1ST_CARD);
-						break;
+				if (!messageReader.readEvaluationContinueGame(msg)) {
+					gameStateManager.changeState(GameState.FINISHED);
+					// delay closing of connection such that server can receive ack
+					handler.postDelayed(new Runnable() {
+						@Override
+						public void run() {
+							stopGame();
+						}
+					}, 100);
+				} else {
+					gameStateManager.changeState(GameState.SELECT_1ST_CARD);
 				}
-				connectionHandler.sendMessage(Message.ACK);
+
+				connectionHandler.sendMessage(messageWriter.createAck());
 				break;
 		}
 	}

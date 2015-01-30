@@ -44,7 +44,7 @@ final class HostGameStateManager extends GameStateManager {
 	 * Starts a state transition by sending the broadcast and waiting for all acks from clients
 	 * before actually changing the state.
 	 */
-	public void startStateTransition(BroadcastMessage broadcastMessage, GameState nextState) {
+	public void startStateTransition(BroadcastMessage<?> broadcastMessage, GameState nextState) {
 		Assert.assertTrue(stateTransition == null || stateTransition.isComplete(), "previous state transition not yet finished!");
 		Timber.d("Starting host game state transition to " + nextState);
 		stateTransition = new HostStateTransition(new HostStateTransitionListener() {

@@ -10,6 +10,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Lists;
 
 import org.faudroids.distributedmemory.R;
@@ -25,7 +26,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 
-public class JoinGameActivity extends BaseListActivity implements ClientNetworkListener {
+public class JoinGameActivity extends BaseListActivity implements ClientNetworkListener<JsonNode> {
 
 	@Inject ClientGameManager clientGameManager;
 	@Inject NetworkManager networkManager;
@@ -89,7 +90,7 @@ public class JoinGameActivity extends BaseListActivity implements ClientNetworkL
 
 
 	@Override
-	public void onConnectedToHostSuccess(ConnectionHandler connectionHandler) {
+	public void onConnectedToHostSuccess(ConnectionHandler<JsonNode> connectionHandler) {
 		connectingToHostDialog.cancel();
 		connectingToHostDialog = null;
 

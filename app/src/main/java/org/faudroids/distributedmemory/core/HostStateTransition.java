@@ -16,9 +16,9 @@ final class HostStateTransition {
 
 	private final HostStateTransitionListener transitionListener;
 	private final GameState nextState;
-	private final BroadcastMessage broadcastMessage;
+	private final BroadcastMessage<?> broadcastMessage;
 
-	public HostStateTransition(HostStateTransitionListener transitionListener, GameState nextState, BroadcastMessage broadcastMessage) {
+	public HostStateTransition(HostStateTransitionListener transitionListener, GameState nextState, BroadcastMessage<?> broadcastMessage) {
 		this.transitionListener = transitionListener;
 		this.nextState = nextState;
 		this.broadcastMessage = broadcastMessage;
