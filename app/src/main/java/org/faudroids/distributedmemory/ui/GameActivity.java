@@ -19,6 +19,7 @@ import org.faudroids.distributedmemory.core.Card;
 import org.faudroids.distributedmemory.core.ClientGameListener;
 import org.faudroids.distributedmemory.core.ClientGameManager;
 import org.faudroids.distributedmemory.core.GameState;
+import org.faudroids.distributedmemory.core.Player;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -197,6 +198,16 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
         }
 
 		Toast.makeText(this, "nope ...", Toast.LENGTH_SHORT).show();
+	}
+
+
+	@Override
+	public void onLeaderBoardAvailable(List<Player> players) {
+		StringBuilder builder = new StringBuilder();
+		for (Player player : players) {
+			builder.append(player.getName()).append(" ");
+		}
+		Toast.makeText(this, builder.toString(), Toast.LENGTH_LONG).show();
 	}
 
 
