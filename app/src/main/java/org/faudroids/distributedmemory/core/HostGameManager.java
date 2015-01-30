@@ -207,25 +207,6 @@ public final class HostGameManager implements HostStateTransitionListener {
 	}
 
 
-    /**
-     * Returns the players sorted by points.
-     */
-	/*
-	TODO maybe useful for the client side at some point?
-    private List<Player> getLeaderboard() {
-
-		List<Player> leaderboard = new LinkedList<>(players);
-		Collections.sort(leaderboard, new Comparator<Player>() {
-			@Override
-			public int compare(Player lhs, Player rhs) {
-				return playerPoints.get(lhs.getId()).compareTo(playerPoints.get(rhs.getId()));
-			}
-		});
-		return leaderboard;
-	}
-	 */
-
-
 	private void assertValidState(GameState state) {
 		if (!gameStateManager.getState().equals(state)) throw new IllegalStateException("must be in state " + state + " to perform this action");
 	}
