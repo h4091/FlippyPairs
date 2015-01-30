@@ -11,11 +11,12 @@ import org.faudroids.distributedmemory.utils.Assert;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.TreeMap;
 
 import javax.inject.Inject;
@@ -33,8 +34,6 @@ public final class HostGameManager implements HostStateTransitionListener {
 	private final List<Card> selectedCards = new LinkedList<>();
 	private final Map<Integer, Card> matchedCards = new HashMap<>();
 
-    private final Map<Integer, Player> players = new HashMap<>();
-
 	private final MessageWriter messageWriter;
 	private final MessageReader messageReader;
 	private final TreeMap<Integer, ConnectionHandler<JsonNode>> connectionHandlers = new TreeMap<>();
@@ -42,6 +41,11 @@ public final class HostGameManager implements HostStateTransitionListener {
 
 	private final List<HostGameListener> hostGameListeners = new LinkedList<>();
 	private PlayerListListener playerListListener;
+
+	private int playerIdCounter = 0;
+	private int currentPlayerIdx;
+	private final List<Player> players = new LinkedList<>();
+    private TreeMap<Integer, Integer> playerPoints = new TreeMap<>();
 
 	// used to postpone execution of tasks that should run on the same thread (UI / main thread)
 	private final Handler handler = new Handler(Looper.getMainLooper());
@@ -62,6 +66,8 @@ public final class HostGameManager implements HostStateTransitionListener {
 		matchedCards.clear();
 		connectionHandlers.clear();
 		devices.clear();
+        players.clear();
+        playerPoints.clear();
 	}
 
 
@@ -90,21 +96,27 @@ public final class HostGameManager implements HostStateTransitionListener {
 		gameStateManager.changeState(GameState.SETUP); // manual new game state, no ack from clients required
 		for (HostGameListener listener : hostGameListeners) listener.onGameStarted();
 
+        // setup players
+        currentPlayerIdx = 0;
+        for(Player player : players) {
+            playerPoints.put(player.getId(), 0);
+        }
+
 		// setup cards locally
 		int pairsCount = 0;
 		for (Device device : devices.values()) pairsCount += device.getPairsCount();
         Timber.i("Pairs: " + pairsCount);
-		Random rand = new Random();
+		//Random rand = new Random();
 		int cardId = 0;
         for(int i = 0; i < pairsCount; ++i) {
-            int randomValue = rand.nextInt(pairsCount);
-			closedCards.put(cardId, new Card(cardId, randomValue));
+            //int randomValue = rand.nextInt(pairsCount*3);
+			closedCards.put(cardId, new Card(cardId, i));
 			++cardId;
-			closedCards.put(cardId, new Card(cardId, randomValue));
+			closedCards.put(cardId, new Card(cardId, i));
 			++cardId;
 
-            Timber.i("Added card " + randomValue + " (" + (cardId - 2) + ")");
-			Timber.i("Added card " + randomValue + " (" + (cardId - 1) + ")");
+            Timber.i("Added card " + i + " (" + (cardId - 2) + ")");
+			Timber.i("Added card " + i + " (" + (cardId - 1) + ")");
         }
 
 		// TODO race condition between connections being added and clients sending device info
@@ -145,8 +157,9 @@ public final class HostGameManager implements HostStateTransitionListener {
 		return new LinkedList<>(devices.values());
 	}
 
+
     public List<Player> getPlayers() {
-        return new LinkedList<>(players.values());
+        return new LinkedList<>(players);
     }
 
 
@@ -172,6 +185,22 @@ public final class HostGameManager implements HostStateTransitionListener {
         Assert.assertTrue(this.playerListListener != null, "not registered");
         this.playerListListener = null;
     }
+
+
+	public void addPlayer(String name) {
+		assertValidState(GameState.CONNECTING);
+		Player player = new Player(playerIdCounter, name);
+		++playerIdCounter;
+		players.add(player);
+		playerListListener.onListChanged();
+	}
+
+
+	public void removePlayer(Player player) {
+		assertValidState(GameState.CONNECTING);
+		players.remove(player);
+		playerListListener.onListChanged();
+	}
 
 
 	/**
@@ -204,6 +233,21 @@ public final class HostGameManager implements HostStateTransitionListener {
 	}
 
 
+    /**
+     * Returns the players sorted by points.
+     */
+    private List<Player> getLeaderboard() {
+		List<Player> leaderboard = new LinkedList<>(players);
+		Collections.sort(leaderboard, new Comparator<Player>() {
+			@Override
+			public int compare(Player lhs, Player rhs) {
+				return playerPoints.get(lhs.getId()).compareTo(playerPoints.get(rhs.getId()));
+			}
+		});
+		return leaderboard;
+	}
+
+
 	private void assertValidState(GameState state) {
 		if (!gameStateManager.getState().equals(state)) throw new IllegalStateException("must be in state " + state + " to perform this action");
 	}
@@ -216,17 +260,27 @@ public final class HostGameManager implements HostStateTransitionListener {
 			case UPDATE_CARDS:
 				// once all clients have acked the last selected card evaluate selection
 				boolean match = evaluateCardSelection();
+
+				// update players
+				if (match) {
+					playerPoints.put(currentPlayerIdx, playerPoints.get(currentPlayerIdx) + 1);
+				}
+				currentPlayerIdx = (currentPlayerIdx + 1) % players.size();
+
+
+				// send response and handle end of game
 				JsonNode responseMsg;
 				GameState responseState;
 
 				if (match && closedCards.size() == 0) {
-					responseMsg = messageWriter.createEvaluationMessage(true, false);
+					responseMsg = messageWriter.createEvaluationMessage(getLeaderboard());
 					responseState = GameState.FINISHED;
 				} else if (match) {
-					responseMsg = messageWriter.createEvaluationMessage(true, true);
+					responseMsg = messageWriter.createEvaluationMessage(true, players.get(currentPlayerIdx).getId());
 					responseState = GameState.SELECT_1ST_CARD;
+					// include next player
 				} else {
-					responseMsg = messageWriter.createEvaluationMessage(false, true);
+					responseMsg = messageWriter.createEvaluationMessage(false, players.get(currentPlayerIdx).getId());
 					responseState = GameState.SELECT_1ST_CARD;
 				}
 
@@ -250,18 +304,6 @@ public final class HostGameManager implements HostStateTransitionListener {
 		gameStateManager.startStateTransition(new BroadcastMessage<>(connectionHandlers.values(), messages), nextState);
 	}
 
-
-    public void addPlayer(String name) {
-        Player p = new Player(this.players.size(), name);
-        this.players.put(p.getId(), p);
-        playerListListener.onListChanged();
-    }
-
-
-    public void removePlayer(int id) {
-        this.players.remove(id);
-        playerListListener.onListChanged();
-    }
 
 	private final class HostMessageListener implements ConnectionHandler.MessageListener<JsonNode> {
 

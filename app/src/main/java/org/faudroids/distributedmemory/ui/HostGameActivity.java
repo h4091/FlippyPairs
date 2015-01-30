@@ -113,7 +113,7 @@ public class HostGameActivity extends BaseActivity implements PlayerListListener
         builder.setPositiveButton("Remove", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                hostGameManager.removePlayer(index);
+                hostGameManager.removePlayer();
             }
         });
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {

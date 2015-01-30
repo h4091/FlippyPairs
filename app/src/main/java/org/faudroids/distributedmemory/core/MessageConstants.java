@@ -11,7 +11,9 @@ interface MessageConstants {
 	static final String
 			KEY_CARD_ID = "cardId",
 			KEY_EVALUATION_CARDS_MATCHED = "cardsMatched",
-			KEY_EVALUATION_CONTINUE_GAME = "continueGame";
+			KEY_EVALUATION_CONTINUE_GAME = "continueGame",
+			KEY_EVALUATION_NEXT_PLAYER_ID = "nextPlayerId",
+			KEY_EVALUATION_WINNERS = "winners";
 
 
 }

@@ -1,12 +1,14 @@
 package org.faudroids.distributedmemory.core;
 
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -58,6 +60,21 @@ final class MessageReader implements MessageConstants {
 
 	public boolean readEvaluationCardsMatched(JsonNode msg) {
 		return msg.get(KEY_EVALUATION_CARDS_MATCHED).asBoolean();
+	}
+
+
+	public int readEvaluationNextPlayerId(JsonNode msg) {
+		return msg.get(KEY_EVALUATION_NEXT_PLAYER_ID).asInt();
+	}
+
+
+	public List<Player> readEvaluationWinners(JsonNode msg) {
+		try {
+			return mapper.readValue(msg.get(KEY_EVALUATION_WINNERS).toString(), new TypeReference<List<Player>>() {
+			});
+		} catch (IOException ioe) {
+			throw new RuntimeException("failed to parse winners", ioe);
+		}
 	}
 
 }
