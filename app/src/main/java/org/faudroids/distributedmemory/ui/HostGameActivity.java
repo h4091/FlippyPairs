@@ -31,7 +31,6 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
 import butterknife.OnItemLongClick;
-import timber.log.Timber;
 
 
 public class HostGameActivity extends BaseActivity {

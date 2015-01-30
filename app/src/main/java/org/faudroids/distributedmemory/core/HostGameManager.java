@@ -11,7 +11,6 @@ import org.faudroids.distributedmemory.utils.Assert;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -41,8 +40,8 @@ public final class HostGameManager implements HostStateTransitionListener {
 	private final List<HostGameListener> hostGameListeners = new LinkedList<>();
 
 	private int currentPlayerIdx;
-	private List<Player> players = new LinkedList<>();
-    private TreeMap<Integer, Integer> playerPoints = new TreeMap<>();
+	private final List<Player> players = new LinkedList<>();
+	private final List<Integer> playerPoints = new LinkedList<>();
 
 	// used to postpone execution of tasks that should run on the same thread (UI / main thread)
 	private final Handler handler = new Handler(Looper.getMainLooper());
@@ -95,8 +94,8 @@ public final class HostGameManager implements HostStateTransitionListener {
 
         // setup players
         currentPlayerIdx = 0;
-        for(Player player : players) {
-            playerPoints.put(player.getId(), 0);
+        for(int i = 0; i < players.size(); ++i) {
+            playerPoints.add(0);
         }
 
 		// setup cards locally
@@ -211,7 +210,10 @@ public final class HostGameManager implements HostStateTransitionListener {
     /**
      * Returns the players sorted by points.
      */
+	/*
+	TODO maybe useful for the client side at some point?
     private List<Player> getLeaderboard() {
+
 		List<Player> leaderboard = new LinkedList<>(players);
 		Collections.sort(leaderboard, new Comparator<Player>() {
 			@Override
@@ -221,6 +223,7 @@ public final class HostGameManager implements HostStateTransitionListener {
 		});
 		return leaderboard;
 	}
+	 */
 
 
 	private void assertValidState(GameState state) {
@@ -238,7 +241,7 @@ public final class HostGameManager implements HostStateTransitionListener {
 
 				// update players
 				if (match) {
-					playerPoints.put(currentPlayerIdx, playerPoints.get(currentPlayerIdx) + 1);
+					playerPoints.set(currentPlayerIdx, playerPoints.get(currentPlayerIdx) + 1);
 				}
 				currentPlayerIdx = (currentPlayerIdx + 1) % players.size();
 				int nextPlayerId = players.get(currentPlayerIdx).getId();
@@ -249,14 +252,14 @@ public final class HostGameManager implements HostStateTransitionListener {
 				GameState responseState;
 
 				if (match && closedCards.size() == 0) {
-					responseMsg = messageWriter.createEvaluationMessage(new Evaluation(true, false, -1, getLeaderboard()));
+					responseMsg = messageWriter.createEvaluationMessage(new Evaluation(true, false, nextPlayerId, playerPoints));
 					responseState = GameState.FINISHED;
 				} else if (match) {
-					responseMsg = messageWriter.createEvaluationMessage(new Evaluation(true, true, nextPlayerId, null));
+					responseMsg = messageWriter.createEvaluationMessage(new Evaluation(true, true, nextPlayerId, playerPoints));
 					responseState = GameState.SELECT_1ST_CARD;
 					// include next player
 				} else {
-					responseMsg = messageWriter.createEvaluationMessage(new Evaluation(false, true, nextPlayerId, null));
+					responseMsg = messageWriter.createEvaluationMessage(new Evaluation(false, true, nextPlayerId, playerPoints));
 					responseState = GameState.SELECT_1ST_CARD;
 				}
 				transitionState(responseState, responseMsg);
