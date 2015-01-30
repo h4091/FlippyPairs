@@ -1,6 +1,9 @@
 package org.faudroids.distributedmemory.ui;
 
 import android.content.Intent;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -30,6 +33,7 @@ public class LobbyActivity extends BaseActivity implements  HostGameListener {
 	@Inject HostGameManager hostGameManager;
 	@InjectView(R.id.peers_list) ListView peersList;
 	private ArrayAdapter<String> adapter;
+    private final BroadcastReceiver serverStateReceiver = new ServerStateBroadcastReceiver();
 
 
 	@Override
@@ -51,12 +55,14 @@ public class LobbyActivity extends BaseActivity implements  HostGameListener {
     @Override
     public void onPause() {
         hostGameManager.unregisterHostGameListener(this);
+        unregisterReceiver(serverStateReceiver);
         super.onPause();
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        registerReceiver(serverStateReceiver, new IntentFilter(HostService.ACTION_HOST_STATE_CHANGED));
         hostGameManager.registerHostGameListener(this);
     }
 
@@ -98,4 +104,15 @@ public class LobbyActivity extends BaseActivity implements  HostGameListener {
 		return Lists.<Object>newArrayList(new UiModule());
 	}
 
+
+    private class ServerStateBroadcastReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            boolean started = intent.getBooleanExtra(HostService.EXTRA_HOST_RUNNING, false);
+            if(!started) {
+                finish();
+            }
+        }
+    }
 }
