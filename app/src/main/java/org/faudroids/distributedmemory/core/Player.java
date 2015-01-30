@@ -10,9 +10,9 @@ public class Player {
     private final int id;
 
 	@JsonCreator
-    Player(
-			@JsonProperty("id") int id,
-			@JsonProperty("name") String name) {
+    public Player(
+            @JsonProperty("id") int id,
+            @JsonProperty("name") String name) {
 
 		this.id = id;
 		this.name = name;

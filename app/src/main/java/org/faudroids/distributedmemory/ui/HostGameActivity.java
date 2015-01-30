@@ -12,6 +12,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.NumberPicker;
 import android.widget.Toast;
 
 import com.google.common.collect.Lists;
@@ -20,7 +21,6 @@ import org.faudroids.distributedmemory.R;
 import org.faudroids.distributedmemory.common.BaseActivity;
 import org.faudroids.distributedmemory.core.HostGameManager;
 import org.faudroids.distributedmemory.core.Player;
-import org.faudroids.distributedmemory.core.PlayerListListener;
 import org.faudroids.distributedmemory.utils.ServiceUtils;
 
 import java.util.List;
@@ -34,7 +34,7 @@ import butterknife.OnItemLongClick;
 import timber.log.Timber;
 
 
-public class HostGameActivity extends BaseActivity implements PlayerListListener {
+public class HostGameActivity extends BaseActivity {
 
 	@Inject ServiceUtils serviceUtils;
     @Inject HostGameManager hostGameManager;
@@ -44,18 +44,12 @@ public class HostGameActivity extends BaseActivity implements PlayerListListener
 
 	private final BroadcastReceiver serverStateReceiver = new ServerStateBroadcastReceiver();
 
-    private ArrayAdapter<Player> adapter;
-
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_host_game);
 		ButterKnife.inject(this);
-        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
-        ListView lv = (ListView)findViewById(R.id.playersList);
-        lv.setAdapter(adapter);
-        onListChanged();
 	}
 
 
@@ -64,35 +58,29 @@ public class HostGameActivity extends BaseActivity implements PlayerListListener
 		super.onResume();
 		registerReceiver(serverStateReceiver, new IntentFilter(HostService.ACTION_HOST_STATE_CHANGED));
 		toggleStartStopButtons(serviceUtils.isServiceRunning(HostService.class));
-        hostGameManager.registerPlayerListListener(this);
-        onListChanged();
+        NumberPicker np = (NumberPicker)findViewById(R.id.playerCountPicker);
+        np.setMinValue(2);
+        np.setMaxValue(100);
 	}
 
 
 	@Override
 	public void onPause() {
 		unregisterReceiver(serverStateReceiver);
-        hostGameManager.unregisterPlayerListListener();
 		super.onPause();
 	}
 
 
 	@OnClick(R.id.start_hosting)
 	public void startHosting() {
-        if(adapter.getCount() > 1) {
-            startHostingButton.setEnabled(false);
-
-            Intent hostIntent = new Intent(this, HostService.class);
-            startService(hostIntent);
-
-            Intent lobbyIntent = new Intent(this, LobbyActivity.class);
-            startActivity(lobbyIntent);
-        } else {
-            Toast errorToast = Toast.makeText(getApplicationContext(),
-                    "Players missing!",
-                    Toast.LENGTH_SHORT);
-            errorToast.show();
+        NumberPicker np = (NumberPicker)findViewById(R.id.playerCountPicker);
+        for(int i=0; i<np.getValue(); ++i) {
+            hostGameManager.addPlayer(new Player(i, "Player" + (i + 1)));
         }
+        Intent hostIntent = new Intent(this, HostService.class);
+        startService(hostIntent);
+        Intent lobbyIntent = new Intent(this, LobbyActivity.class);
+        startActivity(lobbyIntent);
 	}
 
 
@@ -103,63 +91,6 @@ public class HostGameActivity extends BaseActivity implements PlayerListListener
 		Intent hostIntent = new Intent(this, HostService.class);
 		stopService(hostIntent);
 	}
-
-
-    @OnItemLongClick(R.id.playersList)
-    public boolean removePlayer(final ListView lv, final int index) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Remove player?");
-
-        builder.setPositiveButton("Remove", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                hostGameManager.removePlayer(adapter.getItem(index));
-            }
-        });
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
-
-        builder.show();
-        return true;
-    }
-
-
-    @OnClick(R.id.add_player)
-    public void addPlayer() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Enter player name:");
-
-        final EditText input = new EditText(this);
-        input.setInputType(InputType.TYPE_CLASS_TEXT);
-        builder.setView(input);
-
-        builder.setPositiveButton("Add", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                String playerName = input.getText().toString();
-                if(!playerName.isEmpty()) {
-                    hostGameManager.addPlayer(playerName);
-                } else {
-                    Toast errorToast = Toast.makeText(getApplicationContext(),
-                            "Discarded invalid input!",
-                            Toast.LENGTH_SHORT);
-				errorToast.show();
-                }
-            }
-        });
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
-
-        builder.show();
-    }
 
 
 	private void toggleStartStopButtons(boolean serverRunning) {
@@ -179,13 +110,6 @@ public class HostGameActivity extends BaseActivity implements PlayerListListener
 	}
 
 
-    @Override
-    public void onListChanged() {
-        adapter.clear();
-		adapter.addAll(hostGameManager.getPlayers());
-    }
-
-
     private class ServerStateBroadcastReceiver extends BroadcastReceiver {
 
 		@Override
@@ -193,7 +117,5 @@ public class HostGameActivity extends BaseActivity implements PlayerListListener
 			boolean started = intent.getBooleanExtra(HostService.EXTRA_HOST_RUNNING, false);
 			toggleStartStopButtons(started);
 		}
-
 	}
-
 }

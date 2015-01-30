@@ -19,16 +19,32 @@
         android:layout_height="wrap_content"
         android:text="Stop hosting" />
 
-    <ListView
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:id="@+id/playersList"
-        android:layout_weight="1"></ListView>
+    <View
+    android:layout_width="fill_parent"
+    android:layout_height="2dp"
+    android:background="@android:color/darker_gray"/>
 
-    <Button
-        android:id="@+id/add_player"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Click to add player..." />
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:textSize="24sp"
+            android:gravity="center"
+            android:text="Players:"/>
+
+        <NumberPicker
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/playerCountPicker">
+
+            </NumberPicker>
+
+
+        </LinearLayout>
 
 </LinearLayout>

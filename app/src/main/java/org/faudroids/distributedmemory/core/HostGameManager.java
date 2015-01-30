@@ -39,9 +39,7 @@ public final class HostGameManager implements HostStateTransitionListener {
 	private final TreeMap<Integer, Device> devices = new TreeMap<>();
 
 	private final List<HostGameListener> hostGameListeners = new LinkedList<>();
-	private PlayerListListener playerListListener;
 
-	private int playerIdCounter = 0;
 	private int currentPlayerIdx;
 	private List<Player> players = new LinkedList<>();
     private TreeMap<Integer, Integer> playerPoints = new TreeMap<>();
@@ -55,7 +53,6 @@ public final class HostGameManager implements HostStateTransitionListener {
 		this.gameStateManager.registerStateTransitionListener(this);
 		this.messageWriter = messageWriter;
 		this.messageReader = messageReader;
-        setupPlayers();
 	}
 
 
@@ -69,11 +66,6 @@ public final class HostGameManager implements HostStateTransitionListener {
         // players.clear();
         playerPoints.clear();
 	}
-
-    private void setupPlayers() {
-        players.add(0, new Player(0, "Player1"));
-        players.add(1, new Player(1, "Player2"));
-    }
 
 
 	/**
@@ -180,30 +172,9 @@ public final class HostGameManager implements HostStateTransitionListener {
 	}
 
 
-    public void registerPlayerListListener(PlayerListListener listener) {
-        Assert.assertTrue(this.playerListListener == null, "already registered");
-        this.playerListListener = listener;
-    }
-
-
-    public void unregisterPlayerListListener() {
-        Assert.assertTrue(this.playerListListener != null, "not registered");
-        this.playerListListener = null;
-    }
-
-
-	public void addPlayer(String name) {
+	public void addPlayer(Player player) {
 		assertValidState(GameState.CONNECTING);
-		players.add(new Player(playerIdCounter, name));
-		++playerIdCounter;
-		playerListListener.onListChanged();
-	}
-
-
-	public void removePlayer(Player player) {
-		assertValidState(GameState.CONNECTING);
-		players.remove(player);
-		playerListListener.onListChanged();
+		players.add(player);
 	}
 
 
