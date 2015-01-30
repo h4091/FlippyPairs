@@ -105,7 +105,6 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 
 	public void stopGame() {
 		if (connectionHandler != null) connectionHandler.stop();
-		for (ClientGameListener listener : clientGameListeners) listener.onGameFinished();
 	}
 
 
@@ -198,6 +197,7 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 				// change state
 				if (!evaluation.getContinueGame()) {
 					gameStateManager.changeState(GameState.FINISHED);
+					for (ClientGameListener listener : clientGameListeners) listener.onGameFinished();
 					// delay closing of connection such that server can receive ack
 					handler.postDelayed(new Runnable() {
 						@Override
