@@ -131,15 +131,6 @@ public class LobbyActivity extends BaseActivity implements  HostGameListener {
 
 
 	private void onClientsChanged() {
-		// update waiting spinner and start game button
-		if (adapter.getCount() == 0) {
-			emptyView.setVisibility(View.VISIBLE);
-			startGameButton.setEnabled(false);
-		} else {
-			emptyView.setVisibility(View.GONE);
-			startGameButton.setEnabled(true);
-		}
-
 		// update clients list
 		adapter.clear();
 		boolean foundHostClient = false;
@@ -158,6 +149,15 @@ public class LobbyActivity extends BaseActivity implements  HostGameListener {
 			}
 		});
 		adapter.notifyDataSetChanged();
+
+		// update waiting spinner and start game button
+		if (adapter.getCount() == 0) {
+			emptyView.setVisibility(View.VISIBLE);
+			startGameButton.setEnabled(false);
+		} else {
+			emptyView.setVisibility(View.GONE);
+			startGameButton.setEnabled(true);
+		}
 	}
 
 
