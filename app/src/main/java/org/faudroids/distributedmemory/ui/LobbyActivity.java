@@ -108,6 +108,7 @@ public class LobbyActivity extends BaseActivity implements  HostGameListener {
 	public void onGameStarted() {
 		Intent intent = new Intent(this, GameActivity.class);
 		startActivity(intent);
+		finish();
 	}
 
 
