@@ -32,7 +32,7 @@ public interface ClientGameListener {
 	/**
 	 * Called when a new round is about to start.
 	 */
-	public void onNewRound();
+	public void onNewRound(Player currentPlayer, int playerPoints);
 
 
 	/**

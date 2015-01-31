@@ -223,9 +223,9 @@ public final class HostGameManager implements HostStateTransitionListener {
 				// update players
 				if (match) {
 					playerPoints.set(currentPlayerIdx, playerPoints.get(currentPlayerIdx) + 1);
+				} else {
+					currentPlayerIdx = (currentPlayerIdx + 1) % players.size();
 				}
-				currentPlayerIdx = (currentPlayerIdx + 1) % players.size();
-				int nextPlayerId = players.get(currentPlayerIdx).getId();
 
 
 				// send response and handle end of game
@@ -233,14 +233,14 @@ public final class HostGameManager implements HostStateTransitionListener {
 				GameState responseState;
 
 				if (match && closedCards.size() == 0) {
-					responseMsg = messageWriter.createEvaluationMessage(new Evaluation(true, false, nextPlayerId, playerPoints));
+					responseMsg = messageWriter.createEvaluationMessage(new Evaluation(true, false, currentPlayerIdx, playerPoints));
 					responseState = GameState.FINISHED;
 				} else if (match) {
-					responseMsg = messageWriter.createEvaluationMessage(new Evaluation(true, true, nextPlayerId, playerPoints));
+					responseMsg = messageWriter.createEvaluationMessage(new Evaluation(true, true, currentPlayerIdx, playerPoints));
 					responseState = GameState.SELECT_1ST_CARD;
 					// include next player
 				} else {
-					responseMsg = messageWriter.createEvaluationMessage(new Evaluation(false, true, nextPlayerId, playerPoints));
+					responseMsg = messageWriter.createEvaluationMessage(new Evaluation(false, true, currentPlayerIdx, playerPoints));
 					responseState = GameState.SELECT_1ST_CARD;
 				}
 				transitionState(responseState, responseMsg);

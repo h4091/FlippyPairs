@@ -150,7 +150,7 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
                 connectionHandler.sendMessage(messageWriter.createAck());
 				for (ClientGameListener listener : clientGameListeners) listener.onGameStarted();
 				gameStateManager.changeState(GameState.SELECT_1ST_CARD);
-				for (ClientGameListener listener : clientGameListeners) listener.onNewRound();
+				for (ClientGameListener listener : clientGameListeners) listener.onNewRound(players.get(currentPlayerIdx), playerPoints.get(currentPlayerIdx));
 				break;
 
 			case SELECT_1ST_CARD:
@@ -204,7 +204,7 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 					}, 100);
 				} else {
 					gameStateManager.changeState(GameState.SELECT_1ST_CARD);
-					for (ClientGameListener listener : clientGameListeners) listener.onNewRound();
+					for (ClientGameListener listener : clientGameListeners) listener.onNewRound(players.get(currentPlayerIdx), playerPoints.get(currentPlayerIdx));
 				}
 
 				connectionHandler.sendMessage(messageWriter.createAck());

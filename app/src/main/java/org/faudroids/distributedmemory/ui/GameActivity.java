@@ -151,13 +151,8 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 
 
 	@Override
-	public void onNewRound() {
-		List<Pair<Player, Integer>> leaderBoard = getLeaderBoard();
-		StringBuilder builder = new StringBuilder();
-		for (Pair<Player, Integer> pair : leaderBoard) {
-			builder.append(pair.first.getName()).append(" (").append(pair.second).append(") ");
-		}
-		Toast.makeText(this, builder.toString(), Toast.LENGTH_LONG).show();
+	public void onNewRound(Player currentPlayer, int playerPoints) {
+		Toast.makeText(this, currentPlayer.getName() + "'s turn (" + playerPoints + ")", Toast.LENGTH_SHORT).show();
 	}
 
 
