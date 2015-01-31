@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 
 import timber.log.Timber;
@@ -26,11 +27,14 @@ import timber.log.Timber;
 @Singleton
 public final class HostGameManager implements HostStateTransitionListener {
 
+	static final String TOTAL_CARD_IMAGES = "totalCardImages";
+
 	private final HostGameStateManager gameStateManager;
 
 	private final Map<Integer, Card> closedCards = new HashMap<>();
 	private final List<Card> selectedCards = new LinkedList<>();
 	private final Map<Integer, Card> matchedCards = new HashMap<>();
+	private final int totalCardImages;
 
 	private final MessageWriter messageWriter;
 	private final MessageReader messageReader;
@@ -47,11 +51,17 @@ public final class HostGameManager implements HostStateTransitionListener {
 	private final Handler handler = new Handler(Looper.getMainLooper());
 
 	@Inject
-	public HostGameManager(HostGameStateManager gameStateManager, MessageWriter messageWriter, MessageReader messageReader) {
+	public HostGameManager(
+			HostGameStateManager gameStateManager,
+			MessageWriter messageWriter,
+			MessageReader messageReader,
+			@Named(TOTAL_CARD_IMAGES) int totalCardImages) {
+
 		this.gameStateManager = gameStateManager;
 		this.gameStateManager.registerStateTransitionListener(this);
 		this.messageWriter = messageWriter;
 		this.messageReader = messageReader;
+		this.totalCardImages = totalCardImages;
 	}
 
 
@@ -102,17 +112,17 @@ public final class HostGameManager implements HostStateTransitionListener {
 		int pairsCount = 0;
 		for (Device device : devices.values()) pairsCount += device.getPairsCount();
         Timber.i("Pairs: " + pairsCount);
-		//Random rand = new Random();
 		int cardId = 0;
+		int cardValue = 0;
         for(int i = 0; i < pairsCount; ++i) {
-            //int randomValue = rand.nextInt(pairsCount*3);
-			closedCards.put(cardId, new Card(cardId, i));
+			closedCards.put(cardId, new Card(cardId, cardValue));
 			++cardId;
-			closedCards.put(cardId, new Card(cardId, i));
+			closedCards.put(cardId, new Card(cardId, cardValue));
 			++cardId;
+			cardValue = (cardValue + 1) % totalCardImages;
 
-            Timber.i("Added card " + i + " (" + (cardId - 2) + ")");
-			Timber.i("Added card " + i + " (" + (cardId - 1) + ")");
+            Timber.d("Added card " + i + " (" + (cardId - 2) + ")");
+			Timber.d("Added card " + i + " (" + (cardId - 1) + ")");
         }
 
 		// TODO race condition between connections being added and clients sending device info

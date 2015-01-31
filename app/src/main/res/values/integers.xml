@@ -4,4 +4,5 @@
     <integer name="grid_row_count">4</integer>
 
     <integer name="flip_card_half_duration">250</integer>
+    <integer name="card_images_count">10</integer>
 </resources>
