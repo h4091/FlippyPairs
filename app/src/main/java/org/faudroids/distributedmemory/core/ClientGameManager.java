@@ -122,7 +122,6 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 
 	public void selectCard(int cardId) {
 		selectedCards.put(cardId, closedCards.remove(cardId));
-		for (ClientGameListener listener : clientGameListeners) listener.onCardsChanged();
 		connectionHandler.sendMessage(messageWriter.createCardIdMessage(cardId));
 	}
 
@@ -180,16 +179,14 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 				// update cards
 				if (evaluation.getCardsMatched()) {
 					if (!selectedCards.isEmpty()) {
+						for (ClientGameListener listener : clientGameListeners) listener.onCardsMatch(selectedCards.values());
 						matchedCards.putAll(selectedCards);
 						selectedCards.clear();
-						for (ClientGameListener listener : clientGameListeners) listener.onCardsChanged();
-						for (ClientGameListener listener : clientGameListeners) listener.onCardsMatch();
 					}
 				} else {
 					if (!selectedCards.isEmpty()) {
+						for (ClientGameListener listener : clientGameListeners) listener.onCardsMismatch(selectedCards.values());
 						closedCards.putAll(selectedCards);
-						for (ClientGameListener listener : clientGameListeners) listener.onCardsChanged();
-						for (ClientGameListener listener : clientGameListeners) listener.onCardsMismatch();
 						selectedCards.clear();
 					}
 				}

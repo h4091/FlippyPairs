@@ -1,6 +1,8 @@
 package org.faudroids.distributedmemory.core;
 
 
+import java.util.Collection;
+
 public interface ClientGameListener {
 
 	/**
@@ -11,23 +13,20 @@ public interface ClientGameListener {
 
 
 	/**
-	 * Called when a local (!) card has change, e.g. from closed to opened or
-	 * from opened to matched. Use this to update the UI.
-	 */
-	public void onCardsChanged();
-
-
-	/**
 	 * Called when a local (!) card has been matched with either another local
 	 * card or a remote one. Use this to notify the user about the great news.
+	 * @param matchedCards Local (!) cards that matched. Can contain one or two
+	 *                     elements.
 	 */
-	public void onCardsMatch();
+	public void onCardsMatch(Collection<Card> matchedCards);
 
 
 	/**
 	 * Called when a local (!) card has failed to match with anther one.
+	 * @param mismatchedCards Local (!) cards that matched. Can contain one or two
+	 *                     elements.
 	 */
-	public void onCardsMismatch();
+	public void onCardsMismatch(Collection<Card> mismatchedCards);
 
 
 	/**

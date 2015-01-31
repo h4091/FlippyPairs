@@ -9,7 +9,6 @@ import android.util.Pair;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
-import android.view.animation.Interpolator;
 import android.widget.Button;
 import android.widget.GridLayout;
 import android.widget.Toast;
@@ -25,6 +24,7 @@ import org.faudroids.distributedmemory.core.GameState;
 import org.faudroids.distributedmemory.core.Player;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -81,7 +81,7 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 	public void onResume() {
 		super.onResume();
 		clientGameManager.registerClientGameListener(this);
-		onCardsChanged();
+		refreshAllCards();
 
 		if (clientGameManager.getCurrentState() == GameState.SETUP
 				|| clientGameManager.getCurrentState() == GameState.CONNECTING) {
@@ -122,7 +122,7 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 	@Override
 	public void onGameStarted() {
 		// setup cards
-		onCardsChanged();
+		refreshAllCards();
 
 		// cancel waiting dialog
 		waitingForHostDialog.cancel();
@@ -131,86 +131,21 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 
 
 	@Override
-	public void onCardsChanged() {
-		cards.clear();
-		Map<Integer, Card> matchedCards = clientGameManager.getMatchedCards();
-		Map<Integer, Card> selectedCards = clientGameManager.getSelectedCards();
-		cards.addAll(clientGameManager.getClosedCards().values());
-		cards.addAll(matchedCards.values());
-		cards.addAll(selectedCards.values());
-		Collections.sort(cards, new Comparator<Card>() {
-			@Override
-			public int compare(Card lhs, Card rhs) {
-				return Integer.valueOf(lhs.getId()).compareTo(rhs.getId());
-			}
-		});
-
-		// iterate over all cards and update UI accordingly
-		int xIdx = 0, yIdx = 0;
-		int columns = gridLayout.getColumnCount();
-		for (Card card : cards) {
-			Button button = (Button) gridLayout.getChildAt(xIdx + yIdx * columns);
-			button.setTag(R.id.cardId, card.getId());
-			button.setText(card.getValue() + " (" + card.getId() + ")");
-			if (matchedCards.containsKey(card.getId()) || selectedCards.containsKey(card.getId())) {
-				button.setEnabled(false);
-			} else {
-				button.setEnabled(true);
-			}
-			++xIdx;
-			if (xIdx >= columns) {
-				xIdx = 0;
-				++yIdx;
-			}
-		}
-	}
-
-    private void flipCard(final Button toFlip) {
-        Interpolator accelerator = new AccelerateInterpolator();
-
-        ObjectAnimator buttonFlipper = ObjectAnimator.ofFloat(toFlip, "rotationY", 0f, 180f);
-        buttonFlipper.setDuration(500);
-        buttonFlipper.setInterpolator(accelerator);
-
-        buttonFlipper.start();
-    }
-
-    private void backFlipCard(final Button toFlip) {
-        Interpolator decelerator = new DecelerateInterpolator();
-
-        ObjectAnimator backFlipper = ObjectAnimator.ofFloat(toFlip, "rotationY", -180f, 0f);
-        backFlipper.setDuration(500);
-        backFlipper.setInterpolator(decelerator);
-        toFlip.setEnabled(true);
-
-        backFlipper.start();
-    }
-
-	@Override
-	public void onCardsMatch() {
+	public void onCardsMatch(Collection<Card> matchedCards) {
 		Toast.makeText(this, "Match!", Toast.LENGTH_SHORT).show();
 	}
 
 
 	@Override
-	public void onCardsMismatch() {
-        Map<Integer, Card> selectedCards = clientGameManager.getSelectedCards();
-
-        int xIdx = 0, yIdx = 0;
-        int columns = gridLayout.getColumnCount();
-        for (Card card : cards) {
-            Button button = (Button) gridLayout.getChildAt(xIdx + yIdx * columns);
-            if (selectedCards.containsKey(card.getId())) {
-                backFlipCard(button);
-            }
-
-            ++xIdx;
-            if (xIdx >= columns) {
-                xIdx = 0;
-                ++yIdx;
-            }
-        }
-
+	public void onCardsMismatch(Collection<Card> mismatchedCards) {
+		for (Card card : mismatchedCards) {
+			for (int i = 0; i < gridLayout.getChildCount(); ++i) {
+				if (gridLayout.getChildAt(i).getTag(R.id.cardId).equals(card.getId())) {
+					backFlipCard((Button) gridLayout.getChildAt(i));
+					break;
+				}
+			}
+		}
 		Toast.makeText(this, "nope ...", Toast.LENGTH_SHORT).show();
 	}
 
@@ -289,6 +224,60 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 			}
 		});
 		return leaderBoard;
+	}
+
+
+	private void refreshAllCards() {
+		cards.clear();
+		Map<Integer, Card> matchedCards = clientGameManager.getMatchedCards();
+		Map<Integer, Card> selectedCards = clientGameManager.getSelectedCards();
+		cards.addAll(clientGameManager.getClosedCards().values());
+		cards.addAll(matchedCards.values());
+		cards.addAll(selectedCards.values());
+		Collections.sort(cards, new Comparator<Card>() {
+			@Override
+			public int compare(Card lhs, Card rhs) {
+				return Integer.valueOf(lhs.getId()).compareTo(rhs.getId());
+			}
+		});
+
+		// iterate over all cards and update UI accordingly
+		int xIdx = 0, yIdx = 0;
+		int columns = gridLayout.getColumnCount();
+		for (Card card : cards) {
+			Button button = (Button) gridLayout.getChildAt(xIdx + yIdx * columns);
+			button.setTag(R.id.cardId, card.getId());
+			button.setText(card.getValue() + " (" + card.getId() + ")");
+			if (matchedCards.containsKey(card.getId()) || selectedCards.containsKey(card.getId())) {
+				button.setEnabled(false);
+			} else {
+				button.setEnabled(true);
+			}
+			++xIdx;
+			if (xIdx >= columns) {
+				xIdx = 0;
+				++yIdx;
+			}
+		}
+	}
+
+
+	private void flipCard(final Button button) {
+		button.setEnabled(false);
+		ObjectAnimator buttonFlipper = ObjectAnimator.ofFloat(button, "rotationY", 0f, 180f);
+		buttonFlipper.setDuration(500);
+		buttonFlipper.setInterpolator(new AccelerateInterpolator());
+		buttonFlipper.start();
+	}
+
+
+	private void backFlipCard(final Button button) {
+		button.setEnabled(true);
+		ObjectAnimator backFlipper = ObjectAnimator.ofFloat(button, "rotationY", -180f, 0f);
+		backFlipper.setDuration(500);
+		backFlipper.setInterpolator(new DecelerateInterpolator());
+		button.setEnabled(true);
+		backFlipper.start();
 	}
 
 }
