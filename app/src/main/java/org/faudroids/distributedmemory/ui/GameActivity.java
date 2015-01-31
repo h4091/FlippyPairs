@@ -4,13 +4,14 @@ import android.animation.ObjectAnimator;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Pair;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
-import android.widget.Button;
 import android.widget.GridLayout;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.google.common.collect.Lists;
@@ -41,6 +42,7 @@ import timber.log.Timber;
 public class GameActivity extends BaseActivity implements ClientGameListener, View.OnClickListener {
 
 	@Inject ClientGameManager clientGameManager;
+	@Inject BitmapCache bitmapCache;
 
 	private ProgressDialog waitingForHostDialog;
 	private final List<Card> cards = new ArrayList<>();
@@ -60,7 +62,7 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 		// fill grid layout with buttons
 		for (int column = 0; column < columnCount; ++column) {
 			for (int row = 0; row < rowCount; ++row) {
-                Button button = new Button(this);
+                ImageButton button = new ImageButton(this);
                 button.setOnClickListener(this);
 				gridLayout.addView(
 						button,
@@ -141,7 +143,7 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 		for (Card card : mismatchedCards) {
 			for (int i = 0; i < gridLayout.getChildCount(); ++i) {
 				if (gridLayout.getChildAt(i).getTag(R.id.cardId).equals(card.getId())) {
-					backFlipCard((Button) gridLayout.getChildAt(i));
+					backFlipCard(gridLayout.getChildAt(i));
 					break;
 				}
 			}
@@ -198,9 +200,8 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 			return;
 		}
 
-		Button button = (Button) view;
-        flipCard(button);
-		int cardId = (int) button.getTag(R.id.cardId);
+        flipCard(view);
+		int cardId = (int) view.getTag(R.id.cardId);
 		clientGameManager.selectCard(cardId);
 	}
 
@@ -240,9 +241,10 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 		int xIdx = 0, yIdx = 0;
 		int columns = gridLayout.getColumnCount();
 		for (Card card : cards) {
-			Button button = (Button) gridLayout.getChildAt(xIdx + yIdx * columns);
+			Bitmap bitmap = bitmapCache.getBitmap(card.getValue() + ".png");
+			ImageButton button = (ImageButton) gridLayout.getChildAt(xIdx + yIdx * columns);
 			button.setTag(R.id.cardId, card.getId());
-			button.setText(card.getValue() + " (" + card.getId() + ")");
+			button.setImageBitmap(bitmap);
 			if (matchedCards.containsKey(card.getId()) || selectedCards.containsKey(card.getId())) {
 				button.setEnabled(false);
 			} else {
@@ -257,21 +259,21 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 	}
 
 
-	private void flipCard(final Button button) {
-		button.setEnabled(false);
-		ObjectAnimator buttonFlipper = ObjectAnimator.ofFloat(button, "rotationY", 0f, 180f);
+	private void flipCard(View view) {
+		view.setEnabled(false);
+		ObjectAnimator buttonFlipper = ObjectAnimator.ofFloat(view, "rotationY", 0f, 180f);
 		buttonFlipper.setDuration(500);
 		buttonFlipper.setInterpolator(new AccelerateInterpolator());
 		buttonFlipper.start();
 	}
 
 
-	private void backFlipCard(final Button button) {
-		button.setEnabled(true);
-		ObjectAnimator backFlipper = ObjectAnimator.ofFloat(button, "rotationY", -180f, 0f);
+	private void backFlipCard(View view) {
+		view.setEnabled(true);
+		ObjectAnimator backFlipper = ObjectAnimator.ofFloat(view, "rotationY", -180f, 0f);
 		backFlipper.setDuration(500);
 		backFlipper.setInterpolator(new DecelerateInterpolator());
-		button.setEnabled(true);
+		view.setEnabled(true);
 		backFlipper.start();
 	}
 
