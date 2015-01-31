@@ -36,7 +36,7 @@ final class ClientUtils {
 				* context.getResources().getInteger(R.integer.grid_row_count);
 
 		clientGameManager.initGame();
-		clientGameManager.registerDevice(connectionHandler, Build.DEVICE, cardsCount / 2);
+		clientGameManager.registerDevice(connectionHandler, Build.MODEL, cardsCount / 2);
 	}
 
 }
