@@ -13,13 +13,15 @@
     <string name="activity_host_game_game_name_title">Game Name</string>
     <string name="activity_host_game_game_name_hint">Your Game Name</string>
 
+    <string name="activity_lobby_start_game">Start game</string>
+    <string name="activity_lobby_searching">Searching for clients …</string>
     <string name="activity_lobby_back_pressed_title">Host is running</string>
     <string name="activity_lobby_back_pressed_message">Do you want to stop the current game?</string>
 
     <string name="activity_game_back_pressed_title">Game is running</string>
     <string name="activity_game_back_pressed_message">Do you want to stop the current game?</string>
 
-    <string name="activity_join_game_searching">Searching for games ...</string>
+    <string name="activity_join_game_searching">Searching for games …</string>
 
     <string name="btn_stop">Stop</string>
     <string name="btn_continue">Continue</string>

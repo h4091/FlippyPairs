@@ -9,6 +9,7 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
@@ -34,6 +35,7 @@ public class LobbyActivity extends BaseActivity implements  HostGameListener {
 
 	@Inject HostGameManager hostGameManager;
 	@InjectView(R.id.peers_list) ListView peersList;
+	@InjectView(R.id.empty) View emptyView;
 	private ArrayAdapter<String> adapter;
     private final BroadcastReceiver serverStateReceiver = new ServerStateBroadcastReceiver();
 
@@ -66,6 +68,7 @@ public class LobbyActivity extends BaseActivity implements  HostGameListener {
         super.onResume();
         registerReceiver(serverStateReceiver, new IntentFilter(HostService.ACTION_HOST_STATE_CHANGED));
         hostGameManager.registerHostGameListener(this);
+		toggleEmptyView();
     }
 
 	@Override
@@ -100,7 +103,7 @@ public class LobbyActivity extends BaseActivity implements  HostGameListener {
         List<Device> devices = hostGameManager.getConnectedDevices();
         for (Device d : devices) adapter.add(d.getName());
         adapter.notifyDataSetChanged();
-        Timber.i("Called refresh and found " + adapter.getCount() + " elements");
+		toggleEmptyView();
     }
 
 
@@ -117,12 +120,25 @@ public class LobbyActivity extends BaseActivity implements  HostGameListener {
 
 
 	@Override
-	public void onClientLost(Device device) { }
+	public void onClientLost(Device device) {
+		toggleEmptyView();
+	}
 
 
 	@Override
 	protected List<Object> getModules() {
 		return Lists.<Object>newArrayList(new UiModule());
+	}
+
+
+	private void toggleEmptyView() {
+		if (adapter.getCount() == 0) {
+			Timber.d("showing empty view");
+			emptyView.setVisibility(View.VISIBLE);
+		} else {
+			Timber.d("hiding empty view");
+			emptyView.setVisibility(View.GONE);
+		}
 	}
 
 
@@ -135,5 +151,6 @@ public class LobbyActivity extends BaseActivity implements  HostGameListener {
                 finish();
             }
         }
+
     }
 }

@@ -1,15 +1,40 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
                 style="@style/MainLayout">
 
     <Button
         android:id="@+id/start_game"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Start game" />
+        android:text="@string/activity_lobby_start_game" />
 
     <ListView
         android:id="@+id/peers_list"
         android:layout_width="wrap_content"
-        android:layout_height="match_parent" />
+        android:layout_height="wrap_content"
+        android:layout_below="@id/start_game"/>
 
-</LinearLayout>
+    <LinearLayout android:id="@+id/empty"
+                  android:layout_below="@id/peers_list"
+                  android:layout_centerInParent="true"
+                  android:layout_width="wrap_content"
+                  android:layout_height="match_parent"
+                  android:orientation="horizontal">
+
+        <ProgressBar
+            android:layout_gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="20dp"
+            style="?android:attr/progressBarStyleLarge"
+            tools:ignore="RtlHardcoded"/>
+
+        <TextView
+            android:layout_gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/activity_join_game_searching"/>
+
+    </LinearLayout>
+
+</RelativeLayout>
