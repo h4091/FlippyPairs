@@ -40,6 +40,8 @@ import timber.log.Timber;
 
 public class GameActivity extends BaseActivity implements ClientGameListener, View.OnClickListener {
 
+	private static final String FILE_NAME_CARD_BACK = "card_back.png";
+
 	@Inject ClientGameManager clientGameManager;
 	@Inject BitmapCache bitmapCache;
 
@@ -261,7 +263,7 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 			Bitmap bitmap = bitmapCache.getBitmap(card.getValue() + ".png");
 			ImageButton button = (ImageButton) gridLayout.getChildAt(xIdx + yIdx * columns);
 			button.setTag(R.id.cardId, card.getId());
-			if (clientGameManager.getClosedCards().containsKey(card.getId())) button.setImageBitmap(bitmapCache.getBitmap("9.png")); // TODO show back of card here
+			if (clientGameManager.getClosedCards().containsKey(card.getId())) button.setImageBitmap(bitmapCache.getBitmap(FILE_NAME_CARD_BACK));
 			else button.setImageBitmap(bitmap);
 			if (matchedCards.containsKey(card.getId()) || selectedCards.containsKey(card.getId())) {
 				button.setEnabled(false);
@@ -305,7 +307,7 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 
 			@Override
 			public void onAnimationEnd(Animation animation) {
-				button.setImageBitmap(bitmapCache.getBitmap("9.png")); // TODO show back of card here
+				button.setImageBitmap(bitmapCache.getBitmap(FILE_NAME_CARD_BACK));
 				button.startAnimation(stopFlipAnimation);
 			}
 
