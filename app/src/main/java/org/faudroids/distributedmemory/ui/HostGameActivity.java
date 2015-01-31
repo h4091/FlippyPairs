@@ -4,7 +4,10 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.InputFilter;
+import android.text.Spanned;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.NumberPicker;
 import android.widget.TextView;
 
@@ -28,6 +31,7 @@ public class HostGameActivity extends BaseActivity {
 
     @Inject HostGameManager hostGameManager;
 	@InjectView(R.id.player_count_value) TextView playerCountValue;
+	@InjectView(R.id.game_name_value) TextView gameNameValue;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -52,7 +56,6 @@ public class HostGameActivity extends BaseActivity {
 		numberPicker.setMaxValue(100);
 		numberPicker.setWrapSelectorWheel(false);
 
-
 		new AlertDialog.Builder(this)
 				.setView(numberPickerLayout)
 				.setTitle(R.string.activity_host_game_players_count_title)
@@ -60,6 +63,27 @@ public class HostGameActivity extends BaseActivity {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						playerCountValue.setText(String.valueOf(numberPicker.getValue()));
+					}
+				})
+				.setNegativeButton(android.R.string.cancel, null)
+				.show();
+	}
+
+
+	@OnClick(R.id.game_name_value)
+	public void changeGameName() {
+		View inputLayout = getLayoutInflater().inflate(R.layout.dialog_input_text, null);
+		final EditText editText = (EditText) inputLayout.findViewById(R.id.edit_text);
+		editText.setFilters(new InputFilter[]{new GameNameInputFilter()});
+		editText.setText(gameNameValue.getText());
+
+		new AlertDialog.Builder(this)
+				.setView(inputLayout)
+				.setTitle(R.string.activity_host_game_game_name_title)
+				.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						gameNameValue.setText(editText.getText().toString());
 					}
 				})
 				.setNegativeButton(android.R.string.cancel, null)
@@ -86,5 +110,19 @@ public class HostGameActivity extends BaseActivity {
 		return Lists.<Object>newArrayList(new UiModule());
 	}
 
+
+	/**
+	 * Host game name must contain only letters since it is used for Nsd Network discovery.
+	 */
+	private static final class GameNameInputFilter implements InputFilter {
+
+		@Override
+		public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
+			if (source.equals("")) return source;
+			if (source.toString().matches("[a-zA-Z]+")) return source;
+			return "";
+		}
+
+	}
 
 }

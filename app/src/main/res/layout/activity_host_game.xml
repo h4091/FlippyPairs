@@ -42,7 +42,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="end"
-            android:text="Awesome Game"
+            android:text="@string/default_game_name"
             android:layout_gravity="end"
             android:freezesText="true"/>
 
