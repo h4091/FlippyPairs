@@ -99,6 +99,7 @@ public class JoinGameActivity extends BaseListActivity implements ClientNetworkL
 
 		Intent intent = new Intent(this, GameActivity.class);
 		startActivity(intent);
+		finish();
 	}
 
 
