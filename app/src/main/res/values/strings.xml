@@ -15,6 +15,7 @@
 
     <string name="activity_lobby_start_game">Start game</string>
     <string name="activity_lobby_searching">Searching for clients …</string>
+    <string name="activity_lobby_host_client">%1$s (you)</string>
     <string name="activity_lobby_back_pressed_title">Host is running</string>
     <string name="activity_lobby_back_pressed_message">Do you want to stop the current game?</string>
 

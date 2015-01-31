@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -22,6 +23,7 @@ import org.faudroids.distributedmemory.core.Device;
 import org.faudroids.distributedmemory.core.HostGameListener;
 import org.faudroids.distributedmemory.core.HostGameManager;
 
+import java.util.Comparator;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -100,10 +102,6 @@ public class LobbyActivity extends BaseActivity implements  HostGameListener {
 
 	@Override
 	public void onClientAdded(Device device) {
-        adapter.clear();
-        List<Device> devices = hostGameManager.getConnectedDevices();
-        for (Device d : devices) adapter.add(d.getName());
-        adapter.notifyDataSetChanged();
 		onClientsChanged();
     }
 
@@ -133,6 +131,7 @@ public class LobbyActivity extends BaseActivity implements  HostGameListener {
 
 
 	private void onClientsChanged() {
+		// update waiting spinner and start game button
 		if (adapter.getCount() == 0) {
 			emptyView.setVisibility(View.VISIBLE);
 			startGameButton.setEnabled(false);
@@ -140,6 +139,25 @@ public class LobbyActivity extends BaseActivity implements  HostGameListener {
 			emptyView.setVisibility(View.GONE);
 			startGameButton.setEnabled(true);
 		}
+
+		// update clients list
+		adapter.clear();
+		boolean foundHostClient = false;
+		for (Device device : hostGameManager.getConnectedDevices()) {
+			String clientName = device.getName();
+			if (!foundHostClient && clientName.equals(Build.MODEL)) {
+				foundHostClient = true;
+				clientName = getString(R.string.activity_lobby_host_client, clientName);
+			}
+			adapter.add(clientName);
+		}
+		adapter.sort(new Comparator<String>() {
+			@Override
+			public int compare(String lhs, String rhs) {
+				return lhs.compareTo(rhs);
+			}
+		});
+		adapter.notifyDataSetChanged();
 	}
 
 
