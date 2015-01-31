@@ -12,6 +12,7 @@ import android.widget.Toast;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Lists;
 
+import org.faudroids.distributedmemory.R;
 import org.faudroids.distributedmemory.common.BaseListActivity;
 import org.faudroids.distributedmemory.network.ClientNetworkListener;
 import org.faudroids.distributedmemory.network.ConnectionHandler;
@@ -34,6 +35,7 @@ public class JoinGameActivity extends BaseListActivity implements ClientNetworkL
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_join_game);
 
 		adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
 		setListAdapter(adapter);

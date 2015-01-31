@@ -19,6 +19,8 @@
     <string name="activity_game_back_pressed_title">Game is running</string>
     <string name="activity_game_back_pressed_message">Do you want to stop the current game?</string>
 
+    <string name="activity_join_game_searching">Searching for games ...</string>
+
     <string name="btn_stop">Stop</string>
     <string name="btn_continue">Continue</string>
 
