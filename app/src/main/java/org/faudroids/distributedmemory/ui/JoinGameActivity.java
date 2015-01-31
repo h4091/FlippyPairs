@@ -54,6 +54,8 @@ public class JoinGameActivity extends BaseListActivity implements ClientNetworkL
 	public void onResume() {
 		super.onResume();
 		networkManager.startDiscovery(this, new Handler(getMainLooper()));
+		adapter.clear();
+		adapter.notifyDataSetChanged();
 	}
 
 
