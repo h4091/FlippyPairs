@@ -1,39 +1,51 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 style="@style/MainLayout">
 
+
+    <GridLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:columnCount="2"
+        android:rowCount="2">
+
+        <TextView
+            android:id="@+id/player_count_description"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="start"
+            android:text="Number of players:"/>
+
+        <TextView
+            android:id="@+id/player_count_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="end"
+            android:text="2"
+            android:layout_gravity="end"
+            android:freezesText="true"/>
+
+        <TextView
+            android:id="@+id/game_name_description"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Game Name"
+            android:gravity="start"/>
+
+        <TextView
+            android:id="@+id/game_name_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="end"
+            android:text="@string/default_game_name"
+            android:layout_gravity="end"
+            android:freezesText="true"/>
+
+    </GridLayout>
+
     <Button
         android:id="@+id/start_hosting"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Start hosting" />
-
-
-    <View
-    android:layout_width="fill_parent"
-    android:layout_height="2dp"
-    android:background="@android:color/darker_gray"/>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:orientation="horizontal">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:textSize="24sp"
-            android:gravity="center"
-            android:text="Players:"/>
-
-        <NumberPicker
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/playerCountPicker">
-
-            </NumberPicker>
-
-
-        </LinearLayout>
 
 </LinearLayout>
