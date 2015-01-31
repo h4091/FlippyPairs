@@ -80,6 +80,7 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 				button.setScaleType(ImageView.ScaleType.FIT_CENTER);
 				button.setOnClickListener(this);
 				button.setAdjustViewBounds(true);
+				button.setBackgroundResource(0);
 				tableRow.addView(button);
 			}
 			tableLayout.addView(tableRow);
