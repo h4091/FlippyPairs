@@ -2,4 +2,5 @@
 <resources>
     <integer name="grid_column_count">4</integer>
     <integer name="grid_row_count">8</integer>
+    <integer name="flip_card_half_duration">250</integer>
 </resources>

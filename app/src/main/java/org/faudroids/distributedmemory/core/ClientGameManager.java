@@ -179,13 +179,13 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 				// update cards
 				if (evaluation.getCardsMatched()) {
 					if (!selectedCards.isEmpty()) {
-						for (ClientGameListener listener : clientGameListeners) listener.onCardsMatch(selectedCards.values());
+						for (ClientGameListener listener : clientGameListeners) listener.onCardsMatch(new LinkedList<>(selectedCards.values()));
 						matchedCards.putAll(selectedCards);
 						selectedCards.clear();
 					}
 				} else {
 					if (!selectedCards.isEmpty()) {
-						for (ClientGameListener listener : clientGameListeners) listener.onCardsMismatch(selectedCards.values());
+						for (ClientGameListener listener : clientGameListeners) listener.onCardsMismatch(new LinkedList<>(selectedCards.values()));
 						closedCards.putAll(selectedCards);
 						selectedCards.clear();
 					}
