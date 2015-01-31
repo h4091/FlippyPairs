@@ -6,6 +6,8 @@
     <string name="menu_test_game">Test Game</string>
     <string name="submit_id">Will they match?</string>
 
+    <string name="activity_host_game_players_count_title">Number of players</string>
+
     <string name="activity_game_back_pressed_title">Game is running</string>
     <string name="activity_game_back_pressed_message">Do you want to stop the current game?</string>
     <string name="activity_game_back_pressed_stop">Stop</string>

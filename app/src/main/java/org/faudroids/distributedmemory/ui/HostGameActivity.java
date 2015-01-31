@@ -1,9 +1,12 @@
 package org.faudroids.distributedmemory.ui;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.Button;
+import android.view.View;
 import android.widget.NumberPicker;
+import android.widget.TextView;
 
 import com.google.common.collect.Lists;
 
@@ -11,7 +14,6 @@ import org.faudroids.distributedmemory.R;
 import org.faudroids.distributedmemory.common.BaseActivity;
 import org.faudroids.distributedmemory.core.HostGameManager;
 import org.faudroids.distributedmemory.core.Player;
-import org.faudroids.distributedmemory.utils.ServiceUtils;
 
 import java.util.List;
 
@@ -24,11 +26,8 @@ import butterknife.OnClick;
 
 public class HostGameActivity extends BaseActivity {
 
-	@Inject ServiceUtils serviceUtils;
     @Inject HostGameManager hostGameManager;
-
-	@InjectView(R.id.start_hosting) Button startHostingButton;
-
+	@InjectView(R.id.player_count_value) TextView playerCountValue;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -39,26 +38,41 @@ public class HostGameActivity extends BaseActivity {
 
 
 	@Override
-	public void onResume() {
-		super.onResume();
-        NumberPicker np = (NumberPicker)findViewById(R.id.playerCountPicker);
-        np.setMinValue(2);
-        np.setMaxValue(100);
+	public void onPause() {
+		super.onPause();
 	}
 
 
-	@Override
-	public void onPause() {
-		super.onPause();
+	@OnClick(R.id.player_count_value)
+	public void changePlayerCount() {
+		View numberPickerLayout = getLayoutInflater().inflate(R.layout.dialog_number_picker, null);
+		final NumberPicker numberPicker = (NumberPicker) numberPickerLayout.findViewById(R.id.number_picker);
+		numberPicker.setValue(Integer.valueOf(playerCountValue.getText().toString()));
+		numberPicker.setMinValue(2);
+		numberPicker.setMaxValue(100);
+		numberPicker.setWrapSelectorWheel(false);
+
+
+		new AlertDialog.Builder(this)
+				.setView(numberPickerLayout)
+				.setTitle(R.string.activity_host_game_players_count_title)
+				.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						playerCountValue.setText(String.valueOf(numberPicker.getValue()));
+					}
+				})
+				.setNegativeButton(android.R.string.cancel, null)
+				.show();
 	}
 
 
 	@OnClick(R.id.start_hosting)
 	public void startHosting() {
 		hostGameManager.initGame();
-        NumberPicker np = (NumberPicker)findViewById(R.id.playerCountPicker);
-        for(int i=0; i < np.getValue(); ++i) {
-            hostGameManager.addPlayer(new Player(i, "Player" + (i + 1)));
+		int playerCount = Integer.valueOf(playerCountValue.getText().toString());
+        for(int i=0; i < playerCount; ++i) {
+            hostGameManager.addPlayer(new Player(i, "Player " + (i + 1)));
         }
         Intent hostIntent = new Intent(this, HostService.class);
         startService(hostIntent);
