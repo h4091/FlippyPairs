@@ -1,6 +1,5 @@
 package org.faudroids.distributedmemory.ui;
 
-import android.animation.ObjectAnimator;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
@@ -8,8 +7,8 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Pair;
 import android.view.View;
-import android.view.animation.AccelerateInterpolator;
-import android.view.animation.DecelerateInterpolator;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.GridLayout;
 import android.widget.ImageButton;
 import android.widget.Toast;
@@ -49,6 +48,9 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 
 	@InjectView(R.id.cards_grid) GridLayout gridLayout;
 
+	private Animation startFlipAnimation;
+	private Animation stopFlipAnimation;
+
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -71,6 +73,21 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 								GridLayout.spec(column, 1)));
 			}
 		}
+
+		startFlipAnimation = AnimationUtils.loadAnimation(this, R.anim.flip_to_middle);
+		stopFlipAnimation = AnimationUtils.loadAnimation(this, R.anim.flip_from_middle);
+		startFlipAnimation.setAnimationListener(new Animation.AnimationListener() {
+			@Override
+			public void onAnimationStart(Animation animation) {  }
+
+			@Override
+			public void onAnimationEnd(Animation animation) {
+
+			}
+
+			@Override
+			public void onAnimationRepeat(Animation animation) { }
+		});
 	}
 
 	@Override
@@ -143,7 +160,7 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 		for (Card card : mismatchedCards) {
 			for (int i = 0; i < gridLayout.getChildCount(); ++i) {
 				if (gridLayout.getChildAt(i).getTag(R.id.cardId).equals(card.getId())) {
-					backFlipCard(gridLayout.getChildAt(i));
+					backFlipCard((ImageButton) gridLayout.getChildAt(i));
 					break;
 				}
 			}
@@ -200,8 +217,8 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 			return;
 		}
 
-        flipCard(view);
 		int cardId = (int) view.getTag(R.id.cardId);
+        flipCard((ImageButton) view, clientGameManager.getClosedCards().get(cardId));
 		clientGameManager.selectCard(cardId);
 	}
 
@@ -244,7 +261,8 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 			Bitmap bitmap = bitmapCache.getBitmap(card.getValue() + ".png");
 			ImageButton button = (ImageButton) gridLayout.getChildAt(xIdx + yIdx * columns);
 			button.setTag(R.id.cardId, card.getId());
-			button.setImageBitmap(bitmap);
+			if (clientGameManager.getClosedCards().containsKey(card.getId())) button.setImageBitmap(bitmapCache.getBitmap("9.png")); // TODO show back of card here
+			else button.setImageBitmap(bitmap);
 			if (matchedCards.containsKey(card.getId()) || selectedCards.containsKey(card.getId())) {
 				button.setEnabled(false);
 			} else {
@@ -259,22 +277,45 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 	}
 
 
-	private void flipCard(View view) {
-		view.setEnabled(false);
-		ObjectAnimator buttonFlipper = ObjectAnimator.ofFloat(view, "rotationY", 0f, 180f);
-		buttonFlipper.setDuration(500);
-		buttonFlipper.setInterpolator(new AccelerateInterpolator());
-		buttonFlipper.start();
+	private void flipCard(final ImageButton button, final Card card) {
+		startFlipAnimation.setAnimationListener(new Animation.AnimationListener() {
+			@Override
+			public void onAnimationStart(Animation animation) {  }
+
+			@Override
+			public void onAnimationEnd(Animation animation) {
+				button.setImageBitmap(bitmapCache.getBitmap(card.getValue() + ".png"));
+				button.startAnimation(stopFlipAnimation);
+			}
+
+			@Override
+			public void onAnimationRepeat(Animation animation) {  }
+		});
+
+		button.setEnabled(false);
+		button.clearAnimation();
+		button.startAnimation(startFlipAnimation);
 	}
 
 
-	private void backFlipCard(View view) {
-		view.setEnabled(true);
-		ObjectAnimator backFlipper = ObjectAnimator.ofFloat(view, "rotationY", -180f, 0f);
-		backFlipper.setDuration(500);
-		backFlipper.setInterpolator(new DecelerateInterpolator());
-		view.setEnabled(true);
-		backFlipper.start();
+	private void backFlipCard(final ImageButton button) {
+		startFlipAnimation.setAnimationListener(new Animation.AnimationListener() {
+			@Override
+			public void onAnimationStart(Animation animation) {  }
+
+			@Override
+			public void onAnimationEnd(Animation animation) {
+				button.setImageBitmap(bitmapCache.getBitmap("9.png")); // TODO show back of card here
+				button.startAnimation(stopFlipAnimation);
+			}
+
+			@Override
+			public void onAnimationRepeat(Animation animation) {  }
+		});
+
+		button.setEnabled(true);
+		button.clearAnimation();
+		button.startAnimation(startFlipAnimation);
 	}
 
 }
