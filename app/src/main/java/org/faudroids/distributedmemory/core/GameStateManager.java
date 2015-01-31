@@ -11,7 +11,7 @@ class GameStateManager {
 
 	@Inject
 	public GameStateManager() {
-		reset();
+		currentState = GameState.FINISHED;
 	}
 
 

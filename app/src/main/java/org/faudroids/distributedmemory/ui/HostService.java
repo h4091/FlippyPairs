@@ -13,7 +13,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Lists;
 
 import org.faudroids.distributedmemory.common.BaseService;
-import org.faudroids.distributedmemory.core.ClientGameManager;
 import org.faudroids.distributedmemory.core.Device;
 import org.faudroids.distributedmemory.core.HostGameListener;
 import org.faudroids.distributedmemory.core.HostGameManager;
@@ -35,7 +34,7 @@ public final class HostService extends BaseService {
 	static final String ACTION_HOST_STATE_CHANGED = "org.faudroids.distributedmemory.ACTION_HOST_STATE_CHANGED";
 	static final String EXTRA_HOST_RUNNING = "EXTRA_HOST_RUNNING";
 
-	private final HostNetworkListener networkListener = new NetworkListener();
+	private final HostNetworkListener<JsonNode> networkListener = new NetworkListener();
 	private final HostGameListener gameListener = new GameListener();
 
 
@@ -43,7 +42,6 @@ public final class HostService extends BaseService {
 	@Inject NotificationManager notificationManager;
 	@Inject NotificationUtils notificationUtils;
 	@Inject HostGameManager hostGameManager;
-	@Inject ClientGameManager clientGameManager;
 	@Inject ClientUtils clientUtils;
 
 
@@ -74,7 +72,7 @@ public final class HostService extends BaseService {
 		notificationManager.cancel(NOTIFICATION_ID);
 		if (networkManager.isServerRunning()) networkManager.stopServer();
 		hostGameManager.unregisterHostGameListener(gameListener);
-		if (hostGameManager.isGameRunning()) hostGameManager.stopGame();
+		hostGameManager.stopGame();
 		sendHostStoppedBroadcast();
 		super.onDestroy();
 	}
@@ -114,7 +112,7 @@ public final class HostService extends BaseService {
 			Notification notification = notificationUtils.createOngoingNotification(
 					"Game Running",
 					"You are hosting a distributed memory game!",
-					HostGameActivity.class);
+					LobbyActivity.class);
 			notificationManager.notify(NOTIFICATION_ID, notification);
 
 			// start local client

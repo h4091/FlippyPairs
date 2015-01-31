@@ -46,6 +46,16 @@ public class LobbyActivity extends BaseActivity implements  HostGameListener {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
+		// if this activity is called from the host notification and game is running, go to client screen instead
+		if (hostGameManager.isGameRunning()) {
+			Intent intent = new Intent(this, GameActivity.class);
+			intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+			startActivity(intent);
+			finish();
+			return;
+		}
+
 		setContentView(R.layout.activity_lobby);
 		ButterKnife.inject(this);
 		adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);

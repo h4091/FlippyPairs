@@ -144,8 +144,12 @@ public final class HostGameManager implements HostStateTransitionListener {
 	}
 
 
+	/**
+	 * Returns true if {@link #startGame()} has been called and the game is not yet finished,
+	 * false otherwise.
+	 */
 	public boolean isGameRunning() {
-		return gameStateManager.getState() != GameState.FINISHED;
+		return gameStateManager.getState() != GameState.CONNECTING && gameStateManager.getState() != GameState.FINISHED;
 	}
 
 
