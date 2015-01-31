@@ -9,10 +9,13 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Pair;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.GridLayout;
 import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.Toast;
 
 import com.google.common.collect.Lists;
@@ -29,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -50,7 +54,7 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 	private ProgressDialog waitingForHostDialog;
 	private final List<Card> cards = new ArrayList<>();
 
-	@InjectView(R.id.cards_grid) GridLayout gridLayout;
+	@InjectView(R.id.cards_grid) TableLayout tableLayout;
 
 	private boolean animationRunning = false;
 	private Handler handler;
@@ -67,18 +71,21 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 		int columnCount = getResources().getInteger(R.integer.grid_column_count);
 
 		// fill grid layout with buttons
-		for (int column = 0; column < columnCount; ++column) {
-			for (int row = 0; row < rowCount; ++row) {
-                ImageButton button = new ImageButton(this);
-                button.setOnClickListener(this);
-				gridLayout.addView(
-						button,
-						new GridLayout.LayoutParams(
-								GridLayout.spec(row, 1),
-								GridLayout.spec(column, 1)));
+		TableLayout.LayoutParams tableLayoutParams = new TableLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, 0, 1);
+		for (int row = 0; row < rowCount; ++row) {
+			TableRow tableRow = new TableRow(this);
+			tableRow.setLayoutParams(tableLayoutParams);
+			for (int column = 0; column < columnCount; ++column) {
+				ImageButton button = new ImageButton(this);
+				button.setScaleType(ImageView.ScaleType.FIT_CENTER);
+				button.setOnClickListener(this);
+				button.setAdjustViewBounds(true);
+				tableRow.addView(button);
 			}
+			tableLayout.addView(tableRow);
 		}
 	}
+
 
 	@Override
 	protected List<Object> getModules() {
@@ -151,11 +158,16 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 			@Override
 			public void run() {
 				for (Card card : mismatchedCards) {
-					for (int i = 0; i < gridLayout.getChildCount(); ++i) {
-						if (gridLayout.getChildAt(i).getTag(R.id.cardId).equals(card.getId())) {
-							flipCard((ImageButton) gridLayout.getChildAt(i), FILE_NAME_CARD_BACK, true);
-							startAnimationTimer();
-							break;
+					for (int row = 0; row < tableLayout.getChildCount(); ++row) {
+						TableRow rowView = (TableRow) tableLayout.getChildAt(row);
+						for (int column = 0; column < rowView.getChildCount(); ++column) {
+							ImageButton button = (ImageButton) rowView.getChildAt(column);
+							if (button.getTag(R.id.cardId).equals(card.getId())) {
+								flipCard(button, FILE_NAME_CARD_BACK, true);
+								startAnimationTimer();
+								break;
+							}
+
 						}
 					}
 				}
@@ -260,24 +272,24 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 		});
 
 		// iterate over all cards and update UI accordingly
-		int xIdx = 0, yIdx = 0;
-		int columns = gridLayout.getColumnCount();
-		for (Card card : cards) {
-			Bitmap bitmap;
-			if (clientGameManager.getClosedCards().containsKey(card.getId())) bitmap = bitmapCache.getBitmap(FILE_NAME_CARD_BACK);
-			else bitmap = bitmapCache.getBitmap(card.getValue() + ".png");
-			ImageButton button = (ImageButton) gridLayout.getChildAt(xIdx + yIdx * columns);
-			button.setTag(R.id.cardId, card.getId());
-			button.setImageBitmap(bitmap);
-			if (matchedCards.containsKey(card.getId()) || selectedCards.containsKey(card.getId())) {
-				button.setEnabled(false);
-			} else {
-				button.setEnabled(true);
-			}
-			++xIdx;
-			if (xIdx >= columns) {
-				xIdx = 0;
-				++yIdx;
+		Iterator<Card> cardIterator = cards.iterator();
+		for (int row = 0; row < tableLayout.getChildCount(); ++row) {
+			TableRow rowView = (TableRow) tableLayout.getChildAt(row);
+			for (int column = 0; column < rowView.getChildCount(); ++column) {
+				Card card = cardIterator.next();
+
+				Bitmap bitmap;
+				if (clientGameManager.getClosedCards().containsKey(card.getId())) bitmap = bitmapCache.getBitmap(FILE_NAME_CARD_BACK);
+				else bitmap = bitmapCache.getBitmap(card.getValue() + ".png");
+				ImageButton button = (ImageButton) rowView.getChildAt(column);
+				button.setTag(R.id.cardId, card.getId());
+				button.setImageBitmap(bitmap);
+				if (matchedCards.containsKey(card.getId()) || selectedCards.containsKey(card.getId())) {
+					button.setEnabled(false);
+				} else {
+					button.setEnabled(true);
+				}
+
 			}
 		}
 	}
