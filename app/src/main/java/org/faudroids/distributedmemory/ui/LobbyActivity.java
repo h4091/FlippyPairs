@@ -11,6 +11,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 
 import com.google.common.collect.Lists;
@@ -28,12 +29,12 @@ import javax.inject.Inject;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
-import timber.log.Timber;
 
 
 public class LobbyActivity extends BaseActivity implements  HostGameListener {
 
 	@Inject HostGameManager hostGameManager;
+	@InjectView(R.id.start_game) Button startGameButton;
 	@InjectView(R.id.peers_list) ListView peersList;
 	@InjectView(R.id.empty) View emptyView;
 	private ArrayAdapter<String> adapter;
@@ -68,7 +69,7 @@ public class LobbyActivity extends BaseActivity implements  HostGameListener {
         super.onResume();
         registerReceiver(serverStateReceiver, new IntentFilter(HostService.ACTION_HOST_STATE_CHANGED));
         hostGameManager.registerHostGameListener(this);
-		toggleEmptyView();
+		onClientsChanged();
     }
 
 	@Override
@@ -103,7 +104,7 @@ public class LobbyActivity extends BaseActivity implements  HostGameListener {
         List<Device> devices = hostGameManager.getConnectedDevices();
         for (Device d : devices) adapter.add(d.getName());
         adapter.notifyDataSetChanged();
-		toggleEmptyView();
+		onClientsChanged();
     }
 
 
@@ -121,7 +122,7 @@ public class LobbyActivity extends BaseActivity implements  HostGameListener {
 
 	@Override
 	public void onClientLost(Device device) {
-		toggleEmptyView();
+		onClientsChanged();
 	}
 
 
@@ -131,13 +132,13 @@ public class LobbyActivity extends BaseActivity implements  HostGameListener {
 	}
 
 
-	private void toggleEmptyView() {
+	private void onClientsChanged() {
 		if (adapter.getCount() == 0) {
-			Timber.d("showing empty view");
 			emptyView.setVisibility(View.VISIBLE);
+			startGameButton.setEnabled(false);
 		} else {
-			Timber.d("hiding empty view");
 			emptyView.setVisibility(View.GONE);
+			startGameButton.setEnabled(true);
 		}
 	}
 
