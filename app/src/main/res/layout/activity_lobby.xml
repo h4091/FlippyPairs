@@ -33,7 +33,7 @@
             android:layout_gravity="center"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/activity_join_game_searching"/>
+            android:text="@string/activity_lobby_searching"/>
 
     </LinearLayout>
 
