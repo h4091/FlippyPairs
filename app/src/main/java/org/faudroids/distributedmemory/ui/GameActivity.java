@@ -277,6 +277,7 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 		for (int row = 0; row < tableLayout.getChildCount(); ++row) {
 			TableRow rowView = (TableRow) tableLayout.getChildAt(row);
 			for (int column = 0; column < rowView.getChildCount(); ++column) {
+				if (!cardIterator.hasNext()) break;
 				Card card = cardIterator.next();
 
 				Bitmap bitmap;
