@@ -107,8 +107,8 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 		new AlertDialog.Builder(this)
 				.setTitle(R.string.activity_game_back_pressed_title)
 				.setMessage(R.string.activity_game_back_pressed_message)
-				.setPositiveButton(R.string.activity_game_back_pressed_continue, null)
-				.setNegativeButton(R.string.activity_game_back_pressed_stop, new DialogInterface.OnClickListener() {
+				.setPositiveButton(R.string.btn_continue, null)
+				.setNegativeButton(R.string.btn_stop, new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						clientGameManager.stopGame();

@@ -1,8 +1,10 @@
 package org.faudroids.distributedmemory.ui;
 
-import android.content.Intent;
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.view.Menu;
@@ -71,6 +73,24 @@ public class LobbyActivity extends BaseActivity implements  HostGameListener {
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.activity_lobby, menu);
 		return true;
+	}
+
+
+	@Override
+	public void onBackPressed() {
+		new AlertDialog.Builder(this)
+				.setTitle(R.string.activity_lobby_back_pressed_title)
+				.setMessage(R.string.activity_lobby_back_pressed_message)
+				.setPositiveButton(R.string.btn_continue, null)
+				.setNegativeButton(R.string.btn_stop, new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						Intent intent = new Intent(LobbyActivity.this, HostService.class);
+						stopService(intent);
+						finish();
+					}
+				})
+				.show();
 	}
 
 
