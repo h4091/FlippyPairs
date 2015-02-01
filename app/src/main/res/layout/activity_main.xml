@@ -19,26 +19,26 @@
 
         <Button
             android:id="@+id/host_game"
-            android:text="Host Game"
+            android:text="@string/activity_main_btn_host_game"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 
         <Button
             android:id="@+id/join_game"
-            android:text="Join Game"
+            android:text="@string/activity_main_btn_join_game"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 
         <Button
             android:id="@+id/help_game"
-            android:text="Help me!"
+            android:text="@string/activity_main_help"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 
 
         <Button
             android:id="@+id/about_game"
-            android:text="About"
+            android:text="@string/activity_main_about"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 

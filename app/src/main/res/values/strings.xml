@@ -17,6 +17,11 @@
 
     <string name="default_game_name">AwesomeGame</string>
 
+    <string name="activity_main_btn_host_game">Host Game</string>
+    <string name="activity_main_btn_join_game">Join Game</string>
+    <string name="activity_main_help">Help</string>
+    <string name="activity_main_about">About</string>
+
     <string name="activity_host_game_players_count_title">Number of players</string>
     <string name="activity_host_game_players_count_players">players</string>
     <string name="activity_host_game_game_name_title">Game Name</string>
