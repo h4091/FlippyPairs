@@ -28,7 +28,7 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 	private final Map<Integer, Card> matchedCards = new HashMap<>();
 	private final Map<Integer, Card> selectedCards = new HashMap<>();
 
-	private int currentPlayerIdx;
+    private int currentPlayerIdx;
 	private final List<Player> players = new LinkedList<>();
 	private final List<Integer> playerPoints = new LinkedList<>();
 
@@ -71,6 +71,11 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 		connectionHandler.registerMessageListener(this, new Handler(Looper.myLooper()));
 		connectionHandler.start();
 	}
+
+
+    public int getCurrentPlayerIdx() {
+        return currentPlayerIdx;
+    }
 
 
 	public GameState getCurrentState() {

@@ -102,6 +102,11 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 		clientGameManager.registerClientGameListener(this);
 		refreshAllCards();
 
+        String currentPlayerName;
+        currentPlayerName = clientGameManager.getPlayers().get(clientGameManager
+                .getCurrentPlayerIdx()).getName();
+        setTitle(currentPlayerName + "'s turn");
+
 		if (clientGameManager.getCurrentState() == GameState.SETUP
 				|| clientGameManager.getCurrentState() == GameState.CONNECTING) {
 
@@ -151,16 +156,18 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 	public void onGameStarted() {
 		// setup cards
 		refreshAllCards();
-
 		// cancel waiting dialog
 		waitingForHostDialog.cancel();
 		waitingForHostDialog = null;
+        //Update actionbar
+        String currentPlayerName;
+        currentPlayerName = clientGameManager.getPlayers().get(clientGameManager
+                .getCurrentPlayerIdx()).getName();
+        setTitle(currentPlayerName);
 	}
-
 
 	@Override
 	public void onCardsMatch(Collection<Card> matchedCards) {
-		Toast.makeText(this, "Match!", Toast.LENGTH_SHORT).show();
 	}
 
 
@@ -187,13 +194,12 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 		}, 2000);
 
 		animationRunning = true; // disable click events until back animation is finished
-		Toast.makeText(this, "nope ...", Toast.LENGTH_SHORT).show();
 	}
 
 
 	@Override
 	public void onNewRound(Player currentPlayer, int playerPoints) {
-		Toast.makeText(this, currentPlayer.getName() + "'s turn (" + playerPoints + ")", Toast.LENGTH_SHORT).show();
+        setTitle(currentPlayer.getName() + "'s turn");
 	}
 
 
