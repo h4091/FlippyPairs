@@ -13,13 +13,15 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="start"
-            android:text="Number of players:"/>
+            android:text="Number of players:"
+            android:textSize="@dimen/menu_text_size"/>
 
         <TextView
             android:id="@+id/player_count_value"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="end"
+            android:textSize="@dimen/menu_text_size"
             android:text="2"
             android:layout_gravity="end"
             android:freezesText="true"/>
@@ -28,6 +30,7 @@
             android:id="@+id/game_name_description"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textSize="@dimen/menu_text_size"
             android:text="Game Name"
             android:gravity="start"/>
 
@@ -35,6 +38,7 @@
             android:id="@+id/game_name_value"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textSize="@dimen/menu_text_size"
             android:gravity="end"
             android:text="@string/default_game_name"
             android:layout_gravity="end"
