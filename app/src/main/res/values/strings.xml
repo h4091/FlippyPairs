@@ -7,6 +7,11 @@
     <string name="host_game_activity_title">Host game</string>
     <string name="join_game_activity_title">Join game</string>
 
+    <string name="missing_wifi_alert_title">Missing Wifi connection</string>
+    <string name="missing_wifi_alert">In order to play you have to be connected to
+        a Wifi network. If there is no network available you can also create your own hot-spot. Do
+        you want to open Wifi settings?</string>
+
     <string name="menu_test_game">Test Game</string>
     <string name="submit_id">Will they match?</string>
 
@@ -30,5 +35,7 @@
 
     <string name="btn_stop">Stop</string>
     <string name="btn_continue">Continue</string>
+    <string name="btn_yes">Yes</string>
+    <string name="btn_no">No</string>
 
 </resources>
