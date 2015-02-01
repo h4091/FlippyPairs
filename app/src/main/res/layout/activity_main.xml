@@ -7,23 +7,47 @@
         android:layout_height="wrap_content"
         android:src="@drawable/logo"/>
 
-    <LinearLayout
-        android:layout_width="match_parent"
+    <RelativeLayout
+        android:id="@+id/relative_layout_main"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:orientation="vertical">
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true">
 
         <Button
-            android:id="@+id/host_game"
-            android:text="Host Game"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:id="@+id/about_game"
+            android:text="About"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_alignParentBottom="true" />
+
+        <Button
+            android:id="@+id/help_game"
+            android:text="Help me!"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_above="@id/about_game"/>
 
         <Button
             android:id="@+id/join_game"
             android:text="Join Game"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-    </LinearLayout>
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_above="@id/help_game"/>
+
+        <Button
+            android:id="@+id/host_game"
+            android:text="Host Game"
+            android:layout_centerHorizontal="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@id/join_game"/>
+
+
+
+    </RelativeLayout>
 
 </RelativeLayout>
