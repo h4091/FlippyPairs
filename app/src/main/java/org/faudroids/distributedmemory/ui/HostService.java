@@ -58,8 +58,8 @@ public final class HostService extends BaseService {
 		hostGameManager.registerHostGameListener(gameListener);
 
 		Notification notification = notificationUtils.createOngoingNotification(
-				"Game starting",
-				"Distributed memory game is about to be hosted ...",
+				getString(R.string.service_host_starting_title),
+				getString(R.string.service_host_start_message),
 				R.drawable.ic_notify_host,
 				HostGameActivity.class);
 		notificationManager.notify(NOTIFICATION_ID, notification);
@@ -119,10 +119,10 @@ public final class HostService extends BaseService {
 			Context context = HostService.this;
 			Intent stopGameIntent = new Intent(ACTION_STOP_GAME);
 			PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, stopGameIntent, 0);
-			NotificationUtils.Action action = new NotificationUtils.Action(R.drawable.ic_notify_host_stop, getString(R.string.service_host_stop_game), pendingIntent);
+			NotificationUtils.Action action = new NotificationUtils.Action(R.drawable.ic_notify_host_stop, getString(R.string.service_host_running_stop), pendingIntent);
 			Notification notification = notificationUtils.createOngoingNotification(
-					"Game Running",
-					"You are hosting a distributed memory game!",
+					getString(R.string.service_host_running_title),
+					getString(R.string.service_host_running_message),
 					R.drawable.ic_notify_host,
 					LobbyActivity.class,
 					Arrays.asList(action));

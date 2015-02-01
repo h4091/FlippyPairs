@@ -22,7 +22,11 @@
     <string name="activity_host_game_game_name_title">Game Name</string>
     <string name="activity_host_game_game_name_hint">Your Game Name</string>
 
-    <string name="service_host_stop_game">Stop game</string>
+    <string name="service_host_starting_title">Game starting</string>
+    <string name="service_host_start_message">Distributed memory game is about to be hosted …</string>
+    <string name="service_host_running_title">Game Running</string>
+    <string name="service_host_running_message">You are hosting a distributed memory game!</string>
+    <string name="service_host_running_stop">Stop game</string>
 
     <string name="activity_lobby_start_game">Start game</string>
     <string name="activity_lobby_searching">Searching for clients …</string>
