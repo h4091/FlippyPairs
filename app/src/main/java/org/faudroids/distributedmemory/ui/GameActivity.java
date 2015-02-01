@@ -1,6 +1,7 @@
 package org.faudroids.distributedmemory.ui;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
@@ -16,7 +17,6 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
-import android.widget.Toast;
 
 import com.google.common.collect.Lists;
 
@@ -123,6 +123,8 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 			};
 			waitingForHostDialog.show();
 		}
+
+		if (clientGameManager.getCurrentState() == GameState.FINISHED) finish();
 	}
 
 
@@ -226,7 +228,24 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 
 	@Override
 	public void onHostLost() {
-		Toast.makeText(this, "Lost connection to host, shutting down game!", Toast.LENGTH_LONG).show();
+		Dialog dialog = new AlertDialog.Builder(this)
+				.setTitle(R.string.activity_game_host_error_title)
+				.setMessage(R.string.activity_game_host_error_message)
+				.setIcon(R.drawable.ic_action_error)
+				.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						finish();
+					}
+				})
+				.create();
+		dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+			@Override
+			public void onDismiss(DialogInterface dialog) {
+				finish();
+			}
+		});
+		dialog.show();
 	}
 
 

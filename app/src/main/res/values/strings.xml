@@ -39,6 +39,8 @@
     <string name="activity_game_waiting_message">Waiting for host to start the game. Maybe giving him a cookie will make him work faster?</string>
     <string name="activity_game_back_pressed_title">Game is running</string>
     <string name="activity_game_back_pressed_message">Do you want to stop the current game?</string>
+    <string name="activity_game_host_error_title">Lost connection to host</string>
+    <string name="activity_game_host_error_message">There seems to be a problem reaching the host. Has he or another player left the game?</string>
 
     <string name="activity_join_game_searching">Searching for games …</string>
 

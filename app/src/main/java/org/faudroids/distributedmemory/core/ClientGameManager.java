@@ -226,6 +226,7 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 	public void onConnectionError() {
 		// if already finished this is expected as connections are being closed
 		if (gameStateManager.getState() == GameState.FINISHED) return;
+		gameStateManager.setEndState();
 		for (ClientGameListener listener : clientGameListeners) listener.onHostLost();
 	}
 

@@ -33,4 +33,9 @@ class GameStateManager {
 		this.currentState = state;
 	}
 
+
+	public void setEndState() {
+		this.currentState = GameState.FINISHED;
+	}
+
 }
