@@ -12,6 +12,7 @@ import android.widget.Toast;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Lists;
 
+import org.faudroids.distributedmemory.R;
 import org.faudroids.distributedmemory.common.BaseService;
 import org.faudroids.distributedmemory.core.Device;
 import org.faudroids.distributedmemory.core.HostGameListener;
@@ -54,6 +55,7 @@ public final class HostService extends BaseService {
 		Notification notification = notificationUtils.createOngoingNotification(
 				"Game starting",
 				"Distributed memory game is about to be hosted ...",
+				R.drawable.ic_notify_host,
 				HostGameActivity.class);
 		notificationManager.notify(NOTIFICATION_ID, notification);
 
@@ -112,6 +114,7 @@ public final class HostService extends BaseService {
 			Notification notification = notificationUtils.createOngoingNotification(
 					"Game Running",
 					"You are hosting a distributed memory game!",
+					R.drawable.ic_notify_host,
 					LobbyActivity.class);
 			notificationManager.notify(NOTIFICATION_ID, notification);
 

@@ -6,8 +6,6 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 
-import org.faudroids.distributedmemory.R;
-
 import javax.inject.Inject;
 
 public final class NotificationUtils {
@@ -23,6 +21,7 @@ public final class NotificationUtils {
 	public Notification createOngoingNotification(
 			String title,
 			String message,
+			int iconResource,
 			Class<?> activityClass) {
 
 		Intent intent = new Intent(context, activityClass);
@@ -30,7 +29,7 @@ public final class NotificationUtils {
 		return new Notification.Builder(context)
 				.setContentTitle(title)
 				.setContentText(message)
-				.setSmallIcon(R.drawable.ic_launcher)
+				.setSmallIcon(iconResource)
 				.setOngoing(true)
 				.setContentIntent(PendingIntent.getActivity(context, 1000, intent, PendingIntent.FLAG_UPDATE_CURRENT))
 				.build();
