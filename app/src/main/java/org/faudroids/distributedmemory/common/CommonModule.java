@@ -3,6 +3,7 @@ package org.faudroids.distributedmemory.common;
 
 import android.app.NotificationManager;
 import android.content.Context;
+import android.net.ConnectivityManager;
 import android.net.nsd.NsdManager;
 import android.os.Looper;
 
@@ -48,6 +49,13 @@ public final class CommonModule {
 	@Singleton
 	NsdManager provideNsdManager(Context context) {
 		return (NsdManager) context.getSystemService(Context.NSD_SERVICE);
+	}
+
+
+	@Provides
+	@Singleton
+	ConnectivityManager provideConnectivityManager(Context context) {
+		return (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
 	}
 
 }
