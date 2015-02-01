@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.node.TextNode;
 interface MessageConstants {
 
 	static final JsonNode MSG_ACK = new TextNode("MSG_ACK");
+	static final JsonNode MSG_BACKOFF = new TextNode("MSG_BACKOFF");
 
 	static final String
 			KEY_CARD_ID = "cardId",

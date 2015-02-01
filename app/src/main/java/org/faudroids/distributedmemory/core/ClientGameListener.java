@@ -42,6 +42,13 @@ public interface ClientGameListener {
 
 
 	/**
+	 * Indicates that the host was unable to process the last request (e.g. select a card).
+	 * Client should refresh the UI to get a confirmed state.
+	 */
+	public void onHostBusy();
+
+
+	/**
 	 * There was an error communicating with the host.
 	 */
 	public void onHostLost();

@@ -23,6 +23,11 @@ final class MessageReader implements MessageConstants {
 	}
 
 
+	public boolean isBackoffMessage(JsonNode msg) {
+		return msg.equals(MSG_BACKOFF);
+	}
+
+
 	public Device readDeviceInfoMessage(JsonNode msg) {
 		try {
 			return mapper.treeToValue(msg, Device.class);

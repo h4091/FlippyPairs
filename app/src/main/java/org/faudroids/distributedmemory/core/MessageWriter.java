@@ -23,6 +23,11 @@ final class MessageWriter implements MessageConstants {
 	}
 
 
+	public JsonNode createBackoffMessage() {
+		return MSG_BACKOFF;
+	}
+
+
 	/**
 	 * Message about device details.
 	 */

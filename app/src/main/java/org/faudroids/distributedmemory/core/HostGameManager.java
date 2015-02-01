@@ -86,7 +86,7 @@ public final class HostGameManager implements HostStateTransitionListener {
 
 		int deviceId = connectionHandlers.size();
 		connectionHandlers.put(deviceId, connectionHandler);
-		connectionHandler.registerMessageListener(new HostMessageListener(deviceId), handler);
+		connectionHandler.registerMessageListener(new HostMessageListener(deviceId, connectionHandler), handler);
 		connectionHandler.start();
 		connectionHandler.sendMessage(messageWriter.createAck()); // chicken and egg problem otherwise?
 		Timber.i("Adding connection handler with id " + deviceId);
@@ -191,9 +191,6 @@ public final class HostGameManager implements HostStateTransitionListener {
 	}
 
 
-	/**
-	 * Select one card and transition to the next state
-	 */
 	private void selectCard(int cardId, GameState selectionState) {
 		assertValidState(selectionState);
 		Card card = closedCards.remove(cardId);
@@ -241,7 +238,6 @@ public final class HostGameManager implements HostStateTransitionListener {
 					currentPlayerIdx = (currentPlayerIdx + 1) % players.size();
 				}
 
-
 				// send response and handle end of game
 				JsonNode responseMsg;
 				GameState responseState;
@@ -281,9 +277,11 @@ public final class HostGameManager implements HostStateTransitionListener {
 	private final class HostMessageListener implements ConnectionHandler.MessageListener<JsonNode> {
 
 		private final int deviceId;
+		private final ConnectionHandler<JsonNode> connectionHandler;
 
-		public HostMessageListener(int deviceId) {
+		public HostMessageListener(int deviceId, ConnectionHandler<JsonNode> connectionHandler) {
 			this.deviceId = deviceId;
+			this.connectionHandler = connectionHandler;
 		}
 
 
@@ -294,6 +292,12 @@ public final class HostGameManager implements HostStateTransitionListener {
 			// if ack than take note and do nothing
 			if (messageReader.isAck(msg)) {
 				gameStateManager.onAckReceived();
+				return;
+			}
+
+			// message other than ack while others might not have sent ack --> backoff
+			if (!gameStateManager.isStateTransitionComplete()) {
+				connectionHandler.sendMessage(messageWriter.createBackoffMessage());
 				return;
 			}
 

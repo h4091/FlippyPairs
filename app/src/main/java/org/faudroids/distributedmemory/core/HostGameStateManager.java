@@ -50,6 +50,7 @@ final class HostGameStateManager extends GameStateManager {
 		stateTransition = new HostStateTransition(new HostStateTransitionListener() {
 			@Override
 			public void onTransitionFinished(GameState nextState) {
+				stateTransition = null;
 				changeState(nextState);
 				if (stateTransitionListener != null) stateTransitionListener.onTransitionFinished(nextState);
 			}
@@ -59,10 +60,8 @@ final class HostGameStateManager extends GameStateManager {
 
 
 	public boolean onAckReceived() {
-		Assert.assertTrue(stateTransition != null, "no state transition in progress");
-		boolean transitionComplete = stateTransition.onAckReceived();
-		if (transitionComplete) stateTransition = null;
-		return transitionComplete;
+		Assert.assertTrue(stateTransition != null && !stateTransition.isComplete(), "no state transition in progress");
+		return stateTransition.onAckReceived();
 	}
 
 

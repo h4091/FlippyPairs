@@ -168,22 +168,28 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 
 	@Override
 	public void onCardsMismatch(final Collection<Card> mismatchedCards) {
+		final List<ImageButton> buttons = new LinkedList<>();
+		for (Card card : mismatchedCards) {
+			for (int row = 0; row < tableLayout.getChildCount(); ++row) {
+				TableRow rowView = (TableRow) tableLayout.getChildAt(row);
+				for (int column = 0; column < rowView.getChildCount(); ++column) {
+					ImageButton button = (ImageButton) rowView.getChildAt(column);
+					if (button.getTag(R.id.cardId).equals(card.getId())) {
+						button.setTag(R.id.cardBackFlipDelayed, true);
+						buttons.add(button);
+					}
+
+				}
+			}
+		}
+
 		handler.postDelayed(new Runnable() {
 			@Override
 			public void run() {
-				for (Card card : mismatchedCards) {
-					for (int row = 0; row < tableLayout.getChildCount(); ++row) {
-						TableRow rowView = (TableRow) tableLayout.getChildAt(row);
-						for (int column = 0; column < rowView.getChildCount(); ++column) {
-							ImageButton button = (ImageButton) rowView.getChildAt(column);
-							if (button.getTag(R.id.cardId).equals(card.getId())) {
-								flipCard(button, FILE_NAME_CARD_BACK, true);
-								startAnimationTimer();
-								break;
-							}
-
-						}
-					}
+				for (ImageButton button : buttons) {
+					button.setTag(R.id.cardBackFlipDelayed, false);
+					flipCard(button, FILE_NAME_CARD_BACK, true);
+					startAnimationTimer();
 				}
 			}
 		}, 2000);
@@ -216,13 +222,19 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 								finish();
 							}
 						})
-								.setOnCancelListener(new DialogInterface.OnCancelListener() {
-							@Override
-							public void onCancel(DialogInterface dialog) {
-								finish();
-							}
-						})
+				.setOnCancelListener(new DialogInterface.OnCancelListener() {
+					@Override
+					public void onCancel(DialogInterface dialog) {
+						finish();
+					}
+				})
 				.show();
+	}
+
+
+	@Override
+	public void onHostBusy() {
+		refreshAllCards();
 	}
 
 
@@ -301,6 +313,8 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 			}
 		});
 
+		if (cards.size() != 0 && cards.size() != 3 * 4 && cards.size() != 6 * 5) throw new RuntimeException("gotten " + cards.size() + " cards!");
+
 		// iterate over all cards and update UI accordingly
 		Iterator<Card> cardIterator = cards.iterator();
 		for (int row = 0; row < tableLayout.getChildCount(); ++row) {
@@ -308,21 +322,26 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 			for (int column = 0; column < rowView.getChildCount(); ++column) {
 				if (!cardIterator.hasNext()) break;
 				Card card = cardIterator.next();
+				ImageButton button = (ImageButton) rowView.getChildAt(column);
+				boolean backFlipDelayed = Boolean.TRUE.equals(button.getTag(R.id.cardBackFlipDelayed));
 
 				Bitmap bitmap;
-				if (clientGameManager.getClosedCards().containsKey(card.getId())) bitmap = bitmapCache.getBitmap(FILE_NAME_CARD_BACK);
+				if (!backFlipDelayed && clientGameManager.getClosedCards().containsKey(card.getId())) bitmap = bitmapCache.getBitmap(FILE_NAME_CARD_BACK);
 				else bitmap = bitmapCache.getBitmap(card.getValue() + ".png");
-				ImageButton button = (ImageButton) rowView.getChildAt(column);
 				button.setTag(R.id.cardId, card.getId());
+				Animation animation = button.getAnimation();
+				if (animation != null) animation.setAnimationListener(null);
+				button.clearAnimation();
 				button.setImageBitmap(bitmap);
+
 				if (matchedCards.containsKey(card.getId()) || selectedCards.containsKey(card.getId())) {
 					button.setEnabled(false);
 				} else {
 					button.setEnabled(true);
 				}
-
 			}
 		}
+		animationRunning = false;
 	}
 
 
@@ -330,6 +349,7 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 		Player player = clientGameManager.getCurrentPlayer();
 		if (player != null) setTitle(getString(R.string.activity_game_current_player, player.getName()));
 	}
+
 
 	private void flipCard(final ImageButton button, final String newCardFileName, boolean enable) {
 		Animation startFlipAnimation = AnimationUtils.loadAnimation(this, R.anim.flip_to_middle);

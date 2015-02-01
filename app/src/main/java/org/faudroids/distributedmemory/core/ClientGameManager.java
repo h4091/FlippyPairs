@@ -130,14 +130,19 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 
 
 	public void selectCard(int cardId) {
-		selectedCards.put(cardId, closedCards.remove(cardId));
 		connectionHandler.sendMessage(messageWriter.createCardIdMessage(cardId));
+		// update local card maps only when receiving confirmation from host
 	}
 
 
 	@Override
 	public void onNewMessage(JsonNode msg) {
-		Timber.i("received msg from host" + msg);
+		Timber.d("received msg from host" + msg);
+		if (messageReader.isBackoffMessage(msg)) {
+			for (ClientGameListener listener : clientGameListeners) listener.onHostBusy();
+			return;
+		}
+
 		switch(gameStateManager.getState()) {
 			case CONNECTING:
 				connectionHandler.sendMessage(messageWriter.createDeviceInfoMessage(device));
@@ -164,14 +169,16 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 
 			case SELECT_1ST_CARD:
 				int card1Id = messageReader.readCardIdMessage(msg);
-				Timber.i("selected first card with id " + card1Id);
+				if (closedCards.containsKey(card1Id)) selectedCards.put(card1Id, closedCards.remove(card1Id));
+				Timber.d("selected first card with id " + card1Id);
 				connectionHandler.sendMessage(messageWriter.createAck());
 				gameStateManager.changeState(GameState.SELECT_2ND_CARD);
 				break;
 
 			case SELECT_2ND_CARD:
 				int card2Id = messageReader.readCardIdMessage(msg);
-				Timber.i("selected second card with id " + card2Id);
+				if (closedCards.containsKey(card2Id)) selectedCards.put(card2Id, closedCards.remove(card2Id));
+				Timber.d("selected second card with id " + card2Id);
 				connectionHandler.sendMessage(messageWriter.createAck());
 				gameStateManager.changeState(GameState.UPDATE_CARDS);
 				break;
