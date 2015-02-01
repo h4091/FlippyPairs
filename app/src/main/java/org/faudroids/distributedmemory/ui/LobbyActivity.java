@@ -8,8 +8,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -55,8 +53,6 @@ public class LobbyActivity extends BaseActivity implements  HostGameListener {
 			finish();
 			return;
 		}
-
-        setTitle(R.string.lobby_activity_title);
 
 		setContentView(R.layout.activity_lobby);
 		ButterKnife.inject(this);

@@ -3,9 +3,9 @@
 
     <string name="app_name">Flippy Pairs</string>
 
-    <string name="lobby_activity_title">Game Lobby</string>
-    <string name="host_game_activity_title">Host game</string>
-    <string name="join_game_activity_title">Join game</string>
+    <string name="activity_lobby_title">Game Lobby</string>
+    <string name="activity_host_game_title">Host game</string>
+    <string name="activity_join_game_title">Join game</string>
 
     <string name="missing_wifi_alert_title">Missing Wifi connection</string>
     <string name="missing_wifi_alert">In order to play you have to be connected to
