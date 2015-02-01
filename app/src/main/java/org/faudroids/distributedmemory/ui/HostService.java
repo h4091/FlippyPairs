@@ -31,6 +31,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import timber.log.Timber;
+
 public final class HostService extends BaseService {
 
 	private static final int NOTIFICATION_ID = 422;
@@ -148,7 +150,8 @@ public final class HostService extends BaseService {
 
 		@Override
 		public void onConnectedToClient(ConnectionHandler<JsonNode> connectionHandler) {
-			hostGameManager.addDevice(connectionHandler);
+			if (!hostGameManager.isGameRunning()) hostGameManager.addDevice(connectionHandler);
+			else Timber.w("Dropping client join request as game has already started");
 		}
 
 		@Override
