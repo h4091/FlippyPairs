@@ -3,6 +3,7 @@ package org.faudroids.distributedmemory.ui;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
@@ -104,11 +105,20 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 		if (clientGameManager.getCurrentState() == GameState.SETUP
 				|| clientGameManager.getCurrentState() == GameState.CONNECTING) {
 
-			waitingForHostDialog = ProgressDialog.show(
+                ProgressDialog.show(
 					this,
 					"Waiting for host",
 					"Waiting for host to start the game. Maybe giving him a cookie will make him work faster?",
-					false);
+					false, true,
+                        new DialogInterface.OnCancelListener(){
+                        @Override
+                        public void onCancel(DialogInterface dialog) {
+                            clientGameManager.stopGame();
+                            Intent intent = new Intent(GameActivity.this, JoinGameActivity.class);
+                            startActivity(intent);
+                            finish();
+                        }
+                    });
 		}
 	}
 
@@ -122,18 +132,18 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 
 	@Override
 	public void onBackPressed() {
-		new AlertDialog.Builder(this)
-				.setTitle(R.string.activity_game_back_pressed_title)
-				.setMessage(R.string.activity_game_back_pressed_message)
-				.setPositiveButton(R.string.btn_continue, null)
-				.setNegativeButton(R.string.btn_stop, new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						clientGameManager.stopGame();
-						finish();
-					}
-				})
-				.show();
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.activity_game_back_pressed_title)
+                .setMessage(R.string.activity_game_back_pressed_message)
+                .setPositiveButton(R.string.btn_continue, null)
+                .setNegativeButton(R.string.btn_stop, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        clientGameManager.stopGame();
+                        finish();
+                    }
+                })
+                .show();
 	}
 
 
