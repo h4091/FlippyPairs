@@ -22,6 +22,8 @@
     <string name="activity_host_game_game_name_title">Game Name</string>
     <string name="activity_host_game_game_name_hint">Your Game Name</string>
 
+    <string name="service_host_stop_game">Stop game</string>
+
     <string name="activity_lobby_start_game">Start game</string>
     <string name="activity_lobby_searching">Searching for clients …</string>
     <string name="activity_lobby_host_client">%1$s (you)</string>

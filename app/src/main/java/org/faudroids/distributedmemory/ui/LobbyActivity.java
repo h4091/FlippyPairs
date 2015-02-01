@@ -44,8 +44,7 @@ public class LobbyActivity extends BaseActivity implements  HostGameListener {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
-		// if this activity is called from the host notification and game is running, go to client screen instead
+		// if this activity is called from the host notification check if game is running --> continue
 		if (hostGameManager.isGameRunning()) {
 			Intent intent = new Intent(this, GameActivity.class);
 			intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
@@ -77,7 +76,10 @@ public class LobbyActivity extends BaseActivity implements  HostGameListener {
     @Override
     public void onResume() {
         super.onResume();
-        registerReceiver(serverStateReceiver, new IntentFilter(HostService.ACTION_HOST_STATE_CHANGED));
+		IntentFilter intentFilter = new IntentFilter();
+		intentFilter.addAction(HostService.ACTION_HOST_STATE_CHANGED);
+		intentFilter.addAction(HostService.ACTION_STOP_GAME);
+        registerReceiver(serverStateReceiver, intentFilter);
         hostGameManager.registerHostGameListener(this);
 		onClientsChanged();
     }
@@ -166,10 +168,18 @@ public class LobbyActivity extends BaseActivity implements  HostGameListener {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            boolean started = intent.getBooleanExtra(HostService.EXTRA_HOST_RUNNING, false);
-            if(!started) {
-                finish();
-            }
+			switch (intent.getAction()) {
+				case HostService.ACTION_HOST_STATE_CHANGED:
+					boolean started = intent.getBooleanExtra(HostService.EXTRA_HOST_RUNNING, false);
+					if(!started) finish();
+					break;
+
+				case HostService.ACTION_STOP_GAME:
+					Intent stopServiceIntent = new Intent(context, HostService.class);
+					stopService(stopServiceIntent);
+					break;
+			}
+
         }
 
     }

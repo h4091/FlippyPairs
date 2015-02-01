@@ -3,6 +3,8 @@ package org.faudroids.distributedmemory.ui;
 
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.IBinder;
@@ -24,6 +26,7 @@ import org.faudroids.distributedmemory.network.HostNetworkListener;
 import org.faudroids.distributedmemory.network.NetworkManager;
 import org.faudroids.distributedmemory.utils.NotificationUtils;
 
+import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -34,6 +37,8 @@ public final class HostService extends BaseService {
 
 	static final String ACTION_HOST_STATE_CHANGED = "org.faudroids.distributedmemory.ACTION_HOST_STATE_CHANGED";
 	static final String EXTRA_HOST_RUNNING = "EXTRA_HOST_RUNNING";
+
+	static final String ACTION_STOP_GAME = "org.faudroids.distributedmemory.ACTION_STOP_GAME";
 
 	private final HostNetworkListener<JsonNode> networkListener = new NetworkListener();
 	private final HostGameListener gameListener = new GameListener();
@@ -111,11 +116,16 @@ public final class HostService extends BaseService {
 		@Override
 		public void onServerStartSuccess(HostInfo hostInfo) {
 			// start host notification
+			Context context = HostService.this;
+			Intent stopGameIntent = new Intent(ACTION_STOP_GAME);
+			PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, stopGameIntent, 0);
+			NotificationUtils.Action action = new NotificationUtils.Action(R.drawable.ic_notify_host_stop, getString(R.string.service_host_stop_game), pendingIntent);
 			Notification notification = notificationUtils.createOngoingNotification(
 					"Game Running",
 					"You are hosting a distributed memory game!",
 					R.drawable.ic_notify_host,
-					LobbyActivity.class);
+					LobbyActivity.class,
+					Arrays.asList(action));
 			notificationManager.notify(NOTIFICATION_ID, notification);
 
 			// start local client
