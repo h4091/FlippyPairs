@@ -51,6 +51,12 @@
         <service
             android:name=".ui.HostService" >
         </service>
+        <receiver
+            android:name=".ui.StopServerBroadcastReceiver">
+            <intent-filter>
+                <action android:name="org.faudroids.distributedmemory.ACTION_STOP_GAME" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

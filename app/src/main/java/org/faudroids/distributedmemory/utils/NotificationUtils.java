@@ -29,7 +29,7 @@ public final class NotificationUtils {
 			List<Action> actions) {
 
 		Intent intent = new Intent(context, activityClass);
-		intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
 		Notification.Builder builder = new Notification.Builder(context)
 				.setContentTitle(title)
 				.setContentText(message)

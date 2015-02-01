@@ -2,11 +2,7 @@ package org.faudroids.distributedmemory.ui;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
@@ -52,7 +48,6 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 
 	private static final String FILE_NAME_CARD_BACK = "card_back.png";
 
-	private final StopServerBroadcastReceiver stopServerBroadcastReceiver = new StopServerBroadcastReceiver();
 	@Inject ClientGameManager clientGameManager;
 	@Inject BitmapCache bitmapCache;
 
@@ -104,7 +99,6 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 	@Override
 	public void onResume() {
 		super.onResume();
-		registerReceiver(stopServerBroadcastReceiver, new IntentFilter(HostService.ACTION_STOP_GAME));
 		clientGameManager.registerClientGameListener(this);
 		refreshAllCards();
 		updateCurrentPlayer();
@@ -135,7 +129,6 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 	@Override
 	public void onPause() {
 		clientGameManager.unregisterClientGameListener(this);
-		unregisterReceiver(stopServerBroadcastReceiver);
 		super.onPause();
 	}
 
@@ -357,17 +350,6 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 	@Override
 	protected List<Object> getModules() {
 		return Lists.<Object>newArrayList(new UiModule());
-	}
-
-
-	private class StopServerBroadcastReceiver extends BroadcastReceiver {
-
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			Intent stopServiceIntent = new Intent(context, HostService.class);
-			stopService(stopServiceIntent);
-		}
-
 	}
 
 }

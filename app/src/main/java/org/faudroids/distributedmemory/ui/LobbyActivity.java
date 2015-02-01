@@ -20,6 +20,7 @@ import org.faudroids.distributedmemory.common.BaseActivity;
 import org.faudroids.distributedmemory.core.Device;
 import org.faudroids.distributedmemory.core.HostGameListener;
 import org.faudroids.distributedmemory.core.HostGameManager;
+import org.faudroids.distributedmemory.utils.ServiceUtils;
 
 import java.util.Comparator;
 import java.util.List;
@@ -34,6 +35,7 @@ import butterknife.OnClick;
 public class LobbyActivity extends BaseActivity implements  HostGameListener {
 
 	@Inject HostGameManager hostGameManager;
+	@Inject ServiceUtils serviceUtils;
 	@InjectView(R.id.start_game) Button startGameButton;
 	@InjectView(R.id.peers_list) ListView peersList;
 	@InjectView(R.id.empty) View emptyView;
@@ -73,13 +75,15 @@ public class LobbyActivity extends BaseActivity implements  HostGameListener {
         super.onPause();
     }
 
+
     @Override
     public void onResume() {
         super.onResume();
-		IntentFilter intentFilter = new IntentFilter();
-		intentFilter.addAction(HostService.ACTION_HOST_STATE_CHANGED);
-		intentFilter.addAction(HostService.ACTION_STOP_GAME);
-        registerReceiver(serverStateReceiver, intentFilter);
+
+		// if lobby is started after having shut down host via notification
+		if (!serviceUtils.isServiceRunning(HostService.class)) finish();
+
+		registerReceiver(serverStateReceiver, new IntentFilter(HostService.ACTION_HOST_STATE_CHANGED));
         hostGameManager.registerHostGameListener(this);
 		onClientsChanged();
     }
@@ -168,18 +172,8 @@ public class LobbyActivity extends BaseActivity implements  HostGameListener {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-			switch (intent.getAction()) {
-				case HostService.ACTION_HOST_STATE_CHANGED:
-					boolean started = intent.getBooleanExtra(HostService.EXTRA_HOST_RUNNING, false);
-					if(!started) finish();
-					break;
-
-				case HostService.ACTION_STOP_GAME:
-					Intent stopServiceIntent = new Intent(context, HostService.class);
-					stopService(stopServiceIntent);
-					break;
-			}
-
+			boolean started = intent.getBooleanExtra(HostService.EXTRA_HOST_RUNNING, false);
+			if(!started) finish();
         }
 
     }
