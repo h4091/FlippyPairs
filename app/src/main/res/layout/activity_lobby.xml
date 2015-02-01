@@ -8,11 +8,18 @@
         android:layout_height="wrap_content"
         android:text="@string/activity_lobby_start_game" />
 
+    <TextView
+        android:id="@+id/text_client_list"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Connected clients"
+        android:layout_below="@id/start_game"/>
+
     <ListView
         android:id="@+id/peers_list"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/start_game"/>
+        android:layout_below="@id/text_client_list"/>
 
     <LinearLayout android:id="@+id/empty"
                   android:layout_below="@id/peers_list"
