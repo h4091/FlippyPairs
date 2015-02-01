@@ -3,10 +3,12 @@ package org.faudroids.distributedmemory.ui;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.widget.TextView;
 
 import com.google.common.collect.Lists;
 
@@ -18,18 +20,26 @@ import java.util.List;
 import javax.inject.Inject;
 
 import butterknife.ButterKnife;
+import butterknife.InjectView;
 import butterknife.OnClick;
+import timber.log.Timber;
 
 
 public class MainActivity extends BaseActivity {
 
 	@Inject ConnectivityManager connectivityManager;
+	@InjectView(R.id.app_version) TextView appVersionView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 		ButterKnife.inject(this);
+		try {
+			appVersionView.setText(getString(R.string.version, getPackageManager().getPackageInfo(getPackageName(), 0).versionName));
+		} catch (PackageManager.NameNotFoundException nnfe) {
+			Timber.e("failed to find version", nnfe);
+		}
     }
 
 

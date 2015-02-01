@@ -52,4 +52,6 @@
     <string name="btn_yes">Yes</string>
     <string name="btn_no">No</string>
 
+    <string name="version">Version %1$s</string>
+
 </resources>
