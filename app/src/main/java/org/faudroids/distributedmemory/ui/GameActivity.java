@@ -112,8 +112,8 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 
                 ProgressDialog.show(
 					this,
-					"Waiting for host",
-					"Waiting for host to start the game. Maybe giving him a cookie will make him work faster?",
+					getString(R.string.activity_game_waiting_title),
+					getString(R.string.activity_game_waiting_message),
 					false, true,
                         new DialogInterface.OnCancelListener(){
                         @Override
