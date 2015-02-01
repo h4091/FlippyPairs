@@ -56,6 +56,8 @@ public class LobbyActivity extends BaseActivity implements  HostGameListener {
 			return;
 		}
 
+        setTitle(R.string.lobby_activity_title);
+
 		setContentView(R.layout.activity_lobby);
 		ButterKnife.inject(this);
 		adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
@@ -83,13 +85,6 @@ public class LobbyActivity extends BaseActivity implements  HostGameListener {
         hostGameManager.registerHostGameListener(this);
 		onClientsChanged();
     }
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.activity_lobby, menu);
-		return true;
-	}
 
 
 	@Override

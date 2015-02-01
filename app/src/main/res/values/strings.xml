@@ -3,6 +3,10 @@
 
     <string name="app_name">Flippy Pairs</string>
 
+    <string name="lobby_activity_title">Game Lobby</string>
+    <string name="host_game_activity_title">Host game</string>
+    <string name="join_game_activity_title">Join game</string>
+
     <string name="menu_test_game">Test Game</string>
     <string name="submit_id">Will they match?</string>
 

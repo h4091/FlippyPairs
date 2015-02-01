@@ -64,6 +64,7 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_game);
+        setTitle(R.string.app_name);
 		ButterKnife.inject(this);
 		handler = new Handler(Looper.getMainLooper());
 

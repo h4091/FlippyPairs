@@ -37,6 +37,7 @@ public class HostGameActivity extends BaseActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_host_game);
+        setTitle(R.string.host_game_activity_title);
 		ButterKnife.inject(this);
 	}
 
