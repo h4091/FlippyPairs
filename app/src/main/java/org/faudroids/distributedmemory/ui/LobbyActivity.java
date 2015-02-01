@@ -1,6 +1,7 @@
 package org.faudroids.distributedmemory.ui;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -173,7 +174,34 @@ public class LobbyActivity extends BaseActivity implements  HostGameListener {
         @Override
         public void onReceive(Context context, Intent intent) {
 			boolean started = intent.getBooleanExtra(HostService.EXTRA_HOST_RUNNING, false);
-			if(!started) finish();
+			boolean unknownError = intent.getBooleanExtra(HostService.EXTRA_HOST_START_ERROR_UNKNOWN, false);
+			boolean duplicateServiceError = intent.getBooleanExtra(HostService.EXTRA_HOST_START_ERROR_DUPLICATE_SERVICE, false);
+
+			// if there was an error starting server show dialog
+			if (!started && unknownError || duplicateServiceError) {
+				AlertDialog.Builder builder = new AlertDialog.Builder(context)
+						.setTitle(R.string.activity_lobby_starting_error_title)
+						.setIcon(R.drawable.ic_action_error)
+						.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+							@Override
+							public void onClick(DialogInterface dialog, int which) {
+								finish();
+							}
+						});
+				if (unknownError) builder.setMessage(R.string.activity_lobby_starting_error_unknown_message);
+				else builder.setMessage(R.string.activity_lobby_starting_error_duplicate_service_message);
+				Dialog dialog = builder.create();
+				dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+					@Override
+					public void onDismiss(DialogInterface dialog) {
+						finish();
+					}
+				});
+				dialog.show();
+
+			} else if(!started) {
+				finish();
+			}
         }
 
     }

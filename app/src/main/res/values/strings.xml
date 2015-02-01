@@ -33,6 +33,9 @@
     <string name="activity_lobby_host_client">%1$s (you)</string>
     <string name="activity_lobby_back_pressed_title">Host is running</string>
     <string name="activity_lobby_back_pressed_message">Do you want to stop the current game?</string>
+    <string name="activity_lobby_starting_error_title">Unable to start host</string>
+    <string name="activity_lobby_starting_error_duplicate_service_message">Is another game with the same name running in your area?</string>
+    <string name="activity_lobby_starting_error_unknown_message">There was an unknown error while starting the host. Sorry, that\'s all we know.</string>
 
     <string name="activity_game_current_player">%1$s\'s turn</string>
     <string name="activity_game_waiting_title">Waiting for host</string>

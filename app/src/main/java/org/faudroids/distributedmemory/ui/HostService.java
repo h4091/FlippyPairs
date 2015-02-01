@@ -36,19 +36,24 @@ public final class HostService extends BaseService {
 	private static final int NOTIFICATION_ID = 422;
 
 	static final String ACTION_HOST_STATE_CHANGED = "org.faudroids.distributedmemory.ACTION_HOST_STATE_CHANGED";
-	static final String EXTRA_HOST_RUNNING = "EXTRA_HOST_RUNNING";
+	static final String
+			EXTRA_HOST_RUNNING = "EXTRA_HOST_RUNNING",
+			EXTRA_HOST_START_ERROR_DUPLICATE_SERVICE = "EXTRA_HOST_START_ERROR_DUPLICATE_SERVICE",
+			EXTRA_HOST_START_ERROR_UNKNOWN = "EXTRA_HOST_START_ERROR_UNKNOWN";
 
 	static final String ACTION_STOP_GAME = "org.faudroids.distributedmemory.ACTION_STOP_GAME";
 
 	private final HostNetworkListener<JsonNode> networkListener = new NetworkListener();
 	private final HostGameListener gameListener = new GameListener();
 
-
 	@Inject NetworkManager networkManager;
 	@Inject NotificationManager notificationManager;
 	@Inject NotificationUtils notificationUtils;
 	@Inject HostGameManager hostGameManager;
 	@Inject ClientUtils clientUtils;
+
+	// flag set in network listener and used to send broadcast to activities
+	private String startingHostError = null;
 
 
 	@Override
@@ -101,6 +106,8 @@ public final class HostService extends BaseService {
 	private void sendHostStoppedBroadcast() {
 		Intent intent = new Intent(ACTION_HOST_STATE_CHANGED);
 		intent.putExtra(EXTRA_HOST_RUNNING, false);
+		if (startingHostError != null) intent.putExtra(startingHostError, true);
+		startingHostError = null;
 		sendBroadcast(intent);
 	}
 
@@ -133,8 +140,9 @@ public final class HostService extends BaseService {
 		}
 
 		@Override
-		public void onServerStartError() {
-			Toast.makeText(HostService.this, "Failed to start server!", Toast.LENGTH_LONG).show();
+		public void onServerStartError(boolean serviceNameAlreadyTaken) {
+			if (serviceNameAlreadyTaken) startingHostError = EXTRA_HOST_START_ERROR_DUPLICATE_SERVICE;
+			else startingHostError = EXTRA_HOST_START_ERROR_UNKNOWN;
 			stopSelf();
 		}
 

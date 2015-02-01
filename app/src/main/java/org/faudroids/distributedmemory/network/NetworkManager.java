@@ -77,7 +77,7 @@ public final class NetworkManager {
 
 		} catch (IOException ioe) {
 			Timber.e(ioe, "failed to start server");
-			hostNetworkListener.onServerStartError();
+			hostNetworkListener.onServerStartError(false);
 		}
 
 	}
@@ -174,16 +174,16 @@ public final class NetworkManager {
 					handler.post(new Runnable() {
 						@Override
 						public void run() {
-							hostNetworkListener.onServerStartError();
+							hostNetworkListener.onServerStartError(false);
 						}
 					});
 				}
 			} else {
-				Timber.e("Registered service name did not match");
+				Timber.d("Registered service name did not match");
 				handler.post(new Runnable() {
 					@Override
 					public void run() {
-						hostNetworkListener.onServerStartError();
+						hostNetworkListener.onServerStartError(true);
 					}
 				});
 			}
@@ -195,7 +195,7 @@ public final class NetworkManager {
 			handler.post(new Runnable() {
 				@Override
 				public void run() {
-					hostNetworkListener.onServerStartError();
+					hostNetworkListener.onServerStartError(false);
 				}
 			});
 		}
