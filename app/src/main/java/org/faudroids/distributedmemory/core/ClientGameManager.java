@@ -73,8 +73,12 @@ public final class ClientGameManager implements ConnectionHandler.MessageListene
 	}
 
 
-    public int getCurrentPlayerIdx() {
-        return currentPlayerIdx;
+	/**
+	 * Returns the current player or null if the game has not yet started.
+	 */
+	public Player getCurrentPlayer() {
+		if (players.isEmpty()) return null;
+		return players.get(currentPlayerIdx);
     }
 
 

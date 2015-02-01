@@ -3,7 +3,6 @@ package org.faudroids.distributedmemory.ui;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
@@ -91,8 +90,9 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 
 
 	@Override
-	protected List<Object> getModules() {
-		return Lists.<Object>newArrayList(new UiModule());
+	protected void onStop() {
+		if (waitingForHostDialog != null) waitingForHostDialog.dismiss();
+		super.onStop();
 	}
 
 
@@ -101,29 +101,27 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 		super.onResume();
 		clientGameManager.registerClientGameListener(this);
 		refreshAllCards();
-
-        String currentPlayerName;
-        currentPlayerName = clientGameManager.getPlayers().get(clientGameManager
-                .getCurrentPlayerIdx()).getName();
-        setTitle(currentPlayerName + "'s turn");
+		updateCurrentPlayer();
 
 		if (clientGameManager.getCurrentState() == GameState.SETUP
 				|| clientGameManager.getCurrentState() == GameState.CONNECTING) {
 
-                ProgressDialog.show(
-					this,
-					getString(R.string.activity_game_waiting_title),
-					getString(R.string.activity_game_waiting_message),
-					false, true,
-                        new DialogInterface.OnCancelListener(){
-                        @Override
-                        public void onCancel(DialogInterface dialog) {
-                            clientGameManager.stopGame();
-                            Intent intent = new Intent(GameActivity.this, JoinGameActivity.class);
-                            startActivity(intent);
-                            finish();
-                        }
-                    });
+			waitingForHostDialog = new ProgressDialog(this) {
+
+				{
+					setTitle(R.string.activity_game_waiting_title);
+					setMessage(getString(R.string.activity_game_waiting_message));
+					setIndeterminate(false);
+					setCancelable(true);
+				}
+
+				@Override
+				public void onBackPressed() {
+					GameActivity.this.onBackPressed();
+				}
+
+			};
+			waitingForHostDialog.show();
 		}
 	}
 
@@ -137,7 +135,7 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 
 	@Override
 	public void onBackPressed() {
-        new AlertDialog.Builder(this)
+		new AlertDialog.Builder(this)
                 .setTitle(R.string.activity_game_back_pressed_title)
                 .setMessage(R.string.activity_game_back_pressed_message)
                 .setPositiveButton(R.string.btn_continue, null)
@@ -157,18 +155,13 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 		// setup cards
 		refreshAllCards();
 		// cancel waiting dialog
-		waitingForHostDialog.cancel();
+		waitingForHostDialog.dismiss();
 		waitingForHostDialog = null;
-        //Update actionbar
-        String currentPlayerName;
-        currentPlayerName = clientGameManager.getPlayers().get(clientGameManager
-                .getCurrentPlayerIdx()).getName();
-        setTitle(currentPlayerName);
 	}
 
+
 	@Override
-	public void onCardsMatch(Collection<Card> matchedCards) {
-	}
+	public void onCardsMatch(Collection<Card> matchedCards) { }
 
 
 	@Override
@@ -199,7 +192,7 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 
 	@Override
 	public void onNewRound(Player currentPlayer, int playerPoints) {
-        setTitle(currentPlayer.getName() + "'s turn");
+		updateCurrentPlayer();
 	}
 
 
@@ -314,6 +307,11 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 	}
 
 
+	private void updateCurrentPlayer() {
+		Player player = clientGameManager.getCurrentPlayer();
+		if (player != null) setTitle(getString(R.string.activity_game_current_player, player.getName()));
+	}
+
 	private void flipCard(final ImageButton button, final String newCardFileName, boolean enable) {
 		Animation startFlipAnimation = AnimationUtils.loadAnimation(this, R.anim.flip_to_middle);
 		final Animation stopFlipAnimation = AnimationUtils.loadAnimation(this, R.anim.flip_from_middle);
@@ -346,6 +344,12 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 				animationRunning = false;
 			}
 		}, getResources().getInteger(R.integer.flip_card_half_duration) * 2);
+	}
+
+
+	@Override
+	protected List<Object> getModules() {
+		return Lists.<Object>newArrayList(new UiModule());
 	}
 
 }

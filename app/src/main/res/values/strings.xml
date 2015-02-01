@@ -28,6 +28,7 @@
     <string name="activity_lobby_back_pressed_title">Host is running</string>
     <string name="activity_lobby_back_pressed_message">Do you want to stop the current game?</string>
 
+    <string name="activity_game_current_player">%1$s\'s turn</string>
     <string name="activity_game_waiting_title">Waiting for host</string>
     <string name="activity_game_waiting_message">Waiting for host to start the game. Maybe giving him a cookie will make him work faster?</string>
     <string name="activity_game_back_pressed_title">Game is running</string>
