@@ -36,7 +36,7 @@
     <string name="service_host_starting_title">Game starting</string>
     <string name="service_host_start_message">Distributed memory game is about to be hosted …</string>
     <string name="service_host_running_title">Game Running</string>
-    <string name="service_host_running_message">You are hosting a distributed memory game!</string>
+    <string name="service_host_running_message">You are hosting a Flippy Pairs game!</string>
     <string name="service_host_running_stop">Stop game</string>
 
     <string name="activity_lobby_start_game">Start game</string>
