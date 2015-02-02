@@ -69,12 +69,32 @@
     <string name="btn_no">No</string>
 
     <string name="app_description_title">Flippy Pairs</string>
-    <string name="app_description_text">Enjoy a classic game of memory by connecting several smartphones/tablets to form a giant playing field.\nGuaranteed fun for all ages!\n\nDeveloped in January 2015 by FauDroids</string>
-    <string name="app_description_faudroids">FauDroids are:\n\nPhilipp Eichhorn\nSimon
-    Hofmann\nJulian König\n\n<a href="faudroids.org">faudroids.org</a></string>
-    <string name="app_description_credits">Credits/Thanks\n\nRobot images lovingly delivered by
-        Robohash.org\n\nUsed libraries:\nButter Knife\n<a
-            href="http://jakewharton.github.io/butterknife/">http://jakewharton.github.io/butterknife</a></string>
+    <string name="app_description_text">
+        Enjoy a classic game of memory by connecting several smartphones and tablets to form a giant playing field.\n
+        Guaranteed fun for all ages!\n
+        \n
+        Developed in January 2015 by FauDroids
+    </string>
+    <string name="app_description_faudroids">
+        FauDroids are:\n
+        \n
+        Philipp Eichhorn\n
+        Simon Hofmann\n
+        \n
+        <a href="faudroids.org">faudroids.org</a>
+    </string>
+    <string name="app_description_credits">
+        &lt;p&gt;
+        A special thanks goes out to &lt;a href=&quot;https://robohash.org/&quot;&gt;robohash.org&lt;/a&gt; for providing us with lovely robot images!
+        &lt;/p&gt;
+        &lt;p&gt;
+        And of course a big applause to all the awesome open source libraries out there:&lt;br&gt;
+        &lt;a href=&quot;https://square.github.io/dagger/&quot;&gt;Dagger&lt;/a&gt;&lt;br&gt;
+        &lt;a href=&quot;http://jakewharton.github.io/butterknife/&quot;&gt;Butter Knife&lt;/a&gt;&lt;br&gt;
+        &lt;a href=&quot;https://github.com/google/guava&quot;&gt;Guava&lt;/a&gt;&lt;br&gt;
+        &lt;a href=&quot;http://wiki.fasterxml.com/JacksonHome&quot;&gt;Jackson&lt;/a&gt;
+        &lt;/p&gt;
+    </string>
 
     <string name="version">Version %1$s</string>
 

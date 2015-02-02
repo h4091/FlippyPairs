@@ -6,7 +6,7 @@
 
     <style name="ActionBarStyle"
            parent="@android:style/Widget.Holo.Light.ActionBar.Solid.Inverse">
-        <item name="android:background">#ff757574</item>
+        <item name="android:background">#ff3d3d3c</item>
     </style>
 
     <style name="MainLayout">
@@ -30,7 +30,7 @@
     </style>
 
     <style name="DefaultFont">
-        <item name="android:textSize">20sp</item>
+        <item name="android:textSize">18sp</item>
         <item name="android:textColor">@android:color/white</item>
     </style>
 
