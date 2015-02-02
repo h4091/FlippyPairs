@@ -37,7 +37,7 @@ public class JoinGameActivity extends BaseListActivity implements ClientNetworkL
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_join_game);
 
-		adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
+		adapter = new ArrayAdapter<>(this, R.layout.list_item);
 		setListAdapter(adapter);
 	}
 
