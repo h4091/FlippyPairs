@@ -1,52 +1,70 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              style="@style/MainLayout">
+             android:layout_width="match_parent"
+             android:layout_height="match_parent">
 
-    <ImageView
-        android:layout_centerHorizontal="true"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/logo"/>
+    <include layout="@layout/background"/>
 
-    <LinearLayout
-        android:id="@+id/relative_layout_main"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_centerVertical="true"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        style="@style/MainLayout">
 
-
-        <Button
-            android:id="@+id/host_game"
-            android:text="@string/activity_main_btn_host_game"
+        <ImageView
+            android:id="@+id/logo"
+            android:layout_marginTop="@dimen/activity_main_logo_margin"
+            android:layout_centerHorizontal="true"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-
-        <Button
-            android:id="@+id/join_game"
-            android:text="@string/activity_main_btn_join_game"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-
-        <Button
-            android:id="@+id/help_game"
-            android:text="@string/activity_main_help"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:src="@drawable/logo"/>
 
 
-        <Button
-            android:id="@+id/about_game"
-            android:text="@string/activity_main_about"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+        <RelativeLayout
+            android:layout_below="@id/logo"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
-        <TextView
-            android:id="@+id/app_version"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            <LinearLayout
+                android:id="@+id/relative_layout_main"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center_horizontal"
+                android:layout_centerInParent="true">
 
-    </LinearLayout>
+
+                <Button
+                    android:id="@+id/host_game"
+                    android:text="@string/activity_main_btn_host_game"
+                    style="@style/MenuButton"/>
+
+                <Button
+                    android:layout_width="match_parent"
+                    android:id="@+id/join_game"
+                    android:text="@string/activity_main_btn_join_game"
+                    style="@style/MenuButton"/>
+
+                <Button
+                    android:layout_width="match_parent"
+                    android:id="@+id/help_game"
+                    android:text="@string/activity_main_help"
+                    style="@style/MenuButton"/>
+
+
+                <Button
+                    android:layout_width="match_parent"
+                    android:id="@+id/about_game"
+                    android:text="@string/activity_main_about"
+                    style="@style/MenuButton"/>
+
+                <TextView
+                    android:id="@+id/app_version"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+            </LinearLayout>
+
+        </RelativeLayout>
+
+    </RelativeLayout>
 
 </RelativeLayout>
