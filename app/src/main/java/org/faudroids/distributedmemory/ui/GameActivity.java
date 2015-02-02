@@ -35,6 +35,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -207,14 +208,21 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 	@Override
 	public void onGameFinished() {
 		List<Pair<Player, Integer>> leaderBoard = getLeaderBoard();
+
 		StringBuilder stringBuilder = new StringBuilder();
-		stringBuilder.append("Leader Board:\n");
-		for (Pair<Player, Integer> pair : leaderBoard) {
-			stringBuilder.append(pair.first.getName()).append(": ").append(pair.second).append(" points\n");
+		stringBuilder.append(getString(R.string.activity_game_finish_winner, leaderBoard.get(leaderBoard.size() - 1).first.getName()));
+		stringBuilder.append("\n");
+
+		ListIterator<Pair<Player, Integer>> iterator = leaderBoard.listIterator(leaderBoard.size());
+		while(iterator.hasPrevious()) {
+			stringBuilder.append("\n");
+			Pair<Player, Integer> pair = iterator.previous();
+			stringBuilder.append(getString(R.string.activity_game_finish_points, pair.first.getName(), pair.second));
+
 		}
 
 		new AlertDialog.Builder(this)
-				.setTitle("Game Over")
+				.setTitle(getString(R.string.activity_game_finish_title))
 				.setMessage(stringBuilder.toString())
 				.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
 							@Override
@@ -312,8 +320,6 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 				return Integer.valueOf(lhs.getId()).compareTo(rhs.getId());
 			}
 		});
-
-		if (cards.size() != 0 && cards.size() != 3 * 4 && cards.size() != 6 * 5) throw new RuntimeException("gotten " + cards.size() + " cards!");
 
 		// iterate over all cards and update UI accordingly
 		Iterator<Card> cardIterator = cards.iterator();

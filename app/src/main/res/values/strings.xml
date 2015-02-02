@@ -49,6 +49,9 @@
     <string name="activity_game_current_player">%1$s\'s turn</string>
     <string name="activity_game_waiting_title">Waiting for host</string>
     <string name="activity_game_waiting_message">Waiting for host to start the game. Maybe giving him a cookie will make him work faster?</string>
+    <string name="activity_game_finish_title">Game Over</string>
+    <string name="activity_game_finish_winner">%1$s has won the game!</string>
+    <string name="activity_game_finish_points">%1$s: %2$d points</string>
     <string name="activity_game_back_pressed_title">Game is running</string>
     <string name="activity_game_back_pressed_message">Do you want to stop the current game?</string>
     <string name="activity_game_host_error_title">Lost connection to host</string>
