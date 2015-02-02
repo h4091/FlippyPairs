@@ -208,9 +208,15 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 	@Override
 	public void onGameFinished() {
 		List<Pair<Player, Integer>> leaderBoard = getLeaderBoard();
+		Pair<Player, Integer> firstPlayer = leaderBoard.get(leaderBoard.size() - 1);
+		Pair<Player, Integer> secondPlayer = leaderBoard.get(leaderBoard.size() - 2);
 
 		StringBuilder stringBuilder = new StringBuilder();
-		stringBuilder.append(getString(R.string.activity_game_finish_winner, leaderBoard.get(leaderBoard.size() - 1).first.getName()));
+		if (firstPlayer.second.equals(secondPlayer.second)) {
+			stringBuilder.append(getString(R.string.activity_game_finish_draw));
+		} else {
+			stringBuilder.append(getString(R.string.activity_game_finish_winner, firstPlayer.first.getName()));
+		}
 		stringBuilder.append("\n");
 
 		ListIterator<Pair<Player, Integer>> iterator = leaderBoard.listIterator(leaderBoard.size());
