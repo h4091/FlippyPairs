@@ -29,7 +29,7 @@ public class HelpActivity extends BaseActivity {
     @OnClick(R.id.activity_help_host)
     public void onHelpHostClicked() {
         Intent dialogActivity = new Intent(this, HelpDialogActivity.class);
-        int helpText = R.string.activity_help_host_text;
+        String helpText = getResources().getString(R.string.activity_help_host_text);
         Timber.d("Sending helpText: " + helpText);
         dialogActivity.putExtra("helpText", helpText);
         startActivity(new Intent(this, HelpDialogActivity.class));
@@ -50,7 +50,7 @@ public class HelpActivity extends BaseActivity {
     @OnClick(R.id.activity_help_troubleshooting)
     public void onHelpTroubleshootingClick() {
         Intent dialogActivity = new Intent(this, HelpDialogActivity.class);
-        int helpText = R.string.activity_help_troubleshooting_text;
+        String helpText = getResources().getString(R.string.activity_help_troubleshooting_text);
         Timber.d("Sending helpText: " + helpText);
         dialogActivity.putExtra("helpText", helpText);
         startActivity(new Intent(this, HelpDialogActivity.class));

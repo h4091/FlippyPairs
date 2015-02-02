@@ -1,6 +1,5 @@
 package org.faudroids.distributedmemory.ui;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.widget.TextView;
 
@@ -12,7 +11,6 @@ import org.faudroids.distributedmemory.common.BaseActivity;
 import java.util.List;
 
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 import timber.log.Timber;
 
 
@@ -35,12 +33,6 @@ public class HelpDialogActivity extends BaseActivity {
             Timber.d("No extras");
         }
 		ButterKnife.inject(this);
-	}
-
-
-	@Override
-	public void onPause() {
-		super.onPause();
 	}
 
 
