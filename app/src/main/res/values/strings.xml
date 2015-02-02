@@ -22,6 +22,9 @@
     <string name="activity_main_help">Help</string>
     <string name="activity_main_about">About</string>
 
+    <string name="activity_host_game_start">Start hosting</string>
+    <string name="activity_host_game_player_count">Number of players</string>
+    <string name="activity_host_game_name_description">Game Name</string>
     <string name="activity_host_game_players_count_title">Number of players</string>
     <string name="activity_host_game_players_count_players">players</string>
     <string name="activity_host_game_game_name_title">Game Name</string>

@@ -47,7 +47,7 @@ public class HostGameActivity extends BaseActivity {
 	}
 
 
-	@OnClick(R.id.player_count_value)
+	@OnClick({R.id.player_count_value, R.id.player_count_description})
 	public void changePlayerCount() {
 		View numberPickerLayout = getLayoutInflater().inflate(R.layout.dialog_number_picker, null);
 		final NumberPicker numberPicker = (NumberPicker) numberPickerLayout.findViewById(R.id.number_picker);
@@ -70,7 +70,8 @@ public class HostGameActivity extends BaseActivity {
 	}
 
 
-	@OnClick(R.id.game_name_value)
+
+	@OnClick({R.id.game_name_value, R.id.game_name_description})
 	public void changeGameName() {
 		View inputLayout = getLayoutInflater().inflate(R.layout.dialog_input_text, null);
 		final EditText editText = (EditText) inputLayout.findViewById(R.id.edit_text);
