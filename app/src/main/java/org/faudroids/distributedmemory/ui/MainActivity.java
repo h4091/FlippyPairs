@@ -62,6 +62,11 @@ public class MainActivity extends BaseActivity {
 	}
 
 
+    @OnClick(R.id.about_game)
+    public void aboutGame() {
+        startActivity(new Intent(this, AboutActivity.class));
+    }
+
 	private boolean isWifiConnected() {
 		NetworkInfo wifiInfo = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
 		return wifiInfo.isConnected();
