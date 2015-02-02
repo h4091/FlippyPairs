@@ -29,3 +29,6 @@ proguard/
 *.swp
 .idea
 *.iml
+
+# Keys
+crashlytics.properties
