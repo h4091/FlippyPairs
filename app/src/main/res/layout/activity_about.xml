@@ -15,15 +15,16 @@
             android:id="@+id/relative_layout_about"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
             android:background="@drawable/text_background">
 
             <TextView
                 android:id="@+id/activity_about_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
                 android:layout_margin="16dp"
                 android:gravity="center"
+                android:maxWidth="@dimen/text_max_width"
                 style="@style/DefaultFont"
                 android:text="@string/app_description_text"/>
 
@@ -38,6 +39,7 @@
                 android:layout_below="@id/activity_about_text"
                 android:autoLink="web"
                 android:textColorLink="@color/green"
+                android:maxWidth="@dimen/text_max_width"
                 style="@style/DefaultFont"
                 android:text="@string/app_description_faudroids"/>
 
@@ -49,6 +51,7 @@
                 android:layout_margin="16dp"
                 android:gravity="center"
                 android:textColorLink="@color/light_blue"
+                android:maxWidth="@dimen/text_max_width"
                 android:layout_below="@id/activity_about_faudroids"
                 style="@style/DefaultFont"/>
 

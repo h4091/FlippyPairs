@@ -6,47 +6,35 @@
 
     <include layout="@layout/background"/>
 
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
         android:layout_margin="16dp">
 
-        <LinearLayout
+        <Button
+            android:id="@+id/activity_help_host"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center_horizontal"
-            android:orientation="vertical"
-            android:layout_margin="16dp"
-            android:background="@drawable/text_background">
+            android:layout_height="wrap_content"
+            style="@style/MenuButton"
+            android:text="@string/activity_help_host_title"/>
 
-            <TextView
-                android:id="@+id/activity_help_host"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="16dp"
-                android:gravity="center"
-                style="@style/DefaultFont"
-                android:text="@string/activity_help_host_title"/>
+        <Button
+            android:id="@+id/activity_help_join"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="@style/MenuButton"
+            android:text="@string/activity_help_join_title"/>
 
-            <TextView
-                android:id="@+id/activity_help_join"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="16dp"
-                android:gravity="center"
-                style="@style/DefaultFont"
-                android:text="@string/activity_help_join_title"/>
+        <Button
+            android:id="@+id/activity_help_troubleshooting"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/MenuButton"
+            android:text="@string/activity_help_troubleshooting_title"/>
 
-            <TextView
-                android:id="@+id/activity_help_troubleshooting"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="16dp"
-                android:gravity="center"
-                style="@style/DefaultFont"
-                android:text="@string/activity_help_troubleshooting_title"/>
-
-        </LinearLayout>
-    </ScrollView>
+    </LinearLayout>
 
 </RelativeLayout>

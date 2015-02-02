@@ -11,6 +11,7 @@
 # Generated files
 bin/
 gen/
+crashlytics-build.properties
 
 # Gradle files
 .gradle/
