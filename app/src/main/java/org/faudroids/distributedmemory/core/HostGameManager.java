@@ -34,7 +34,10 @@ public final class HostGameManager implements HostStateTransitionListener {
 	private final Map<Integer, Card> closedCards = new HashMap<>();
 	private final List<Card> selectedCards = new LinkedList<>();
 	private final Map<Integer, Card> matchedCards = new HashMap<>();
-	private final int totalCardImages;
+
+
+    private final int totalCardImages;
+    private int usedCardImages;
 
 	private final MessageWriter messageWriter;
 	private final MessageReader messageReader;
@@ -119,7 +122,7 @@ public final class HostGameManager implements HostStateTransitionListener {
 			++cardId;
 			closedCards.put(cardId, new Card(cardId, cardValue));
 			++cardId;
-			cardValue = (cardValue + 1) % totalCardImages;
+			cardValue = (cardValue + 1) % usedCardImages;
 
             Timber.d("Added card " + i + " (" + (cardId - 2) + ")");
 			Timber.d("Added card " + i + " (" + (cardId - 1) + ")");
@@ -170,6 +173,16 @@ public final class HostGameManager implements HostStateTransitionListener {
 
     public List<Player> getPlayers() {
         return new LinkedList<>(players);
+    }
+
+
+    public int getTotalCardImages() {
+        return totalCardImages;
+    }
+
+
+    public void setUsedCardImages(int count) {
+        usedCardImages = count;
     }
 
 

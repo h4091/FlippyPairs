@@ -32,6 +32,7 @@ public class HostGameActivity extends BaseActivity {
     @Inject HostGameManager hostGameManager;
 	@InjectView(R.id.player_count_value) TextView playerCountValue;
 	@InjectView(R.id.game_name_value) TextView gameNameValue;
+    @InjectView(R.id.pairs_count_value) TextView pairsCountValue;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +56,9 @@ public class HostGameActivity extends BaseActivity {
 		numberPicker.setMinValue(2);
 		numberPicker.setMaxValue(100);
 		numberPicker.setWrapSelectorWheel(false);
+        final TextView playersTextView = (TextView) numberPickerLayout.findViewById(R.id
+                .number_picker_text);
+        playersTextView.setText(R.string.activity_host_game_players_count_players);
 
 		new AlertDialog.Builder(this)
 				.setView(numberPickerLayout)
@@ -68,6 +72,31 @@ public class HostGameActivity extends BaseActivity {
 				.setNegativeButton(android.R.string.cancel, null)
 				.show();
 	}
+
+    @OnClick({R.id.pairs_count_value, R.id.pairs_count_description})
+    public void changePairsCount() {
+        View numberPickerLayout = getLayoutInflater().inflate(R.layout.dialog_number_picker, null);
+        final NumberPicker numberPicker = (NumberPicker) numberPickerLayout.findViewById(R.id.number_picker);
+        numberPicker.setValue(Integer.valueOf(pairsCountValue.getText().toString()));
+        numberPicker.setMinValue(2);
+        numberPicker.setMaxValue(hostGameManager.getTotalCardImages());
+        numberPicker.setWrapSelectorWheel(false);
+        final TextView pairsTextView = (TextView) numberPickerLayout.findViewById(R.id
+                .number_picker_text);
+        pairsTextView.setText(R.string.activity_host_game_pairs_count_pairs);
+
+        new AlertDialog.Builder(this)
+                .setView(numberPickerLayout)
+                .setTitle(R.string.activity_host_game_pairs_count_title)
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        pairsCountValue.setText(String.valueOf(numberPicker.getValue()));
+                    }
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
 
 
 
@@ -95,6 +124,8 @@ public class HostGameActivity extends BaseActivity {
 	@OnClick(R.id.start_hosting)
 	public void startHosting() {
 		hostGameManager.initGame();
+        int pairsCount = Integer.valueOf(pairsCountValue.getText().toString());
+        hostGameManager.setUsedCardImages(pairsCount);
 		int playerCount = Integer.valueOf(playerCountValue.getText().toString());
         for(int i=0; i < playerCount; ++i) {
             hostGameManager.addPlayer(new Player(i, "Player " + (i + 1)));

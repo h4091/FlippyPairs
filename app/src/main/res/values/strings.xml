@@ -27,6 +27,8 @@
     <string name="activity_host_game_name_description">Game Name</string>
     <string name="activity_host_game_players_count_title">Number of players</string>
     <string name="activity_host_game_players_count_players">players</string>
+    <string name="activity_host_game_pairs_count_title">Number of different pairs</string>
+    <string name="activity_host_game_pairs_count_pairs">pairs</string>
     <string name="activity_host_game_game_name_title">Game Name</string>
     <string name="activity_host_game_game_name_hint">Your Game Name</string>
 

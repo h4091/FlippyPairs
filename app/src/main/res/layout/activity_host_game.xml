@@ -38,6 +38,23 @@
 
             <TextView
                 style="@style/DefaultFont"
+                android:id="@+id/pairs_count_description"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/activity_host_game_pairs_count_title"/>
+
+            <TextView
+                style="@style/SecondaryFont"
+                android:id="@+id/pairs_count_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="2"
+                android:freezesText="true"/>
+
+            <include layout="@layout/divider"/>
+
+            <TextView
+                style="@style/DefaultFont"
                 android:id="@+id/game_name_description"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
