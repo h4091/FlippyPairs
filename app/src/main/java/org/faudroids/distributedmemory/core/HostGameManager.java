@@ -27,7 +27,7 @@ import timber.log.Timber;
 @Singleton
 public final class HostGameManager implements HostStateTransitionListener {
 
-	static final String TOTAL_CARD_IMAGES = "totalCardImages";
+	public static final String TOTAL_CARD_IMAGES = "totalCardImages";
 
 	private final HostGameStateManager gameStateManager;
 
@@ -173,11 +173,6 @@ public final class HostGameManager implements HostStateTransitionListener {
 
     public List<Player> getPlayers() {
         return new LinkedList<>(players);
-    }
-
-
-    public int getTotalCardImages() {
-        return totalCardImages;
     }
 
 

@@ -9,6 +9,7 @@
         android:layout_gravity="center"
         android:layout_width="wrap_content"
         android:text="@string/default_game_name"
+        android:selectAllOnFocus="true"
         android:layout_height="wrap_content"/>
 
 </LinearLayout>

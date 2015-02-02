@@ -21,10 +21,12 @@ import org.faudroids.distributedmemory.core.Player;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
+import timber.log.Timber;
 
 
 public class HostGameActivity extends BaseActivity {
@@ -33,6 +35,7 @@ public class HostGameActivity extends BaseActivity {
 	@InjectView(R.id.player_count_value) TextView playerCountValue;
 	@InjectView(R.id.game_name_value) TextView gameNameValue;
     @InjectView(R.id.pairs_count_value) TextView pairsCountValue;
+	@Inject @Named(HostGameManager.TOTAL_CARD_IMAGES) int totalCardImages;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +59,7 @@ public class HostGameActivity extends BaseActivity {
 		numberPicker.setMinValue(2);
 		numberPicker.setMaxValue(100);
 		numberPicker.setWrapSelectorWheel(false);
+		numberPicker.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         final TextView playersTextView = (TextView) numberPickerLayout.findViewById(R.id
                 .number_picker_text);
         playersTextView.setText(R.string.activity_host_game_players_count_players);
@@ -73,16 +77,18 @@ public class HostGameActivity extends BaseActivity {
 				.show();
 	}
 
+
     @OnClick({R.id.pairs_count_value, R.id.pairs_count_description})
     public void changePairsCount() {
         View numberPickerLayout = getLayoutInflater().inflate(R.layout.dialog_number_picker, null);
         final NumberPicker numberPicker = (NumberPicker) numberPickerLayout.findViewById(R.id.number_picker);
-        numberPicker.setValue(Integer.valueOf(pairsCountValue.getText().toString()));
+		Timber.d("setting value to " + Integer.valueOf(pairsCountValue.getText().toString()));
         numberPicker.setMinValue(2);
-        numberPicker.setMaxValue(hostGameManager.getTotalCardImages());
+        numberPicker.setMaxValue(totalCardImages);
+		numberPicker.setValue(Integer.valueOf(pairsCountValue.getText().toString()));
         numberPicker.setWrapSelectorWheel(false);
-        final TextView pairsTextView = (TextView) numberPickerLayout.findViewById(R.id
-                .number_picker_text);
+		numberPicker.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
+        final TextView pairsTextView = (TextView) numberPickerLayout.findViewById(R.id.number_picker_text);
         pairsTextView.setText(R.string.activity_host_game_pairs_count_pairs);
 
         new AlertDialog.Builder(this)
