@@ -57,7 +57,7 @@ final class StringConnectionHandler implements ConnectionHandler<String> {
 		try {
 			socket.close();
 		} catch (IOException ioe) {
-			Timber.e(ioe, "failed to close socket");
+			Timber.w(ioe, "failed to close socket");
 		}
 	}
 

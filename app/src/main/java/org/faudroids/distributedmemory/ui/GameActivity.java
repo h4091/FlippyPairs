@@ -283,7 +283,7 @@ public class GameActivity extends BaseActivity implements ClientGameListener, Vi
 		// do not forward click events while game manager is not ready
 		if (clientGameManager.getCurrentState() != GameState.SELECT_1ST_CARD
 				&& clientGameManager.getCurrentState() != GameState.SELECT_2ND_CARD) {
-			Timber.w("Dropped click request due to wrong state");
+			Timber.d("Dropped click request due to wrong state");
 			return;
 		}
 

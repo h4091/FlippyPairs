@@ -30,7 +30,7 @@ final class HostSocketHandler {
 				serverSocket,
 				clientConnectionListener);
 		new Thread(serverRunnable).start();
-		Timber.i("Hosting on port " + serverSocket.getLocalPort());
+		Timber.d("Hosting on port " + serverSocket.getLocalPort());
 		return serverSocket.getLocalPort();
 	}
 
@@ -69,7 +69,7 @@ final class HostSocketHandler {
 			try {
 				serverSocket.close();
 			} catch (IOException ioe) {
-				Timber.e("failed to close server socket");
+				Timber.w("failed to close server socket");
 			}
 		}
 
@@ -81,13 +81,13 @@ final class HostSocketHandler {
 					Socket socket = serverSocket.accept();
 					clientConnectionListener.onClientConnected(socket);
 				} catch(IOException ioe) {
-					Timber.e(ioe, "failed to accept client");
+					if (alive) Timber.e(ioe, "failed to accept client");
 				}
 			}
 			try {
 				serverSocket.close();
 			} catch (IOException ioe) {
-				Timber.e(ioe, "failed to close server socket");
+				Timber.w(ioe, "failed to close server socket");
 			}
 		}
 

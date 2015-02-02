@@ -92,7 +92,7 @@ public final class HostGameManager implements HostStateTransitionListener {
 		connectionHandler.registerMessageListener(new HostMessageListener(deviceId, connectionHandler), handler);
 		connectionHandler.start();
 		connectionHandler.sendMessage(messageWriter.createAck()); // chicken and egg problem otherwise?
-		Timber.i("Adding connection handler with id " + deviceId);
+		Timber.d("Adding connection handler with id " + deviceId);
 	}
 
 
@@ -114,7 +114,7 @@ public final class HostGameManager implements HostStateTransitionListener {
 		// setup cards locally
 		int pairsCount = 0;
 		for (Device device : devices.values()) pairsCount += device.getPairsCount();
-        Timber.i("Pairs: " + pairsCount);
+        Timber.d("Pairs: " + pairsCount);
 		int cardId = 0;
 		int cardValue = 0;
         for(int i = 0; i < pairsCount; ++i) {
@@ -322,14 +322,14 @@ public final class HostGameManager implements HostStateTransitionListener {
 
                 case SELECT_1ST_CARD:
 					int firstCardId = messageReader.readCardIdMessage(msg);
-					Timber.i("Received first card " + firstCardId);
+					Timber.d("Received first card " + firstCardId);
 					selectCard(firstCardId, GameState.SELECT_1ST_CARD);
 					transitionState(GameState.SELECT_2ND_CARD, msg);
                     break;
 
                 case SELECT_2ND_CARD:
 					int secondCardId = messageReader.readCardIdMessage(msg);
-					Timber.i("Received second card " + secondCardId);
+					Timber.d("Received second card " + secondCardId);
 					selectCard(secondCardId, GameState.SELECT_2ND_CARD);
 					transitionState(GameState.UPDATE_CARDS, msg);
                     break;

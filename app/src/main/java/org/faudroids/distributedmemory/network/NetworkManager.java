@@ -158,7 +158,7 @@ public final class NetworkManager {
 
 		@Override
 		public void onServiceRegistered(final NsdServiceInfo serviceInfo) {
-			Timber.i("Service registration success");
+			Timber.d("Service registration success");
 			if (serviceInfo.getServiceName().equals(serviceName)) {
 				try {
 					final InetAddress localHost = InetAddress.getLocalHost();
@@ -203,7 +203,7 @@ public final class NetworkManager {
 
 		@Override
 		public void onServiceUnregistered(NsdServiceInfo serviceInfo) {
-			Timber.i("Service unregistered");
+			Timber.d("Service unregistered");
 			handler.post(new Runnable() {
 				@Override
 				public void run() {
@@ -242,21 +242,21 @@ public final class NetworkManager {
 
 		@Override
 		public void onDiscoveryStarted(String serviceType) {
-			Timber.i("Service discovery started");
+			Timber.d("Service discovery started");
 		}
 
 
 		@Override
 		public void onDiscoveryStopped(String serviceType) {
-			Timber.i("Service discovery stopped");
+			Timber.d("Service discovery stopped");
 		}
 
 
 		@Override
 		public void onServiceFound(NsdServiceInfo serviceInfo) {
-			Timber.i("Service discovery success (" + serviceInfo + ")");
+			Timber.d("Service discovery success (" + serviceInfo + ")");
 			if (!serviceInfo.getServiceType().equals(SERVICE_TYPE) || !serviceInfo.getServiceName().startsWith(SERVICE_PREFIX)) {
-				Timber.i("Discarding discovered service");
+				Timber.d("Discarding discovered service");
 				return;
 			}
 			nsdManager.resolveService(serviceInfo, new ResolveListener(clientNetworkListener, handler));
@@ -265,7 +265,7 @@ public final class NetworkManager {
 
 		@Override
 		public void onServiceLost(final NsdServiceInfo serviceInfo) {
-			Timber.i("Service lost (" + serviceInfo + ")");
+			Timber.d("Service lost (" + serviceInfo + ")");
 			handler.post(new Runnable() {
 				@Override
 				public void run() {
@@ -328,7 +328,7 @@ public final class NetworkManager {
 
 		@Override
 		public void onServiceResolved(final NsdServiceInfo serviceInfo) {
-			Timber.i("Service resolve success (" + serviceInfo + ")");
+			Timber.d("Service resolve success (" + serviceInfo + ")");
 			handler.post(new Runnable() {
 				@Override
 				public void run() {
