@@ -18,7 +18,9 @@ import dagger.Provides;
 				LobbyActivity.class,
 				GameActivity.class,
 				HostService.class,
-                AboutActivity.class
+                AboutActivity.class,
+                HelpActivity.class,
+                HelpDialogActivity.class
 		}
 )
 public final class UiModule {

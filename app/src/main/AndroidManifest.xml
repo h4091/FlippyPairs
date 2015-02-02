@@ -54,6 +54,19 @@
             android:launchMode="singleTop"
             android:label="@string/activity_about_title" >
         </activity>
+        <activity
+            android:screenOrientation="portrait"
+            android:name=".ui.HelpActivity"
+            android:launchMode="singleTop"
+            android:label="@string/activity_help_title" >
+        </activity>
+        <activity
+            android:theme="@android:style/Theme.Holo.Dialog"
+            android:screenOrientation="portrait"
+            android:name=".ui.HelpDialogActivity"
+            android:launchMode="singleTop"
+            android:label="@string/activity_help_title" >
+        </activity>
         <service
             android:name=".ui.HostService" >
         </service>

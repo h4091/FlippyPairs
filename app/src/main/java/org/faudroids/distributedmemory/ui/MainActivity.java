@@ -67,7 +67,14 @@ public class MainActivity extends BaseActivity {
         startActivity(new Intent(this, AboutActivity.class));
     }
 
-	private boolean isWifiConnected() {
+
+    @OnClick(R.id.help_game)
+    public void helpGame() {
+        startActivity(new Intent(this, HelpActivity.class));
+    }
+
+
+        private boolean isWifiConnected() {
 		NetworkInfo wifiInfo = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
 		return wifiInfo.isConnected();
 	}
