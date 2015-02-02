@@ -1,14 +1,12 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Base application theme. -->
     <style name="AppTheme" parent="android:Theme.Holo.Light.DarkActionBar">
-        <!-- Customize your theme here. -->
         <item name="android:actionBarStyle">@style/ActionBarStyle</item>
     </style>
 
     <style name="ActionBarStyle"
            parent="@android:style/Widget.Holo.Light.ActionBar.Solid.Inverse">
-        <item name="android:background">#889900</item>
+        <item name="android:background">#ff757574</item>
     </style>
 
     <style name="MainLayout">
