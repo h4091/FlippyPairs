@@ -31,8 +31,8 @@ public class HelpActivity extends BaseActivity {
         Intent dialogActivity = new Intent(this, HelpDialogActivity.class);
         String helpText = getResources().getString(R.string.activity_help_host_text);
         Timber.d("Sending helpText: " + helpText);
-        dialogActivity.putExtra("helpText", helpText);
-        startActivity(new Intent(this, HelpDialogActivity.class));
+        dialogActivity.putExtra("org.faudroids.distributedmemory.helpText", helpText);
+        startActivity(dialogActivity);
     }
 
 
@@ -40,10 +40,10 @@ public class HelpActivity extends BaseActivity {
     public void onHelpJoinClick() {
         Intent dialogActivity = new Intent(this, HelpDialogActivity.class);
         String helpText = getResources().getString(R.string.activity_help_join_text);
-        dialogActivity.putExtra("helpText", helpText);
+        dialogActivity.putExtra("org.faudroids.distributedmemory.helpText", helpText);
         dialogActivity.setType("text/plain");
         Timber.d("Sending helpText: " + helpText);
-        startActivity(new Intent(this, HelpDialogActivity.class));
+        startActivity(dialogActivity);
     }
 
 
@@ -52,8 +52,8 @@ public class HelpActivity extends BaseActivity {
         Intent dialogActivity = new Intent(this, HelpDialogActivity.class);
         String helpText = getResources().getString(R.string.activity_help_troubleshooting_text);
         Timber.d("Sending helpText: " + helpText);
-        dialogActivity.putExtra("helpText", helpText);
-        startActivity(new Intent(this, HelpDialogActivity.class));
+        dialogActivity.putExtra("org.faudroids.distributedmemory.helpText", helpText);
+        startActivity(dialogActivity);
     }
 
 
