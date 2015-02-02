@@ -27,7 +27,6 @@ public class HelpDialogActivity extends BaseActivity {
         if(extra!=null) {
             String helpText;
             helpText = (String) extra.get("org.faudroids.distributedmemory.helpText");
-            Timber.d("helpText: " + helpText);
             helpTextView.setText(helpText);
         } else {
             Timber.d("No extras");

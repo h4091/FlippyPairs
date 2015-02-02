@@ -120,11 +120,13 @@
         \n
         4. Game on!
     </string>
-    <string name="activity_help_troubleshooting_text"><b>I can\'t find any games</b>\n
-        You have to be within the same subnet to successfully perform service discovery.\n
+    <string name="activity_help_troubleshooting_text">Q: I can\'t find any games?\n
         \n
-        <b>There is no Wifi available or you\'re not in the same subnet</b>\n
-        You can also create your own Wifi hotspot in Wifi settings.
+        A: You have to be within the same subnet to successfully perform service discovery.\n
+        \n
+        Q: There is no Wifi available or you\'re not in the same subnet?\n
+        \n
+        A: You can also create your own Wifi hotspot in Wifi settings.
     </string>
 
     <string name="version">Version %1$s</string>
