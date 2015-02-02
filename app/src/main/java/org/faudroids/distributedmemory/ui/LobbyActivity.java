@@ -58,7 +58,7 @@ public class LobbyActivity extends BaseActivity implements  HostGameListener {
 
 		setContentView(R.layout.activity_lobby);
 		ButterKnife.inject(this);
-		adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
+		adapter = new ArrayAdapter<>(this, R.layout.list_item);
 		peersList.setAdapter(adapter);
 	}
 

@@ -1,47 +1,70 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 xmlns:tools="http://schemas.android.com/tools"
-                style="@style/MainLayout">
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
 
-    <Button
-        android:id="@+id/start_game"
+    <include layout="@layout/background"/>
+
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/activity_lobby_start_game" />
+        android:layout_height="match_parent"
+        style="@style/MainLayout">
 
-    <TextView
-        android:id="@+id/text_client_list"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Connected clients"
-        android:layout_below="@id/start_game"/>
-
-    <ListView
-        android:id="@+id/peers_list"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/text_client_list"/>
-
-    <LinearLayout android:id="@+id/empty"
-                  android:layout_below="@id/peers_list"
-                  android:layout_centerInParent="true"
-                  android:layout_width="wrap_content"
-                  android:layout_height="match_parent"
-                  android:orientation="horizontal">
-
-        <ProgressBar
-            android:layout_gravity="center"
-            android:layout_width="wrap_content"
+        <Button
+            style="@style/MenuButton"
+            android:id="@+id/start_game"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginRight="20dp"
-            style="?android:attr/progressBarStyleLarge"
-            tools:ignore="RtlHardcoded"/>
+            android:text="@string/activity_lobby_start_game" />
 
-        <TextView
-            android:layout_gravity="center"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/activity_lobby_searching"/>
+        <LinearLayout
+            android:padding="@dimen/text_background_padding"
+            android:layout_below="@id/start_game"
+            android:background="@drawable/text_background"
+            android:orientation="vertical"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent">
 
-    </LinearLayout>
+            <TextView
+                style="@style/DefaultFont"
+                android:layout_gravity="center_horizontal"
+                android:id="@+id/text_client_list"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/activity_lobby_connected_clients"/>
+
+            <include layout="@layout/divider"/>
+
+            <ListView
+                android:id="@+id/peers_list"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <LinearLayout
+                android:id="@+id/empty"
+                android:layout_gravity="center_horizontal"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <ProgressBar
+                    android:layout_gravity="center"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="20dp"
+                    style="?android:attr/progressBarStyleLarge"/>
+
+                <TextView
+                    style="@style/DefaultFont"
+                    android:layout_gravity="center"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/activity_lobby_searching"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </RelativeLayout>
 
 </RelativeLayout>
