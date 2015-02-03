@@ -145,6 +145,20 @@ public final class HostGameManager implements HostStateTransitionListener {
 				++currentCardCount;
 				selectedCards.put(card.getId(), card.getValue());
 			}
+
+            if(devices.keySet().size()==1) {
+                List<Integer> cardValues = new ArrayList<>(selectedCards.values());
+                Collections.shuffle(cardValues);
+
+                for(int i = 0; i < cardValues.size(); ++i) {
+                    selectedCards.put(i, cardValues.get(i));
+                    closedCards.put(i, new Card(i, cardValues.get(i)));
+                }
+            }
+
+            for(int i=0; i<selectedCards.keySet().size(); ++i) {
+                Timber.d("selected card id: " + i + " value: " + selectedCards.get(i));
+            }
 			cardDetailMessages.add(messageWriter.createSetupMessage(new GameSetupInfo(selectedCards, currentPlayerIdx, players)));
 		}
 		transitionState(GameState.SELECT_1ST_CARD, cardDetailMessages);
@@ -215,6 +229,8 @@ public final class HostGameManager implements HostStateTransitionListener {
 		assertValidState(GameState.UPDATE_CARDS);
 
 		if (selectedCards.get(0).getValue() == selectedCards.get(1).getValue()) {
+            Timber.d("first value: " + selectedCards.get(0).getValue() + " second value: " +
+                    selectedCards.get(1).getValue());
 			for (Card card : selectedCards) matchedCards.put(card.getId(), card);
 			selectedCards.clear();
 			return true;
