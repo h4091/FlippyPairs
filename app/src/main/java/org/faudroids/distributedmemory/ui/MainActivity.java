@@ -1,11 +1,13 @@
 package org.faudroids.distributedmemory.ui;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.widget.TextView;
@@ -15,6 +17,8 @@ import com.google.common.collect.Lists;
 import org.faudroids.distributedmemory.R;
 import org.faudroids.distributedmemory.common.BaseActivity;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -46,7 +50,7 @@ public class MainActivity extends BaseActivity {
     @Override
     public void onResume() {
         super.onResume();
-        if (!isWifiConnected()) openWifiSettings();
+        if (!isWifiConnected() && !isHotSpotActive()) openWifiSettings();
     }
 
 
@@ -74,10 +78,28 @@ public class MainActivity extends BaseActivity {
     }
 
 
-        private boolean isWifiConnected() {
+    private boolean isWifiConnected() {
 		NetworkInfo wifiInfo = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
 		return wifiInfo.isConnected();
 	}
+
+    private boolean isHotSpotActive() {
+        WifiManager wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+        Method[] wmMethods = wifi.getClass().getDeclaredMethods();
+        for(Method method: wmMethods) {
+            if (method.getName().equals("isWifiApEnabled")) {
+                try {
+                    return (boolean) method.invoke(wifi);
+                } catch (InvocationTargetException e) {
+                    Timber.w("Failed to read Wi-Fi hotspot status.");
+                } catch (IllegalAccessException e) {
+                    Timber.w("Failed to read Wi-Fi hotspot status.");
+                }
+            }
+        }
+
+        return false;
+    }
 
 
 	private void openWifiSettings() {
