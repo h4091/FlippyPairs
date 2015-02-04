@@ -10,8 +10,8 @@
 
     <string name="missing_wifi_alert_title">Missing Wifi connection</string>
     <string name="missing_wifi_alert">In order to play you have to be connected to
-        a Wifi network. If there is no network available you can also create your own hot-spot. Do
-        you want to open Wifi settings?</string>
+        a Wi-Fi network. If there is no network available you can also create your own hotspot. Do
+        you want to open Wi-Fi settings?</string>
 
     <string name="menu_test_game">Test Game</string>
     <string name="submit_id">Will they match?</string>
@@ -122,11 +122,11 @@
     </string>
     <string name="activity_help_troubleshooting_text">Q: I can\'t find any games, what\'s wrong?\n
         \n
-        A: You have to be within the same Wifi subnet to successfully join another game.\n
+        A: You have to be within the same Wi-Fi subnet to successfully join another game.\n
         \n
-        Q: There is no Wifi available / me and my friend are not in the same subnet, what now?\n
+        Q: There is no Wi-Fi available / me and my friend are not in the same subnet, what now?\n
         \n
-        A: Try creating your own Wifi hotspot in the Wifi settings.
+        A: Try creating your own Wi-Fi hotspot in the Wi-Fi settings.
     </string>
 
     <string name="version">Version %1$s</string>
