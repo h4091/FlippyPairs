@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
@@ -28,6 +29,8 @@ import timber.log.Timber;
 
 public class MainActivity extends BaseActivity {
 
+	private static final String PREFS_WIFI_SETTINGS_SHOW = "wifiSettingsShown";
+
 	@Inject ConnectivityManager connectivityManager;
 	private Dialog wifiDialog = null;
 
@@ -42,7 +45,9 @@ public class MainActivity extends BaseActivity {
     @Override
     public void onResume() {
         super.onResume();
-        if (!isWifiConnected() && !isHotSpotActive()) openWifiDialog();
+        if (!isWifiConnected() && !isHotSpotActive() && !getPreferences(MODE_PRIVATE).getBoolean(PREFS_WIFI_SETTINGS_SHOW, false)) {
+			openWifiDialog();
+		}
     }
 
 
@@ -103,6 +108,11 @@ public class MainActivity extends BaseActivity {
 
 
 	private void openWifiDialog() {
+		// show dialog only once
+		SharedPreferences.Editor editor = getPreferences(MODE_PRIVATE).edit();
+		editor.putBoolean(PREFS_WIFI_SETTINGS_SHOW, true);
+		editor.apply();
+
 		wifiDialog = new AlertDialog.Builder(MainActivity.this)
 				.setTitle(R.string.missing_wifi_alert_title)
 				.setMessage(R.string.missing_wifi_alert)
