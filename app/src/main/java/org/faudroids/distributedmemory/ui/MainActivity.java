@@ -1,6 +1,7 @@
 package org.faudroids.distributedmemory.ui;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -15,7 +16,6 @@ import com.google.common.collect.Lists;
 import org.faudroids.distributedmemory.R;
 import org.faudroids.distributedmemory.common.BaseActivity;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 
@@ -29,6 +29,7 @@ import timber.log.Timber;
 public class MainActivity extends BaseActivity {
 
 	@Inject ConnectivityManager connectivityManager;
+	private Dialog wifiDialog = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,8 +42,18 @@ public class MainActivity extends BaseActivity {
     @Override
     public void onResume() {
         super.onResume();
-        if (!isWifiConnected() && !isHotSpotActive()) openWifiSettings();
+        if (!isWifiConnected() && !isHotSpotActive()) openWifiDialog();
     }
+
+
+	@Override
+	public void onPause() {
+		if (wifiDialog != null) {
+			wifiDialog.dismiss();
+			wifiDialog = null;
+		}
+		super.onPause();
+	}
 
 
 	@OnClick(R.id.host_game)
@@ -74,6 +85,7 @@ public class MainActivity extends BaseActivity {
 		return wifiInfo.isConnected();
 	}
 
+
     private boolean isHotSpotActive() {
         WifiManager wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
         Method[] wmMethods = wifi.getClass().getDeclaredMethods();
@@ -81,20 +93,17 @@ public class MainActivity extends BaseActivity {
             if (method.getName().equals("isWifiApEnabled")) {
                 try {
                     return (boolean) method.invoke(wifi);
-                } catch (InvocationTargetException e) {
-                    Timber.w("Failed to read Wi-Fi hotspot status.");
-                } catch (IllegalAccessException e) {
-                    Timber.w("Failed to read Wi-Fi hotspot status.");
+                } catch (Exception e) {
+                    Timber.w(e, "Failed to read Wi-Fi hotspot status");
                 }
             }
         }
-
         return false;
     }
 
 
-	private void openWifiSettings() {
-		new AlertDialog.Builder(MainActivity.this)
+	private void openWifiDialog() {
+		wifiDialog = new AlertDialog.Builder(MainActivity.this)
 				.setTitle(R.string.missing_wifi_alert_title)
 				.setMessage(R.string.missing_wifi_alert)
 				.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
