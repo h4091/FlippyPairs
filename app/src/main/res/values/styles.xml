@@ -2,6 +2,7 @@
 
     <style name="AppTheme" parent="android:Theme.Holo.Light.DarkActionBar">
         <item name="android:actionBarStyle">@style/ActionBarStyle</item>
+        <item name="android:icon">@android:color/transparent</item>
     </style>
 
     <style name="ActionBarStyle"
