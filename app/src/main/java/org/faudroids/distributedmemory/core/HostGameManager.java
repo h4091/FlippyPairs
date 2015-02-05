@@ -115,17 +115,21 @@ public final class HostGameManager implements HostStateTransitionListener {
 		int pairsCount = 0;
 		for (Device device : devices.values()) pairsCount += device.getPairsCount();
         Timber.d("Pairs: " + pairsCount);
-		int cardId = 0;
+
+		// create card ids such that they can be shuffled afterwards
+		LinkedList<Integer> cardIds = new LinkedList<>();
+		for (int cardId = 0; cardId < pairsCount*2; ++cardId) {
+			cardIds.add(cardId);
+		}
+		Collections.shuffle(cardIds);
+
 		int cardValue = 0;
         for(int i = 0; i < pairsCount; ++i) {
+			int cardId = cardIds.removeFirst();
 			closedCards.put(cardId, new Card(cardId, cardValue));
-			++cardId;
+			cardId = cardIds.removeFirst();
 			closedCards.put(cardId, new Card(cardId, cardValue));
-			++cardId;
 			cardValue = (cardValue + 1) % usedCardImages;
-
-            Timber.d("Added card " + i + " (" + (cardId - 2) + ")");
-			Timber.d("Added card " + i + " (" + (cardId - 1) + ")");
         }
 
 		// TODO race condition between connections being added and clients sending device info
@@ -145,20 +149,6 @@ public final class HostGameManager implements HostStateTransitionListener {
 				++currentCardCount;
 				selectedCards.put(card.getId(), card.getValue());
 			}
-
-            if(devices.keySet().size()==1) {
-                List<Integer> cardValues = new ArrayList<>(selectedCards.values());
-                Collections.shuffle(cardValues);
-
-                for(int i = 0; i < cardValues.size(); ++i) {
-                    selectedCards.put(i, cardValues.get(i));
-                    closedCards.put(i, new Card(i, cardValues.get(i)));
-                }
-            }
-
-            for(int i=0; i<selectedCards.keySet().size(); ++i) {
-                Timber.d("selected card id: " + i + " value: " + selectedCards.get(i));
-            }
 			cardDetailMessages.add(messageWriter.createSetupMessage(new GameSetupInfo(selectedCards, currentPlayerIdx, players)));
 		}
 		transitionState(GameState.SELECT_1ST_CARD, cardDetailMessages);
