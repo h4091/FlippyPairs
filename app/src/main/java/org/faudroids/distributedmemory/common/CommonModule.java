@@ -5,6 +5,7 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.nsd.NsdManager;
+import android.net.wifi.WifiManager;
 import android.os.Looper;
 
 import javax.inject.Singleton;
@@ -56,6 +57,13 @@ public final class CommonModule {
 	@Singleton
 	ConnectivityManager provideConnectivityManager(Context context) {
 		return (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+	}
+
+
+	@Provides
+	@Singleton
+	WifiManager provideWifiManager(Context context) {
+		return (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
 	}
 
 }

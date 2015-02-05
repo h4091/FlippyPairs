@@ -23,6 +23,7 @@ import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import timber.log.Timber;
 
 
 public class MainActivity extends BaseActivity {
@@ -68,7 +69,7 @@ public class MainActivity extends BaseActivity {
     }
 
 
-    private boolean isWifiConnected() {
+	private boolean isWifiConnected() {
 		NetworkInfo wifiInfo = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
 		return wifiInfo.isConnected();
 	}

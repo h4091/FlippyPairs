@@ -8,31 +8,64 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/text_background"
-        android:padding="@dimen/text_background_padding"
         style="@style/MainLayout">
 
-        <ListView
-            android:id="@android:id/list"
+        <TextView
+            android:id="@+id/join_help"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            style="@style/HelpJoinGameFont"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:text="@string/join_game_help"/>
 
-        <LinearLayout android:id="@android:id/empty"
-                      android:layout_below="@android:id/list"
-                      android:layout_centerInParent="true"
-                      android:layout_width="wrap_content"
-                      android:layout_height="wrap_content"
-                      android:orientation="horizontal">
 
-            <include layout="@layout/progressbar"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:layout_above="@id/join_help"
+            android:background="@drawable/text_background"
+            android:padding="@dimen/text_background_padding">
 
             <TextView
                 style="@style/DefaultFont"
-                android:layout_marginLeft="20sp"
-                android:layout_gravity="center"
+                android:id="@+id/text_client_list"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/activity_join_game_searching"/>
+                android:layout_gravity="center_horizontal"
+                android:text="@string/activity_join_game_games"/>
+
+            <include layout="@layout/divider"/>
+
+            <ListView
+                android:id="@android:id/list"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <RelativeLayout android:id="@android:id/empty"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content">
+
+                <LinearLayout
+                    android:layout_centerInParent="true"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+
+                    <include layout="@layout/progressbar"/>
+
+                    <TextView
+                        style="@style/DefaultFont"
+                        android:layout_marginLeft="20sp"
+                        android:layout_gravity="center"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/activity_join_game_searching"/>
+
+                </LinearLayout>
+
+            </RelativeLayout>
 
         </LinearLayout>
 

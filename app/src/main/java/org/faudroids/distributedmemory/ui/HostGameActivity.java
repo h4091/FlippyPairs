@@ -37,6 +37,7 @@ public class HostGameActivity extends BaseActivity {
     @InjectView(R.id.pairs_count_value) TextView pairsCountValue;
 	@Inject @Named(HostGameManager.TOTAL_CARD_IMAGES) int totalCardImages;
 
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);

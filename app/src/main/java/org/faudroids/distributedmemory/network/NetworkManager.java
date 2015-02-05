@@ -3,7 +3,9 @@ package org.faudroids.distributedmemory.network;
 
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
+import android.net.wifi.WifiManager;
 import android.os.Handler;
+import android.text.format.Formatter;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -26,6 +28,7 @@ public final class NetworkManager {
 	private static final String SERVICE_PREFIX = "distributedmemory";
 	private static final String SERVICE_TYPE = "_socket._tcp.";
 
+	private final WifiManager wifiManager;
 	private final NsdManager nsdManager;
 	private final HostSocketHandler hostSocketHandler;
 	private final ConnectionHandlerFactory connectionHandlerFactory;
@@ -33,23 +36,27 @@ public final class NetworkManager {
 	private NsdManager.RegistrationListener serviceRegistrationListener;
 	private NsdManager.DiscoveryListener discoveryListener;
 
+	private HostInfo hostInfo;
+
 	@Inject
 	public NetworkManager(
+			WifiManager wifiManager,
 			NsdManager nsdManager,
 			HostSocketHandler hostSocketHandler,
 			ConnectionHandlerFactory connectionHandlerFactory) {
 
+		this.wifiManager = wifiManager;
 		this.nsdManager = nsdManager;
 		this.hostSocketHandler = hostSocketHandler;
 		this.connectionHandlerFactory = connectionHandlerFactory;
 	}
 
 
-	public void startServer(String serviceName, final HostNetworkListener<JsonNode> hostNetworkListener, final Handler handler) {
+	public void startServer(final String serviceName, final HostNetworkListener<JsonNode> hostNetworkListener, final Handler handler) {
 		Assert.assertFalse(hostSocketHandler.isRunning(), "can only start one server");
 
 		try {
-			int serverPort = hostSocketHandler.start(new HostSocketHandler.ClientConnectionListener() {
+			final int serverPort = hostSocketHandler.start(new HostSocketHandler.ClientConnectionListener() {
 				@Override
 				public void onClientConnected(Socket socket) {
 					try {
@@ -75,11 +82,29 @@ public final class NetworkManager {
 			serviceRegistrationListener = new RegistrationListener(fullServiceName, serverPort, hostNetworkListener, handler);
 			nsdManager.registerService(serviceInfo, NsdManager.PROTOCOL_DNS_SD, serviceRegistrationListener);
 
+			// set local host info
+			int ip = wifiManager.getConnectionInfo().getIpAddress();
+			final String hostAddress = Formatter.formatIpAddress(ip);
+			new Thread() {
+				@Override
+				public void run() {
+					try {
+						hostInfo = new HostInfo(serviceName, InetAddress.getByName(hostAddress), serverPort);
+					} catch (UnknownHostException uhe) {
+						Timber.e("failed to find host name for this device", uhe);
+					}
+				}
+			}.start();
+
 		} catch (IOException ioe) {
 			Timber.e(ioe, "failed to start server");
 			hostNetworkListener.onServerStartError(false);
 		}
+	}
 
+
+	public HostInfo getHostInfo() {
+		return hostInfo;
 	}
 
 
@@ -93,6 +118,7 @@ public final class NetworkManager {
 		hostSocketHandler.shutdown();
 		nsdManager.unregisterService(serviceRegistrationListener);
 		serviceRegistrationListener = null;
+		hostInfo = null;
 	}
 
 

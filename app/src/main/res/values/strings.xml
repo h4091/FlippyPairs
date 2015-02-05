@@ -61,6 +61,7 @@
     <string name="activity_game_host_error_title">Lost connection to host</string>
     <string name="activity_game_host_error_message">There seems to be a problem reaching the host. Has he or another player left the game?</string>
 
+    <string name="activity_join_game_games">Available games</string>
     <string name="activity_join_game_searching">Searching for games …</string>
 
     <string name="btn_stop">Stop</string>
@@ -130,5 +131,14 @@
     </string>
 
     <string name="version">Version %1$s</string>
+
+    <string name="join_game_help">Having trouble connecting? Click me!</string>
+    <string name="join_game_help_title">Having trouble</string>
+    <string name="join_game_help_host_instructions1">You can try helping others discover your game by letting them scan the following QR code. Clients can find a scanner under \"Join Game\"</string>
+    <string name="join_game_help_host_instructions2">Tell others to scan this code to join your game.</string>
+    <string name="join_game_host_host_title">Host Code</string>
+    <string name="join_game_help_client_error">Failed to read host code</string>
+    <string name="join_game_help_client_instructions1">"If the game you looking for does not appear in the list you can try joining directly by scanning the QR on the host screen."</string>
+    <string name="join_game_help_client_instructions2">Scan the code that is shown on the host screen!</string>
 
 </resources>

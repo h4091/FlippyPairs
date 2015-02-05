@@ -7,20 +7,28 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
 
 import com.google.common.collect.Lists;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.WriterException;
+import com.google.zxing.client.android.Contents;
 
 import org.faudroids.distributedmemory.R;
 import org.faudroids.distributedmemory.common.BaseActivity;
 import org.faudroids.distributedmemory.core.Device;
 import org.faudroids.distributedmemory.core.HostGameListener;
 import org.faudroids.distributedmemory.core.HostGameManager;
+import org.faudroids.distributedmemory.network.NetworkManager;
+import org.faudroids.distributedmemory.utils.QRCodeEncoder;
 import org.faudroids.distributedmemory.utils.ServiceUtils;
 
 import java.util.Comparator;
@@ -36,6 +44,8 @@ import butterknife.OnClick;
 public class LobbyActivity extends BaseActivity implements  HostGameListener {
 
 	@Inject HostGameManager hostGameManager;
+	@Inject NetworkManager networkManager;
+	@Inject QRCodeUtils qrCodeUtils;
 	@Inject ServiceUtils serviceUtils;
 	@InjectView(R.id.start_game) Button startGameButton;
 	@InjectView(R.id.peers_list) ListView peersList;
@@ -66,6 +76,49 @@ public class LobbyActivity extends BaseActivity implements  HostGameListener {
 	@OnClick(R.id.start_game)
 	public void startGame() {
 		hostGameManager.startGame();
+	}
+
+
+	@OnClick(R.id.join_help)
+	public void helpJoinGame() {
+		// prepare QR code dialog
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		LayoutInflater layoutInflater = LayoutInflater.from(this);
+		ImageView imageView = (ImageView) layoutInflater.inflate(R.layout.qrcode, null);
+
+		int qrCodeDimension = 500;
+		QRCodeEncoder qrCodeEncoder = new QRCodeEncoder(
+				qrCodeUtils.writeHostInfo(networkManager.getHostInfo()),
+				null,
+				Contents.Type.TEXT,
+				BarcodeFormat.QR_CODE.toString(), qrCodeDimension);
+		try {
+			Bitmap bitmap = qrCodeEncoder.encodeAsBitmap();
+			imageView.setImageBitmap(bitmap);
+		} catch (WriterException e) {
+			e.printStackTrace();
+			return;
+		}
+
+		final AlertDialog qrCodeDialog = builder
+				.setTitle(getString(R.string.join_game_host_host_title))
+				.setMessage(getString(R.string.join_game_help_host_instructions2))
+				.setView(imageView)
+				.setPositiveButton(android.R.string.ok, null)
+				.create();
+
+		// show help dialog
+		new AlertDialog.Builder(this)
+				.setTitle(getString(R.string.join_game_help_title))
+				.setMessage(getString(R.string.join_game_help_host_instructions1))
+				.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						qrCodeDialog.show();
+					}
+				})
+				.setNegativeButton(android.R.string.cancel, null)
+				.show();
 	}
 
 

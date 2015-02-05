@@ -16,9 +16,21 @@
             android:layout_height="wrap_content"
             android:text="@string/activity_lobby_start_game" />
 
+        <TextView
+            android:id="@+id/join_help"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/HelpJoinGameFont"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="5dp"
+            android:text="@string/join_game_help"/>
+
         <LinearLayout
+            android:id="@+id/client_list"
             android:padding="@dimen/text_background_padding"
             android:layout_below="@id/start_game"
+            android:layout_above="@id/join_help"
             android:background="@drawable/text_background"
             android:orientation="vertical"
             android:layout_width="fill_parent"
