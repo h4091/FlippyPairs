@@ -98,6 +98,10 @@
         &lt;a href=&quot;http://jakewharton.github.io/butterknife/&quot;&gt;Butter Knife&lt;/a&gt;&lt;br&gt;
         &lt;a href=&quot;https://github.com/google/guava&quot;&gt;Guava&lt;/a&gt;&lt;br&gt;
         &lt;a href=&quot;http://wiki.fasterxml.com/JacksonHome&quot;&gt;Jackson&lt;/a&gt;
+        &lt;a href=&quot;https://github.com/zxing/zxing/&quot;&gt;zxing&lt;/a&gt; and &lt;a href=&quot;https://github.com/journeyapps/zxing-android-embedded&quot;&gt;zxing-android-embedded&lt;/a&gt;
+        &lt;/p&gt;
+        &lt;p&gt;
+        This app itself is Open Source too and can be found at &lt;a href=&quot;https://github.com/FauDroids/DistributedMemory&quot;&gt;GitHub&lt;/a&gt;.
         &lt;/p&gt;
     </string>
 
@@ -125,9 +129,9 @@
     </string>
     <string name="activity_help_troubleshooting_text">Q: I can\'t find any games, what\'s wrong?\n
         \n
-        A: You have to be within the same Wi-Fi subnet to successfully join another game.\n
+        A: Some Wi-Fi networks are funny like that. Try directly connecting to a game by clicking the small help message at the bottom of the screen.\n
         \n
-        Q: There is no Wi-Fi available / me and my friend are not in the same subnet, what now?\n
+        Q: There is no Wi-Fi available, what now?\n
         \n
         A: Try creating your own Wi-Fi hotspot in the Wi-Fi settings.
     </string>
@@ -140,7 +144,7 @@
     <string name="join_game_help_host_instructions2">Tell others to scan this code to join your game.</string>
     <string name="join_game_host_host_title">Host Code</string>
     <string name="join_game_help_client_error">Failed to read host code</string>
-    <string name="join_game_help_client_instructions1">"If the game you looking for does not appear in the list you can try joining directly by scanning the QR on the host screen."</string>
+    <string name="join_game_help_client_instructions1">If the game you\'re looking for does not appear in the list you can try joining directly by scanning the QR on the host screen.</string>
     <string name="join_game_help_client_instructions2">Scan the code that is shown on the host screen!</string>
 
 </resources>
