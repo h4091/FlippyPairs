@@ -9,9 +9,11 @@
     <string name="activity_about_title">About</string>
 
     <string name="missing_wifi_alert_title">Missing Wifi connection</string>
-    <string name="missing_wifi_alert">In order to play you have to be connected to
+    <string name="missing_wifi_alert">
+        In order to enjoy multiplayer games you have to be connected to
         a Wi-Fi network. If there is no network available you can also create your own hotspot. Do
-        you want to open Wi-Fi settings?</string>
+        you want to open Wi-Fi settings?
+    </string>
 
     <string name="menu_test_game">Test Game</string>
     <string name="submit_id">Will they match?</string>
@@ -133,7 +135,7 @@
     <string name="version">Version %1$s</string>
 
     <string name="join_game_help">Having trouble connecting? Click me!</string>
-    <string name="join_game_help_title">Having trouble</string>
+    <string name="join_game_help_title">Having trouble?</string>
     <string name="join_game_help_host_instructions1">You can try helping others discover your game by letting them scan the following QR code. Clients can find a scanner under \"Join Game\"</string>
     <string name="join_game_help_host_instructions2">Tell others to scan this code to join your game.</string>
     <string name="join_game_host_host_title">Host Code</string>
